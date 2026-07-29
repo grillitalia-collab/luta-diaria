@@ -3,322 +3,466 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>A Luta Diária</title>
-  <script src="https://cdn.tailwindcss.com"></script>
+  <title>A Luta Diária 🥊 - Minhas Tarefas</title>
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap');
-    body { font-family: 'Plus+Jakarta+Sans', sans-serif; }
-    .glass-card { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); }
-    .no-scrollbar::-webkit-scrollbar { display: none; }
-    .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    :root {
+      --primary: #4f46e5;
+      --bg: #f3f4f6;
+      --card-bg: #ffffff;
+      --text: #1f2937;
+      --accent: #10b981;
+      --warning: #f59e0b;
+      --danger: #ef4444;
+      --purple: #8b5cf6;
+    }
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: var(--bg);
+      color: var(--text);
+      margin: 0;
+      padding: 15px;
+      display: flex;
+      flex-direction: column;
+      min-height: 95vh;
+    }
+    .container {
+      max-width: 850px;
+      margin: 0 auto;
+      flex: 1;
+    }
+    header {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    .card {
+      background: var(--card-bg);
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
+      margin-bottom: 20px;
+    }
+    .login-box {
+      max-width: 400px;
+      margin: 40px auto;
+    }
+    .login-box input, .login-box select {
+      width: 100%;
+      padding: 10px;
+      margin: 8px 0;
+      box-sizing: border-box;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+    }
+    .nav-tabs {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 15px;
+      flex-wrap: wrap;
+    }
+    .btn-tab {
+      flex: 1;
+      min-width: 90px;
+      padding: 10px;
+      border: none;
+      background: #e5e7eb;
+      font-weight: bold;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+    .btn-tab.active {
+      background: var(--primary);
+      color: white;
+    }
+    .progress-bar {
+      width: 100%;
+      height: 15px;
+      background: #e5e7eb;
+      border-radius: 10px;
+      overflow: hidden;
+      margin-top: 10px;
+    }
+    .progress-fill {
+      height: 100%;
+      background: var(--accent);
+      width: 0%;
+      transition: width 0.3s ease;
+    }
+    .section-title {
+      font-size: 1.05rem;
+      color: var(--primary);
+      border-bottom: 2px solid #e0e7ff;
+      padding-bottom: 4px;
+      margin-top: 15px;
+      margin-bottom: 10px;
+    }
+    .item-card {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px;
+      border-bottom: 1px solid #e5e7eb;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    .item-card.expired {
+      background-color: #fef2f2;
+      border-left: 4px solid var(--danger);
+    }
+    .item-card.disabled {
+      opacity: 0.6;
+      background-color: #f9fafb;
+    }
+    .item-card.paused {
+      background-color: #fef9c3;
+      border-left: 4px solid var(--warning);
+    }
+    .item-card.trade-pending {
+      background-color: #eff6ff;
+      border-left: 4px solid var(--primary);
+    }
+    .item-card:last-child {
+      border-bottom: none;
+    }
+    .btn-action {
+      background: var(--accent);
+      color: white;
+      border: none;
+      padding: 8px 14px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: bold;
+      white-space: nowrap;
+    }
+    .btn-action.pending {
+      background: var(--warning);
+      cursor: default;
+    }
+    .btn-action.expired-btn {
+      background: var(--danger);
+      cursor: pointer;
+    }
+    .btn-action.store {
+      background: var(--purple);
+    }
+    .btn-action.small {
+      padding: 4px 8px;
+      font-size: 0.8rem;
+    }
+    .btn-logout {
+      background: #6b7280;
+      color: white;
+      border: none;
+      padding: 6px 12px;
+      border-radius: 6px;
+      float: right;
+      cursor: pointer;
+    }
+    .tag {
+      font-size: 0.75rem;
+      padding: 3px 8px;
+      border-radius: 10px;
+      background: #e0e7ff;
+      color: #3730a3;
+      font-weight: bold;
+      margin-left: 5px;
+      white-space: nowrap;
+    }
+    .tag-day { background: #e0f2fe; color: #075985; }
+    .tag-alert { background: #fee2e2; color: #991b1b; }
+    .tag-store { background: #f3e8ff; color: #6b21a8; }
+    .tag-trade { background: #dbeafe; color: #1e40af; }
+    .report-grid {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-top: 10px;
+    }
+    .report-card {
+      flex: 1;
+      min-width: 200px;
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      padding: 12px;
+      border-radius: 8px;
+    }
+    .admin-form input, .admin-form select, .admin-form textarea {
+      padding: 8px;
+      margin: 5px 0;
+      width: calc(100% - 20px);
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      box-sizing: border-box;
+    }
+    .admin-form textarea {
+      resize: vertical;
+      min-height: 60px;
+    }
+    footer {
+      text-align: center;
+      padding: 10px 0;
+      margin-top: 20px;
+    }
+    .btn-sugestao {
+      background: transparent;
+      border: 1px solid #cbd5e1;
+      color: #64748b;
+      font-size: 0.75rem;
+      padding: 4px 10px;
+      border-radius: 12px;
+      cursor: pointer;
+    }
+    .btn-sugestao:hover {
+      background: #e2e8f0;
+      color: #334155;
+    }
+    .toggle-folga {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 15px;
+      padding: 10px;
+      background: #fef9c3;
+      border-radius: 8px;
+    }
+    .toggle-switch {
+      position: relative;
+      display: inline-block;
+      width: 50px;
+      height: 26px;
+    }
+    .toggle-switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+    .toggle-slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: #ccc;
+      border-radius: 26px;
+      transition: .4s;
+    }
+    .toggle-slider:before {
+      position: absolute;
+      content: "";
+      height: 20px;
+      width: 20px;
+      left: 3px;
+      bottom: 3px;
+      background-color: white;
+      border-radius: 50%;
+      transition: .4s;
+    }
+    input:checked + .toggle-slider {
+      background-color: var(--warning);
+    }
+    input:checked + .toggle-slider:before {
+      transform: translateX(24px);
+    }
+    .trade-request-card {
+      background: #eff6ff;
+      border: 1px solid #bfdbfe;
+      border-radius: 8px;
+      padding: 10px;
+      margin: 8px 0;
+    }
+    .penalty-waive-form {
+      background: #f0fdf4;
+      border-radius: 8px;
+      padding: 10px;
+      margin-top: 8px;
+    }
   </style>
 </head>
-<body class="bg-slate-100 min-h-screen text-slate-800 pb-12">
-
-  <!-- TOAST DE NOTIFICAÇÕES -->
-  <div id="toast-container" class="fixed top-4 right-4 z-50 flex flex-col gap-2 max-w-sm w-full px-4 pointer-events-none"></div>
-
-  <!-- CABEÇALHO -->
-  <header class="bg-indigo-900 text-white shadow-lg sticky top-0 z-40">
-    <div class="max-w-4xl mx-auto px-4 py-3 flex justify-between items-center">
-      <div class="flex items-center space-x-2">
-        <span class="text-2xl">🥊</span>
-        <h1 class="text-xl font-extrabold tracking-wide">A LUTA DIÁRIA</h1>
-      </div>
-      <div id="header-user-info" class="hidden flex items-center gap-3">
-        <span id="current-user-name" class="font-bold text-indigo-100"></span>
-        <button onclick="logout()" class="text-xs bg-indigo-800 hover:bg-indigo-700 text-indigo-200 px-3 py-1.5 rounded-lg font-semibold transition cursor-pointer">Sair</button>
-      </div>
-    </div>
+<body>
+<div class="container">
+  <header>
+    <h1>🥊 A Luta Diária</h1>
+    <p style="color: #6b7280; margin-top: -10px; font-weight: bold;">Minhas Tarefas e Missões da Casa</p>
   </header>
 
-  <main class="max-w-4xl mx-auto px-4 mt-6">
-
-    <!-- TELA DE LOGIN -->
-    <section id="screen-login" class="max-w-md mx-auto space-y-4">
-      <div class="glass-card rounded-3xl p-8 shadow-xl border border-slate-200 text-center">
-        <div class="text-5xl mb-3">🛡️</div>
-        <h2 class="text-2xl font-bold text-slate-800 mb-1">A Luta Diária</h2>
-        <p class="text-slate-500 text-sm mb-6">Escolha seu perfil para acessar</p>
-        
-        <div class="space-y-3">
-          <button type="button" onclick="openAuthModal('Manuela')" class="w-full flex items-center justify-between p-4 bg-pink-50 hover:bg-pink-100 border border-pink-200 rounded-2xl font-bold text-pink-900 transition cursor-pointer">
-            <span class="flex items-center gap-3"><span class="text-2xl">👧</span> Manuela</span>
-            <span class="text-xs bg-pink-200 text-pink-800 px-2 py-1 rounded-full">Filha</span>
-          </button>
-          <button type="button" onclick="openAuthModal('Tayrone')" class="w-full flex items-center justify-between p-4 bg-blue-50 hover:bg-blue-100 border border-blue-200 rounded-2xl font-bold text-blue-900 transition cursor-pointer">
-            <span class="flex items-center gap-3"><span class="text-2xl">🧒</span> Tayrone</span>
-            <span class="text-xs bg-blue-200 text-blue-800 px-2 py-1 rounded-full">Filho</span>
-          </button>
-          <button type="button" onclick="openAuthModal('Thiego')" class="w-full flex items-center justify-between p-4 bg-purple-50 hover:bg-purple-100 border border-purple-200 rounded-2xl font-bold text-purple-900 transition cursor-pointer">
-            <span class="flex items-center gap-3"><span class="text-2xl">👦</span> Thiego</span>
-            <span class="text-xs bg-purple-200 text-purple-800 px-2 py-1 rounded-full">Filho</span>
-          </button>
-          
-          <hr class="my-4 border-slate-200">
-          
-          <button type="button" onclick="openAuthModal('Pais')" class="w-full p-4 bg-slate-900 hover:bg-slate-800 text-white rounded-2xl font-bold transition flex justify-center items-center gap-2 cursor-pointer">
-            <span>👑</span> Painel dos Pais
-          </button>
-        </div>
-      </div>
-    </section>
-
-    <!-- MODAL DE AUTENTICAÇÃO -->
-    <div id="modal-auth" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm hidden flex items-center justify-center p-4 z-50">
-      <div class="bg-white rounded-3xl p-6 max-w-sm w-full space-y-4 shadow-2xl">
-        <h3 id="auth-title" class="font-bold text-lg text-slate-800">Autenticação</h3>
-        <p id="auth-desc" class="text-xs text-slate-500">Digite sua senha para entrar.</p>
-        
-        <form onsubmit="handleAuthSubmit(event)" class="space-y-3">
-          <input type="password" id="auth-password" required placeholder="Digite a senha" class="w-full p-3 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
-          <div class="flex justify-end gap-2">
-            <button type="button" onclick="closeAuthModal()" class="px-4 py-2 text-xs font-bold text-slate-500 hover:bg-slate-100 rounded-xl">Cancelar</button>
-            <button type="submit" class="px-4 py-2 text-xs font-bold bg-indigo-600 text-white rounded-xl hover:bg-indigo-700">Entrar</button>
-          </div>
-        </form>
-      </div>
+  <div id="login-screen" class="card login-box">
+    <h2>🔑 Entrar no App</h2>
+    <label for="user-select">Quem é você?</label>
+    <select id="user-select" onchange="checkFirstAccess()">
+      <option value="thiego">👦 Thiego</option>
+      <option value="manuela">👧 Manuela</option>
+      <option value="tayrone">🧒 Tayrone</option>
+      <option value="admin">🔑 Os Pais (Supervisores)</option>
+    </select>
+    <div id="first-access-msg" style="display:none; color: var(--primary); font-size: 0.85rem; margin-top: 5px;">
+      ✨ É seu primeiro acesso! Crie sua senha abaixo.
     </div>
-
-    <!-- TELA DAS CRIANÇAS -->
-    <section id="screen-child" class="hidden space-y-6">
-      
-      <div id="rest-mode-banner" class="hidden bg-emerald-500 text-white p-4 rounded-3xl shadow-lg flex items-center gap-4">
-        <span class="text-4xl">🏖️</span>
-        <div>
-          <h3 class="font-extrabold text-lg">Modo Descanso / Folga Ativado!</h3>
-          <p class="text-emerald-100 text-sm">Os pais deram uma pausa nas tarefas por hoje. Aproveite!</p>
-        </div>
-      </div>
-
-      <div class="bg-gradient-to-r from-purple-800 via-indigo-800 to-slate-900 rounded-3xl p-6 text-white shadow-xl relative overflow-hidden">
-        <div class="flex justify-between items-start relative z-10">
-          <div class="flex items-center gap-4">
-            <div id="child-avatar" class="text-5xl bg-white/10 p-3 rounded-2xl backdrop-blur-md">👦</div>
-            <div>
-              <h2 id="child-name" class="text-2xl font-black">--</h2>
-              <span class="inline-block bg-purple-900/60 text-purple-200 text-xs px-3 py-1 rounded-full font-semibold mt-1">Nível 1 - Guerreiro(a)</span>
-            </div>
-          </div>
-          <div class="text-right">
-            <span class="text-xs text-purple-300 uppercase tracking-widest block font-bold">Saldo de XP</span>
-            <span id="child-xp" class="text-4xl font-black text-amber-300">0 XP</span>
-          </div>
-        </div>
-
-        <div class="mt-5 pt-4 border-t border-white/10 flex flex-wrap gap-2 justify-between items-center text-xs">
-          <button onclick="openChildShopModal()" class="bg-emerald-500 hover:bg-emerald-400 text-white font-extrabold px-4 py-2 rounded-xl shadow transition flex items-center gap-1.5 cursor-pointer">
-            <span>🛒</span> Ver Lojinha de Prêmios
-          </button>
-          <button onclick="openSuggestionModal()" class="bg-amber-400 hover:bg-amber-300 text-slate-900 font-extrabold px-4 py-2 rounded-xl shadow transition flex items-center gap-1.5 cursor-pointer">
-            <span>💡</span> Mandar Sugestão aos Pais
-          </button>
-        </div>
-      </div>
-
-      <div class="bg-white p-2 rounded-2xl shadow-sm border border-slate-200 flex gap-1">
-        <button onclick="setFilter('hoje')" id="filter-hoje" class="flex-1 py-2 rounded-xl text-xs font-bold transition bg-purple-700 text-white cursor-pointer">Hoje</button>
-        <button onclick="setFilter('diarias')" id="filter-diarias" class="flex-1 py-2 rounded-xl text-xs font-bold transition text-slate-600 hover:bg-slate-100 cursor-pointer">Diárias</button>
-        <button onclick="setFilter('flexiveis')" id="filter-flexiveis" class="flex-1 py-2 rounded-xl text-xs font-bold transition text-slate-600 hover:bg-slate-100 cursor-pointer">Flexíveis</button>
-        <button onclick="setFilter('todas')" id="filter-todas" class="flex-1 py-2 rounded-xl text-xs font-bold transition text-slate-600 hover:bg-slate-100 cursor-pointer">Todas</button>
-      </div>
-
-      <div id="child-tasks-list" class="space-y-3"></div>
-    </section>
-
-    <!-- PAINEL DOS PAIS -->
-    <section id="screen-parents" class="hidden space-y-6">
-      
-      <div class="bg-purple-950 text-white p-4 rounded-3xl flex justify-between items-center shadow-md border border-purple-800">
-        <div class="flex items-center gap-3">
-          <span class="text-2xl">🏖️</span>
-          <div>
-            <h3 class="font-bold text-sm">Modo Descanso / Folga</h3>
-            <p class="text-purple-300 text-xs">Pausa cobranças e penalidades até ser desativado</p>
-          </div>
-        </div>
-        <label class="relative inline-flex items-center cursor-pointer">
-          <input type="checkbox" id="toggle-rest-mode" onchange="toggleRestMode(this.checked)" class="sr-only peer">
-          <div class="w-11 h-6 bg-purple-900 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-500"></div>
-        </label>
-      </div>
-
-      <div class="bg-white p-2 rounded-2xl shadow-sm border border-slate-200 flex space-x-1 overflow-x-auto no-scrollbar">
-        <button onclick="setParentTab('relatorio')" id="ptab-relatorio" class="px-4 py-2.5 rounded-xl text-xs font-bold whitespace-nowrap transition bg-purple-700 text-white cursor-pointer">📊 Visão Geral</button>
-        <button onclick="setParentTab('pendentes')" id="ptab-pendentes" class="px-4 py-2.5 rounded-xl text-xs font-bold whitespace-nowrap transition text-slate-600 hover:bg-slate-100 cursor-pointer">📌 Validações</button>
-        <button onclick="setParentTab('missoes')" id="ptab-missoes" class="px-4 py-2.5 rounded-xl text-xs font-bold whitespace-nowrap transition text-slate-600 hover:bg-slate-100 cursor-pointer">⚙️ Missões</button>
-        <button onclick="setParentTab('lojinha')" id="ptab-lojinha" class="px-4 py-2.5 rounded-xl text-xs font-bold whitespace-nowrap transition text-slate-600 hover:bg-slate-100 cursor-pointer">🛒 Lojinha</button>
-        <button onclick="setParentTab('membros')" id="ptab-membros" class="px-4 py-2.5 rounded-xl text-xs font-bold whitespace-nowrap transition text-slate-600 hover:bg-slate-100 cursor-pointer">👑 Senhas & XP</button>
-      </div>
-
-      <div id="parent-content">
-        <!-- VISÃO GERAL -->
-        <div id="parent-sub-relatorio" class="space-y-6">
-          <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div class="bg-white p-5 rounded-3xl border border-slate-200 shadow-sm flex justify-between items-center">
-              <div>
-                <span class="text-xs text-slate-500 font-bold block uppercase">Manuela</span>
-                <span id="p-xp-manuela" class="text-2xl font-black text-pink-600">0 XP</span>
-              </div>
-              <span class="text-3xl">👧</span>
-            </div>
-            <div class="bg-white p-5 rounded-3xl border border-slate-200 shadow-sm flex justify-between items-center">
-              <div>
-                <span class="text-xs text-slate-500 font-bold block uppercase">Tayrone</span>
-                <span id="p-xp-tayrone" class="text-2xl font-black text-blue-600">0 XP</span>
-              </div>
-              <span class="text-3xl">🧒</span>
-            </div>
-            <div class="bg-white p-5 rounded-3xl border border-slate-200 shadow-sm flex justify-between items-center">
-              <div>
-                <span class="text-xs text-slate-500 font-bold block uppercase">Thiego</span>
-                <span id="p-xp-thiego" class="text-2xl font-black text-purple-700">0 XP</span>
-              </div>
-              <span class="text-3xl">👦</span>
-            </div>
-          </div>
-
-          <div class="bg-white rounded-3xl p-6 shadow-sm border border-slate-200">
-            <h3 class="font-bold text-lg mb-4 flex items-center gap-2"><span>💡</span> Sugestões das Crianças</h3>
-            <div id="parent-suggestions-list" class="space-y-3"></div>
-          </div>
-        </div>
-
-        <!-- VALIDAÇÕES & PENALIDADES -->
-        <div id="parent-sub-pendentes" class="hidden space-y-6">
-          <div class="bg-white rounded-3xl p-6 shadow-sm border border-slate-200">
-            <h3 class="font-bold text-lg mb-4">Tarefas Concluídas Aguardando Validação</h3>
-            <div id="parent-pending-tasks" class="space-y-3"></div>
-          </div>
-
-          <div class="bg-white rounded-3xl p-6 shadow-sm border border-slate-200">
-            <h3 class="font-bold text-lg mb-1 text-slate-800">🛡️ Perdoar Penalidades Aplicadas</h3>
-            <p class="text-xs text-slate-500 mb-4">Remova a penalidade e devolva o XP da criança se ela teve um motivo justo.</p>
-            <div id="parent-penalties-list" class="space-y-3"></div>
-          </div>
-
-          <div class="bg-white rounded-3xl p-6 shadow-sm border border-slate-200">
-            <h3 class="font-bold text-lg mb-4">Resgates da Lojinha Pendentes</h3>
-            <div id="parent-pending-rewards" class="space-y-3"></div>
-          </div>
-        </div>
-
-        <!-- CONFIGURAR MISSÕES (ADICIONAR / EDITAR) -->
-        <div id="parent-sub-missoes" class="hidden space-y-6">
-          <div class="bg-white rounded-3xl p-6 shadow-sm border border-slate-200">
-            <h3 id="form-task-title" class="font-bold text-lg mb-4">➕ Cadastrar Nova Missão</h3>
-            <form onsubmit="handleSaveTask(event)" class="space-y-4">
-              <input type="hidden" id="edit-task-id">
-              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label class="block text-xs font-bold text-slate-600 mb-1">Título da Tarefa</label>
-                  <input type="text" id="task-title" required placeholder="Ex: Arrumar a cama" class="w-full p-3 rounded-xl border border-slate-200 text-sm">
-                </div>
-                <div>
-                  <label class="block text-xs font-bold text-slate-600 mb-1">Ícone / Emoji</label>
-                  <input type="text" id="task-icon" required value="🧹" class="w-full p-3 rounded-xl border border-slate-200 text-sm">
-                </div>
-              </div>
-
-              <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div>
-                  <label class="block text-xs font-bold text-slate-600 mb-1">Atribuído a</label>
-                  <select id="task-assignee" class="w-full p-3 rounded-xl border border-slate-200 text-sm font-bold">
-                    <option value="Todos">Todos (Cada um tem a sua)</option>
-                    <option value="Rodízio">Rodízio (Manuela ➔ Tayrone ➔ Thiego)</option>
-                    <option value="Manuela">Apenas Manuela</option>
-                    <option value="Tayrone">Apenas Tayrone</option>
-                    <option value="Thiego">Apenas Thiego</option>
-                  </select>
-                </div>
-                <div>
-                  <label class="block text-xs font-bold text-slate-600 mb-1">Categoria</label>
-                  <select id="task-category" class="w-full p-3 rounded-xl border border-slate-200 text-sm">
-                    <option value="diarias">Diária</option>
-                    <option value="flexiveis">Flexível</option>
-                  </select>
-                </div>
-                <div>
-                  <label class="block text-xs font-bold text-slate-600 mb-1">Horário Limite</label>
-                  <input type="time" id="task-deadline" value="12:00" class="w-full p-3 rounded-xl border border-slate-200 text-sm">
-                </div>
-              </div>
-
-              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label class="block text-xs font-bold text-slate-600 mb-1">Ganho (+XP)</label>
-                  <input type="number" id="task-xp" value="15" min="0" class="w-full p-3 rounded-xl border border-slate-200 text-sm">
-                </div>
-                <div>
-                  <label class="block text-xs font-bold text-slate-600 mb-1">Penalidade (-XP)</label>
-                  <input type="number" id="task-penalty" value="10" min="0" class="w-full p-3 rounded-xl border border-slate-200 text-sm">
-                </div>
-              </div>
-
-              <div class="flex gap-2">
-                <button type="submit" class="flex-1 py-3 bg-purple-700 hover:bg-purple-800 text-white font-bold rounded-xl transition cursor-pointer">Salvar Missão</button>
-                <button type="button" onclick="resetTaskForm()" id="btn-cancel-edit" class="hidden px-4 py-3 bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold rounded-xl transition cursor-pointer">Cancelar Edição</button>
-              </div>
-            </form>
-          </div>
-
-          <div class="bg-white rounded-3xl p-6 shadow-sm border border-slate-200">
-            <h3 class="font-bold text-lg mb-4">Missões Configuradas</h3>
-            <div id="parent-all-tasks" class="space-y-3"></div>
-          </div>
-        </div>
-
-        <!-- PAINEL DA LOJINHA -->
-        <div id="parent-sub-lojinha" class="hidden space-y-6">
-          <div class="bg-white rounded-3xl p-6 shadow-sm border border-slate-200">
-            <h3 class="font-bold text-lg mb-4">➕ Cadastrar Prêmio na Lojinha</h3>
-            <form onsubmit="handleCreateReward(event)" class="space-y-4">
-              <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div class="md:col-span-2">
-                  <label class="block text-xs font-bold text-slate-600 mb-1">Nome do Prêmio</label>
-                  <input type="text" id="reward-title" required placeholder="Ex: 30min de Videogame" class="w-full p-3 rounded-xl border border-slate-200 text-sm">
-                </div>
-                <div>
-                  <label class="block text-xs font-bold text-slate-600 mb-1">Ícone / Emoji</label>
-                  <input type="text" id="reward-icon" required value="🎮" class="w-full p-3 rounded-xl border border-slate-200 text-sm">
-                </div>
-              </div>
-              <div>
-                <label class="block text-xs font-bold text-slate-600 mb-1">Custo em XP</label>
-                <input type="number" id="reward-cost" value="100" min="10" required class="w-full p-3 rounded-xl border border-slate-200 text-sm">
-              </div>
-              <button type="submit" class="w-full py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl transition cursor-pointer">Adicionar Prêmio</button>
-            </form>
-          </div>
-
-          <div class="bg-white rounded-3xl p-6 shadow-sm border border-slate-200">
-            <h3 class="font-bold text-lg mb-4">Prêmios Ativos</h3>
-            <div id="parent-all-rewards" class="space-y-3"></div>
-          </div>
-        </div>
-
-        <!-- MEMBROS & SENHAS -->
-        <div id="parent-sub-membros" class="hidden space-y-4">
-          <div class="bg-white rounded-3xl p-6 shadow-sm border border-slate-200">
-            <h3 class="font-bold text-lg mb-4">Gestão de Senhas e XP</h3>
-            <div class="space-y-3" id="parent-members-list"></div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-  </main>
-
-  <!-- MODAL DA LOJINHA PARA AS CRIANÇAS -->
-  <div id="modal-child-shop" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm hidden flex items-center justify-center p-4 z-50">
-    <div class="bg-white rounded-3xl p-6 max-w-md w-full space-y-4 shadow-2xl max-h-[85vh] flex flex-col">
-      <div class="flex justify-between items-center">
-        <h3 class="font-bold text-lg text-slate-800 flex items-center gap-2"><span>🛒</span> Lojinha de Recompensas</h3>
-        <button onclick="closeChildShopModal()" class="text-slate-400 font-bold hover:text-slate-600 text-xl">✕</button>
-      </div>
-      <div id="child-shop-rewards-list" class="space-y-3 overflow-y-auto pr-1 flex-1"></div>
-    </div>
+    <label for="password-input" style="margin-top: 10px; display:block;">Senha:</label>
+    <input type="password" id="password-input" placeholder="Digite sua senha">
+    <button class="btn-action" style="width:100%; margin-top:10px;" onclick="handleLogin()">Entrar</button>
+    <button style="width:100%; margin-top:8px; background:transparent; border:none; color:#6b7280; font-size:0.8rem; cursor:pointer;" onclick="forgotPasswordMsg()">Esqueci minha senha</button>
   </div>
 
-  <!-- MODAL DE SUGESTÃO -->
-  <div id="modal-suggestion" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm hidden
+  <div id="app-screen" style="display:none;">
+    <div class="card" id="user-status">
+      <button class="btn-logout" onclick="handleLogout()">Sair</button>
+      <h2 id="user-name">Perfil</h2>
+      <p style="margin: 5px 0;">Nível Atual: <strong id="user-level" style="color:var(--purple);">1 - Iniciante</strong></p>
+      <p style="margin: 5px 0;">Saldo Atual: <strong id="user-xp" style="color:var(--primary); font-size:1.2rem;">0</strong> XP</p>
+      <div>
+        <span id="level-next-info" style="font-size:0.85rem; color:#6b7280;">Progresso para o próximo nível:</span>
+        <div class="progress-bar">
+          <div class="progress-fill" id="xp-bar"></div>
+        </div>
+      </div>
+    </div>
+
+    <div id="holiday-banner" class="card" style="display:none; background:#fef9c3; border:2px solid #f59e0b;">
+      <h3 style="color:#92400e; margin:0;">☀️ HOJE É DIA DE FOLGA!</h3>
+      <p style="color:#78350f; margin:5px 0 0 0;">Todas as tarefas estão pausadas. Aproveite! 😊</p>
+    </div>
+
+    <div class="nav-tabs" id="user-tabs">
+      <button class="btn-tab active" id="filter-today" onclick="setFilter('today')">📅 Hoje</button>
+      <button class="btn-tab" id="filter-daily" onclick="setFilter('daily')">☀️ Diárias</button>
+      <button class="btn-tab" id="filter-flexible" onclick="setFilter('flexible')">📚 Flexíveis</button>
+      <button class="btn-tab" id="filter-all" onclick="setFilter('all')">📋 Todas</button>
+      <button class="btn-tab" id="tab-store-btn" onclick="switchTab('store')">🛒 Loja</button>
+    </div>
+
+    <div class="card" id="tab-tasks">
+      <h3 id="panel-title">📋 Minhas Missões</h3>
+      <div id="tasks-list"></div>
+    </div>
+
+    <div class="card" id="tab-store" style="display:none;">
+      <h3>🛒 Lojinha de Prêmios</h3>
+      <p style="font-size:0.85rem; color:#6b7280; margin-top:-10px;">Ao resgatar um prêmio, o seu saldo de XP zera!</p>
+      <div id="store-list"></div>
+    </div>
+
+    <div class="card" id="tab-admin" style="display:none;">
+      <button class="btn-logout" onclick="handleLogout()">Sair</button>
+      <h3>🛠️ Painel de Os Pais (Supervisores)</h3>
+      
+      <div class="toggle-folga">
+        <label class="toggle-switch">
+          <input type="checkbox" id="holiday-toggle" onchange="toggleHoliday()">
+          <span class="toggle-slider"></span>
+        </label>
+        <span><strong>☀️ Ativar Folga</strong> — Pausa todas as tarefas até desligar</span>
+      </div>
+
+      <div id="admin-content"></div>
+    </div>
+  </div>
+</div>
+
+<footer>
+  <button class="btn-sugestao" onclick="openSuggestionModal()">💡 Mandar uma Sugestão</button>
+</footer>
+
+<script>
+  const daysOfWeek = ['domingo', 'segunda', 'terca', 'quarta', 'quinta', 'sexta', 'sabado'];
+  function getTodayKey() { return daysOfWeek[new Date().getDay()]; }
+
+  let isHolidayMode = false;
+  let currentFilter = 'today';
+  let tradeRequests = [];
+  let penaltyWaiveRequests = [];
+
+  const levelTable = [
+    { level: 1, name: "Iniciante Preguiçoso 😴", minXp: 0, maxXp: 30 },
+    { level: 2, name: "Caçador de Meia Perdida 🧦", minXp: 30, maxXp: 70 },
+    { level: 3, name: "Dobrador de Lençol 🛏️", minXp: 70, maxXp: 120 },
+    { level: 4, name: "Mestre do Escorredor 🍽️", minXp: 120, maxXp: 200 },
+    { level: 5, name: "General da Vassoura 🧹", minXp: 200, maxXp: 350 },
+    { level: 6, name: "Guardião do Sabão 🧼", minXp: 350, maxXp: 600 },
+    { level: 7, name: "Soberano da Louça 👑", minXp: 600, maxXp: 1000 },
+    { level: 8, name: "Lorde do Pano de Chão 🧽", minXp: 1000, maxXp: 1600 },
+    { level: 9, name: "Destruidor da Sujeira ⚡", minXp: 1600, maxXp: 2500 },
+    { level: 10, name: "Lenda Suprema do Lar 🏆", minXp: 2500, maxXp: 4000 }
+  ];
+
+  function getLevelInfo(xp) {
+    for (let i = levelTable.length - 1; i >= 0; i--) {
+      if (xp >= levelTable[i].minXp) {
+        let current = levelTable[i];
+        let next = levelTable[i + 1];
+        if (!next) return { level: current.level + Math.floor((xp - current.minXp) / 2000), name: `Super Lenda nível ${current.level + Math.floor((xp - current.minXp) / 2000)} 🌟`, progress: 100, nextXp: "Max" };
+        let range = next.minXp - current.minXp;
+        let gained = xp - current.minXp;
+        let pct = Math.min(100, Math.max(0, Math.round((gained / range) * 100)));
+        return { level: current.level, name: current.name, progress: pct, nextXp: next.minXp };
+      }
+    }
+    return { level: 1, name: levelTable[0].name, progress: 0, nextXp: 30 };
+  }
+
+  const children = { thiego: { name: "Thiego (14 anos)", xp: 0, password: null }, manuela: { name: "Manuela (14 anos)", xp: 0, password: null }, tayrone: { name: "Tayrone (9 anos)", xp: 0, password: null } };
+  const adminCredentials = { username: "admin", password: "admin1234" };
+  const bathroomRotation = ['thiego', 'manuela', 'tayrone']; let bathroomIndex = 0;
+  const generalRotation = ['thiego', 'manuela', 'tayrone']; let dishIndex = 0, trashIndex = 0, dogIndex = 0;
+
+  let tasks = [
+    { id: 1, title: "Arrumar a Cama", xp: 10, penalty: 15, category: "daily", assignedTo: "all", days: ['domingo','segunda','terca','quarta','quinta','sexta','sabado'], schedule: "Todos os dias", deadline: "12:00", canTrade: false },
+    { id: 3, title: "Água e Comida da Cachorra", xp: 15, penalty: 25, category: "daily", assignedTo: generalRotation[dogIndex], days: ['domingo','segunda','terca','quarta','quinta','sexta','sabado'], schedule: "Todos os dias", deadline: "09:00", canTrade: true },
+    { id: 6, title: "Secar Louça da Janta", xp: 20, penalty: 30, category: "daily", assignedTo: generalRotation[dishIndex], days: ['domingo','segunda','terca','quarta','quinta','sexta','sabado'], schedule: "Todos os dias", deadline: "21:00", canTrade: true },
+    { id: 2, title: "Tirar Lixo", xp: 15, penalty: 25, category: "rotation", assignedTo: generalRotation[trashIndex], days: ['segunda','quarta','sexta'], schedule: "Seg, Qua e Sex", deadline: "12:00", canTrade: true },
+    { id: 4, title: "Limpar o Quarto", xp: 25, penalty: 40, category: "rotation", assignedTo: "all", days: ['quarta'], schedule: "Toda Quarta-feira", deadline: "18:00", canTrade: false },
+    { id: 5, title: "Lavar Banheiro", xp: 50, penalty: 75, category: "rotation", assignedTo: bathroomRotation[bathroomIndex], days: ['quinta'], schedule: "Toda Quinta-feira", deadline: "17:00", canTrade: true },
+    { id: 7, title: "30 Minutos de Leitura", xp: 30, penalty: 0, category: "flexible", assignedTo: "all", days: ['domingo','segunda','terca','quarta','quinta','sexta','sabado'], schedule: "3x por semana", deadline: "21:00", canTrade: false }
+  ];
+
+  let rewards = [
+    { id: 101, title: "30 Minutos a mais de Videogame/Celular", cost: 50, icon: "🎮" },
+    { id: 102, title: "Escolher o Filme da Sexta à Noite", cost: 80, icon: "🍿" },
+    { id: 103, title: "Escolher o Lanche do Fim de Semana", cost: 120, icon: "🍔" },
+    { id: 104, title: "R$ 15,00 no PIX (Mesada Extra)", cost: 200, icon: "💵" }
+  ];
+
+  let pendingApprovals = [], pendingRedemptions = [], appliedPenaltiesLog = [], suggestionsLog = [], historyLog = [], currentUser = null;
+
+  function checkFirstAccess() { const s = document.getElementById('user-select').value; document.getElementById('first-access-msg').style.display = (s !== 'admin' && children[s].password === null) ? 'block' : 'none'; }
+  function handleLogin() {
+    const u = document.getElementById('user-select').value, p = document.getElementById('password-input').value;
+    if (!p) return alert("Digite a senha!");
+    if (u === 'admin') { if (p === adminCredentials.password) { currentUser = 'admin'; showApp(); } else alert("Senha admin errada!"); return; }
+    if (children[u].password === null) { children[u].password = p; alert("Senha criada!"); currentUser = u; showApp(); }
+    else if (children[u].password === p) { currentUser = u; showApp(); }
+    else alert("Senha incorreta!");
+  }
+  function forgotPasswordMsg() { alert("Peça para os pais redefinirem sua senha!"); }
+  function handleLogout() { currentUser = null; document.getElementById('password-input').value = ''; document.getElementById('app-screen').style.display = 'none'; document.getElementById('login-screen').style.display = 'block'; }
+  function toggleHoliday() { isHolidayMode = document.getElementById('holiday-toggle').checked; document.getElementById('holiday-banner').style.display = isHolidayMode ? 'block' : 'none'; currentUser === 'admin' ? renderAdminView() : renderTasks(); }
+  function setFilter(f) { currentFilter = f; ['today','daily','flexible','all'].forEach(ft => document.getElementById(`filter-${ft}`).classList.toggle('active', ft === f)); renderTasks(); }
+  function showApp() {
+    document.getElementById('login-screen').style.display = 'none'; document.getElementById('app-screen').style.display = 'block';
+    if (currentUser === 'admin') { document.getElementById('user-status').style.display = 'none'; document.getElementById('user-tabs').style.display = 'none'; document.getElementById('tab-tasks').style.display = 'none'; document.getElementById('tab-store').style.display = 'none'; document.getElementById('tab-admin').style.display = 'block'; document.getElementById('holiday-banner').style.display = 'none'; document.getElementById('holiday-toggle').checked = isHolidayMode; renderAdminView(); }
+    else { document.getElementById('user-status').style.display = 'block'; document.getElementById('user-tabs').style.display = 'flex'; document.getElementById('tab-admin').style.display = 'none'; switchTab('tasks'); updateHeaderStatus(); }
+  }
+  function switchTab(t) { document.getElementById('tab-tasks').style.display = t === 'tasks' ? 'block' : 'none'; document.getElementById('tab-store').style.display = t === 'store' ? 'block' : 'none'; t==='tasks'&&renderTasks(); t==='store'&&renderStore(); }
+  function updateHeaderStatus() { const x = children[currentUser].xp, l = getLevelInfo(x); document.getElementById('user-name').innerText = children[currentUser].name; document.getElementById('user-level').innerText = `Nível ${l.level}: ${l.name}`; document.getElementById('user-xp').innerText = x; document.getElementById('xp-bar').style.width = l.progress+'%'; document.getElementById('level-next-info').innerText = l.nextXp !== "Max" ? `Falta ${l.nextXp} XP (${l.progress}%)` : "Nível Máximo! 🎉"; }
+  function getCurrentTime() { const d = new Date(); return `${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`; }
+  function isExpired(dl) { return dl ? getCurrentTime() > dl : false; }
+  function isToday(t) { return t.days.includes(getTodayKey()); }
+
+  function renderTasks() {
+    const l = document.getElementById('tasks-list'); l.innerHTML = '';
+    if (isHolidayMode) { l.innerHTML = `<div class="item-card paused"><strong>☀️ FOLGA ATIVA!</strong> Todas as tarefas pausadas.</div>`; return; }
+    const tdy = getTodayKey(), myTs = tasks.filter(t => t.assignedTo === 'all' || t.assignedTo === currentUser);
+    let ft = [];
+    if (currentFilter === 'today') { ft = myTs.filter(t => t.days.includes(tdy)); document.getElementById('panel-title').innerText = '📋 Missões de Hoje'; }
+    else if (currentFilter === 'daily') { ft = myTs.filter(t => t.category === 'daily'); document.getElementById('panel-title').innerText = '☀️ Diárias'; }
+    else if (currentFilter === 'flexible') { ft = myTs.filter(t => t.category === 'flexible'); document.getElementById('panel-title').innerText = '📚 Flexíveis'; }
+    else { ft = myTs; document.getElementById('panel-title').innerText = '📋 Todas'; }
+    if (!ft.length) { l.innerHTML = `<p style="text-align:center;color:#6b7280;">Nenhuma tarefa encontrada</p>`; return; }
+    ft.forEach(t => renderTaskItem(l, t, t.days.includes(tdy)));
+    renderMyTradeRequests();
+  }
+
+  function renderMyTradeRequests() {
+    const l = document.getElementById('tasks-list'), inR = tradeRequests.filter(r => r.to === currentUser && r.status === 'pending'), outR = tradeRequests.filter(r => r.from === currentUser && r.status === 'pending');
+    if (inR.length) {
+      const t = document.createElement('div'); t.className='section-title'; t.innerText='🔄 Pedidos Recebidos'; l.appendChild(t);
+      inR.forEach(r => { const i = tradeRequests.indexOf(r); const c = document.createElement('div'); c.className='trade-request-card'; c.innerHTML = `<div><strong>${children[r.from].name.split(' ')[0]}</strong> quer trocar: ${r.taskTitle}</div><p>Ganha +${r
