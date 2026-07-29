@@ -7,12 +7,14 @@
   <style>
     :root {
       --primary: #4f46e5;
-      --bg: #f3f4f6;
+      --primary-gradient: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+      --bg: #f8fafc;
       --card-bg: #ffffff;
-      --text: #1f2937;
+      --text: #0f172a;
       --accent: #10b981;
       --warning: #f59e0b;
       --danger: #ef4444;
+      --purple-dark: #3b0764;
       --purple: #6d28d9;
       --purple-light: #8b5cf6;
     }
@@ -22,10 +24,10 @@
       background-color: var(--bg);
       color: var(--text);
       margin: 0;
-      padding: 15px;
+      padding: 12px;
       display: flex;
       flex-direction: column;
-      min-height: 95vh;
+      min-height: 98vh;
     }
 
     .container {
@@ -33,6 +35,7 @@
       margin: 0 auto;
       flex: 1;
       width: 100%;
+      box-sizing: border-box;
     }
 
     header {
@@ -40,163 +43,249 @@
       margin-bottom: 20px;
     }
 
+    header h1 {
+      margin: 10px 0 5px 0;
+      font-size: 1.8rem;
+      color: #1e1b4b;
+    }
+
     .card {
       background: var(--card-bg);
       padding: 20px;
-      border-radius: 12px;
-      box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
+      border-radius: 16px;
+      box-shadow: 0 4px 15px -3px rgba(0,0,0,0.05), 0 2px 6px -2px rgba(0,0,0,0.05);
       margin-bottom: 20px;
+      border: 1px solid #e2e8f0;
     }
 
+    /* TELA DE LOGIN ESTILIZADA */
     .login-box {
       max-width: 400px;
-      margin: 40px auto;
+      margin: 30px auto;
+      text-align: center;
+    }
+
+    .login-box h2 {
+      color: var(--primary);
+      margin-top: 0;
+    }
+
+    .login-box label {
+      display: block;
+      text-align: left;
+      font-weight: bold;
+      font-size: 0.9rem;
+      color: #475569;
+      margin-top: 12px;
     }
 
     .login-box input, .login-box select {
       width: 100%;
-      padding: 10px;
-      margin: 8px 0;
+      padding: 12px;
+      margin: 6px 0;
       box-sizing: border-box;
-      border: 1px solid #ccc;
-      border-radius: 6px;
+      border: 1.5px solid #cbd5e1;
+      border-radius: 10px;
+      font-size: 1rem;
     }
 
+    /* PERFIL DO USUÁRIO (TELA INICIAL VIVA) */
+    .user-profile-card {
+      background: var(--primary-gradient);
+      color: white;
+      border: none;
+      padding: 22px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .user-profile-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .user-info-group {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+
+    .user-avatar-big {
+      font-size: 2.8rem;
+      background: rgba(255,255,255,0.2);
+      width: 60px;
+      height: 60px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+      backdrop-filter: blur(5px);
+    }
+
+    .xp-badge {
+      background: #f59e0b;
+      color: white;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 1.2rem;
+      font-weight: 800;
+      box-shadow: 0 2px 8px rgba(245, 158, 11, 0.4);
+    }
+
+    .progress-bar {
+      width: 100%;
+      height: 12px;
+      background: rgba(255,255,255,0.25);
+      border-radius: 10px;
+      overflow: hidden;
+      margin-top: 12px;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: #10b981;
+      width: 0%;
+      transition: width 0.4s ease;
+      border-radius: 10px;
+    }
+
+    /* NAVEGAÇÃO ENTRE ABAS */
     .nav-tabs {
       display: flex;
       gap: 10px;
-      margin-bottom: 15px;
+      margin-bottom: 20px;
     }
 
     .btn-tab {
       flex: 1;
-      padding: 10px;
+      padding: 12px 8px;
       border: none;
-      background: #e5e7eb;
+      background: #e2e8f0;
+      color: #64748b;
       font-weight: bold;
-      border-radius: 8px;
+      border-radius: 12px;
       cursor: pointer;
+      font-size: 0.95rem;
+      transition: all 0.2s;
     }
 
     .btn-tab.active {
       background: var(--primary);
       color: white;
-    }
-
-    .progress-bar {
-      width: 100%;
-      height: 15px;
-      background: #e5e7eb;
-      border-radius: 10px;
-      overflow: hidden;
-      margin-top: 10px;
-    }
-
-    .progress-fill {
-      height: 100%;
-      background: var(--accent);
-      width: 0%;
-      transition: width 0.3s ease;
+      box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);
     }
 
     .section-title {
       font-size: 1.05rem;
+      font-weight: bold;
       color: var(--primary);
       border-bottom: 2px solid #e0e7ff;
-      padding-bottom: 4px;
-      margin-top: 15px;
-      margin-bottom: 10px;
+      padding-bottom: 6px;
+      margin-top: 20px;
+      margin-bottom: 12px;
     }
 
+    /* CARDS DE TAREFAS E RECOMPENSAS */
     .item-card {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 12px;
-      border-bottom: 1px solid #e5e7eb;
+      padding: 14px;
+      border-radius: 12px;
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      margin-bottom: 10px;
       gap: 10px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.02);
     }
 
     .item-card.expired {
       background-color: #fef2f2;
-      border-left: 4px solid var(--danger);
+      border-left: 5px solid var(--danger);
     }
 
     .item-card.disabled {
-      opacity: 0.6;
-      background-color: #f9fafb;
-    }
-
-    .item-card:last-child {
-      border-bottom: none;
+      opacity: 0.65;
+      background-color: #f8fafc;
     }
 
     .btn-action {
       background: var(--accent);
       color: white;
       border: none;
-      padding: 8px 14px;
-      border-radius: 6px;
+      padding: 10px 16px;
+      border-radius: 8px;
       cursor: pointer;
       font-weight: bold;
+      font-size: 0.85rem;
+      box-shadow: 0 2px 6px rgba(16, 185, 129, 0.3);
+      transition: all 0.2s;
+    }
+
+    .btn-action:active {
+      transform: scale(0.96);
     }
 
     .btn-action.pending {
       background: var(--warning);
+      box-shadow: 0 2px 6px rgba(245, 158, 11, 0.3);
       cursor: default;
     }
 
     .btn-action.expired-btn {
       background: var(--danger);
-      cursor: pointer;
+      box-shadow: 0 2px 6px rgba(239, 68, 68, 0.3);
     }
 
     .btn-action.store {
       background: var(--purple-light);
+      box-shadow: 0 2px 6px rgba(139, 92, 246, 0.3);
     }
 
     .btn-logout {
       background: rgba(255, 255, 255, 0.2);
       color: white;
-      border: 1px solid rgba(255,255,255,0.4);
-      padding: 6px 12px;
-      border-radius: 6px;
-      float: right;
+      border: 1px solid rgba(255,255,255,0.3);
+      padding: 6px 14px;
+      border-radius: 8px;
       cursor: pointer;
+      font-size: 0.8rem;
+      font-weight: bold;
     }
 
     .tag {
       font-size: 0.75rem;
       padding: 3px 8px;
-      border-radius: 10px;
+      border-radius: 12px;
       background: #e0e7ff;
       color: #3730a3;
       font-weight: bold;
-      margin-left: 5px;
+      margin-left: 4px;
     }
 
     .tag-day { background: #e0f2fe; color: #075985; }
     .tag-alert { background: #fee2e2; color: #991b1b; }
     .tag-store { background: #f3e8ff; color: #6b21a8; }
 
-    /* ESTILOS DO PAINEL ROXO (IGUAL AI STUDIO) */
+    /* ESTILOS PAINEL ROXO DOS PAIS */
     .admin-banner {
       background: linear-gradient(135deg, #3b0764 0%, #6d28d9 50%, #4c1d95 100%);
       color: white;
-      padding: 20px;
+      padding: 22px;
       border-radius: 16px;
       margin-bottom: 20px;
-      box-shadow: 0 10px 15px -3px rgba(109, 40, 217, 0.3);
+      box-shadow: 0 10px 20px -3px rgba(109, 40, 217, 0.3);
     }
 
     .admin-banner h2 {
-      margin: 0 0 5px 0;
-      font-size: 1.3rem;
+      margin: 0 0 6px 0;
+      font-size: 1.4rem;
     }
 
     .admin-banner p {
-      margin: 0 0 15px 0;
-      font-size: 0.8rem;
+      margin: 0 0 16px 0;
+      font-size: 0.85rem;
       opacity: 0.85;
     }
 
@@ -207,7 +296,7 @@
     }
 
     .admin-nav-btn {
-      background: rgba(255, 255, 255, 0.15);
+      background: rgba(255, 255, 255, 0.12);
       border: 1px solid rgba(255, 255, 255, 0.2);
       color: white;
       padding: 10px 14px;
@@ -216,9 +305,6 @@
       font-weight: bold;
       cursor: pointer;
       text-align: left;
-      display: flex;
-      align-items: center;
-      gap: 8px;
     }
 
     .admin-nav-btn.active {
@@ -234,17 +320,19 @@
       margin-bottom: 12px;
     }
 
-    .report-header-ai {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 10px;
+    .admin-form input, .admin-form select {
+      padding: 10px;
+      margin: 6px 0;
+      width: 100%;
+      box-sizing: border-box;
+      border: 1px solid #cbd5e1;
+      border-radius: 8px;
     }
 
     footer {
       text-align: center;
-      padding: 10px 0;
-      margin-top: 20px;
+      padding: 15px 0;
+      margin-top: auto;
     }
 
     .btn-sugestao {
@@ -252,10 +340,11 @@
       border: 1px solid #cbd5e1;
       color: #64748b;
       font-size: 0.8rem;
-      padding: 8px 16px;
+      padding: 8px 18px;
       border-radius: 20px;
       cursor: pointer;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+      box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+      font-weight: bold;
     }
   </style>
 </head>
@@ -264,7 +353,7 @@
 <div class="container">
   <header>
     <h1>🥊 A Luta Diária</h1>
-    <p style="color: #6b7280; margin-top: -10px; font-weight: bold;">Minhas Tarefas e Missões da Casa</p>
+    <p style="color: #64748b; margin-top: -6px; font-weight: 600; font-size: 0.9rem;">Minhas Tarefas e Missões da Casa</p>
   </header>
 
   <!-- TELA DE LOGIN -->
@@ -282,50 +371,70 @@
       ✨ É seu primeiro acesso! Crie sua senha abaixo.
     </div>
 
-    <label for="password-input" style="margin-top: 10px; display:block;">Senha:</label>
+    <label for="password-input">Senha:</label>
     <input type="password" id="password-input" placeholder="Digite sua senha">
 
-    <button class="btn-action" style="width:100%; margin-top:10px;" onclick="handleLogin()">Entrar</button>
-    <button style="width:100%; margin-top:8px; background:transparent; border:none; color:#6b7280; font-size:0.8rem; cursor:pointer;" onclick="forgotPasswordMsg()">Esqueci minha senha</button>
+    <button class="btn-action" style="width:100%; margin-top:15px; font-size:1rem; padding:12px;" onclick="handleLogin()">Entrar</button>
+    <button style="width:100%; margin-top:10px; background:transparent; border:none; color:#64748b; font-size:0.8rem; cursor:pointer;" onclick="forgotPasswordMsg()">Esqueci minha senha</button>
   </div>
 
-  <!-- TELA PRINCIPAL -->
+  <!-- TELA PRINCIPAL DO APP -->
   <div id="app-screen" style="display:none;">
-    <div class="card" id="user-status">
-      <button class="btn-logout" style="background:#6b7280;" onclick="handleLogout()">Sair</button>
-      <h2 id="user-name">Perfil</h2>
-      <p style="margin: 5px 0;">Nível Atual: <strong id="user-level" style="color:var(--purple-light);">1 - Iniciante</strong></p>
-      <p style="margin: 5px 0;">Saldo Atual: <strong id="user-xp" style="color:var(--primary); font-size:1.2rem;">0</strong> XP</p>
-      <div>
-        <span id="level-next-info" style="font-size:0.85rem; color:#6b7280;">Progresso para o próximo nível:</span>
+    
+    <!-- PERFIL DO USUÁRIO NA TELA INICIAL -->
+    <div class="card user-profile-card" id="user-status">
+      <div class="user-profile-header">
+        <div class="user-info-group">
+          <div class="user-avatar-big" id="user-avatar-icon">👦</div>
+          <div>
+            <h2 id="user-name" style="margin:0; font-size:1.3rem;">Nome</h2>
+            <div id="user-level" style="font-size:0.85rem; opacity:0.9; margin-top:2px;">Nível 1</div>
+          </div>
+        </div>
+        <div style="text-align:right;">
+          <button class="btn-logout" onclick="handleLogout()">Sair</button>
+          <div style="margin-top:8px;">
+            <span class="xp-badge"><span id="user-xp">0</span> XP</span>
+          </div>
+        </div>
+      </div>
+      
+      <div style="margin-top:15px;">
+        <div style="display:flex; justify-content:space-between; font-size:0.75rem; opacity:0.9;">
+          <span id="level-next-info">Progresso do Nível</span>
+          <span id="xp-pct-label">0%</span>
+        </div>
         <div class="progress-bar">
           <div class="progress-fill" id="xp-bar"></div>
         </div>
       </div>
     </div>
 
+    <!-- BOTÕES DAS ABAS PRINCIPAIS -->
     <div class="nav-tabs" id="user-tabs">
       <button class="btn-tab active" id="tab-tasks-btn" onclick="switchTab('tasks')">📋 Minhas Missões</button>
-      <button class="btn-tab" id="tab-store-btn" onclick="switchTab('store')">🛒 Lojinha de Recompensas</button>
+      <button class="btn-tab" id="tab-store-btn" onclick="switchTab('store')">🛒 Lojinha de Prêmios</button>
     </div>
 
+    <!-- ABA 1: TAREFAS -->
     <div class="card" id="tab-tasks">
-      <h3 id="panel-title">📋 Missões do Dia</h3>
+      <h3 id="panel-title" style="margin-top:0; color:#1e1b4b;">📋 Missões do Dia</h3>
       <div id="tasks-list"></div>
     </div>
 
+    <!-- ABA 2: LOJINHA -->
     <div class="card" id="tab-store" style="display:none;">
-      <h3>🛒 Lojinha de Prêmios</h3>
-      <p style="font-size:0.85rem; color:#6b7280; margin-top:-10px;">Ao resgatar um prêmio, o seu saldo de XP zera!</p>
+      <h3 style="margin-top:0; color:#1e1b4b;">🛒 Lojinha de Prêmios</h3>
+      <p style="font-size:0.85rem; color:#64748b; margin-top:-8px;">Resgate prêmios com o seu saldo acumulado de XP!</p>
       <div id="store-list"></div>
     </div>
 
-    <!-- PAINEL ROXO DOS PAIS -->
+    <!-- ABA 3: PAINEL DOS PAIS -->
     <div id="tab-admin" style="display:none;">
       <div class="admin-banner">
         <button class="btn-logout" onclick="handleLogout()">Sair</button>
         <h2>🛠️ Painel de Os Pais (Supervisores)</h2>
-        <p>Gerencie missões, aprove validações, reverta penalidades, configure recompensas e acompanhe o desempenho.</p>
+        <p>Gerencie missões, aprovações, penalidades, recompensas e acompanhe o progresso das crianças.</p>
 
         <div class="admin-nav-grid">
           <button class="admin-nav-btn active" id="adm-btn-report" onclick="setAdminSubTab('report')">📊 Relatório Semanal</button>
@@ -338,6 +447,7 @@
 
       <div id="admin-content"></div>
     </div>
+
   </div>
 </div>
 
@@ -397,9 +507,9 @@
   }
 
   const children = {
-    thiego: { name: "Thiego", xp: 100, done: 1, expired: 0, password: null },
-    manuela: { name: "Manuela", xp: 120, done: 1, expired: 0, password: null },
-    tayrone: { name: "Tayrone", xp: 80, done: 0, expired: 0, password: null }
+    thiego: { name: "Thiego", avatar: "👦", xp: 100, done: 1, expired: 0, password: null },
+    manuela: { name: "Manuela", avatar: "👧", xp: 120, done: 1, expired: 0, password: null },
+    tayrone: { name: "Tayrone", avatar: "🧒", xp: 80, done: 0, expired: 0, password: null }
   };
 
   const adminCredentials = { username: "admin", password: "admin1234" };
@@ -526,15 +636,17 @@
     let xp = children[currentUser].xp;
     let lvlInfo = getLevelInfo(xp);
 
+    document.getElementById('user-avatar-icon').innerText = children[currentUser].avatar;
     document.getElementById('user-name').innerText = children[currentUser].name;
     document.getElementById('user-level').innerText = `Nível ${lvlInfo.level}: ${lvlInfo.name}`;
     document.getElementById('user-xp').innerText = xp;
     document.getElementById('xp-bar').style.width = lvlInfo.progress + '%';
+    document.getElementById('xp-pct-label').innerText = lvlInfo.progress + '%';
 
     if (lvlInfo.nextXp !== "Max") {
-      document.getElementById('level-next-info').innerText = `Falta chegar em ${lvlInfo.nextXp} XP para o próximo nível (${lvlInfo.progress}% concluído):`;
+      document.getElementById('level-next-info').innerText = `Falta chegar em ${lvlInfo.nextXp} XP para o Nível ${lvlInfo.level + 1}`;
     } else {
-      document.getElementById('level-next-info').innerText = `Você atingiu o Nível Máximo! 🎉`;
+      document.getElementById('level-next-info').innerText = `Nível Máximo Atingido! 🎉`;
     }
   }
 
@@ -576,8 +688,8 @@
     if (futureTasks.length > 0) {
       const futureTitle = document.createElement('div');
       futureTitle.className = 'section-title';
-      futureTitle.style.color = '#6b7280';
-      futureTitle.innerText = '📅 Próximos Dias (Apenas Leitura/Troca)';
+      futureTitle.style.color = '#94a3b8';
+      futureTitle.innerText = '📅 Próximos Dias';
       list.appendChild(futureTitle);
 
       futureTasks.forEach(task => renderTaskItem(list, task, false));
@@ -590,17 +702,17 @@
     item.className = `item-card ${expired ? 'expired' : ''} ${!isForToday ? 'disabled' : ''}`;
 
     let tradeBtnHtml = '';
-    if (task.canTrade && !expired) {
-      tradeBtnHtml = `<button style="font-size:0.75rem; margin-left:5px;" onclick="requestTrade(${task.id})">🔄 Propor Troca</button>`;
+    if (task.canTrade && !expired && isForToday) {
+      tradeBtnHtml = `<button style="font-size:0.7rem; background:#f1f5f9; border:1px solid #cbd5e1; border-radius:6px; padding:3px 6px; margin-left:4px; cursor:pointer;" onclick="requestTrade(${task.id})">🔄 Trocar</button>`;
     }
 
     const isPending = pendingApprovals.some(p => p.taskId === task.id && p.childKey === currentUser);
     let actionBtnHtml = '';
 
     if (!isForToday) {
-      actionBtnHtml = `<span style="font-size:0.8rem; color:#6b7280; font-weight:bold;">Dia: ${task.schedule}</span>`;
+      actionBtnHtml = `<span style="font-size:0.8rem; color:#64748b; font-weight:600;">${task.schedule}</span>`;
     } else if (isPending) {
-      actionBtnHtml = `<button class="btn-action pending">Aguardando Os Pais...</button>`;
+      actionBtnHtml = `<button class="btn-action pending">Em Aprovação...</button>`;
     } else if (expired) {
       actionBtnHtml = `<button class="btn-action expired-btn" onclick="applyPenalty(${task.id})">Expirou (-${task.penalty} XP)</button>`;
     } else {
@@ -609,11 +721,13 @@
 
     item.innerHTML = `
       <div>
-        <strong>${task.title}</strong> 
-        <span class="tag">+${task.xp} XP</span>
-        <span class="tag tag-day">Até ${task.deadline}h</span>
-        ${expired ? `<span class="tag tag-alert">⚠️ Perda: -${task.penalty} XP</span>` : ''}
-        ${tradeBtnHtml}
+        <strong style="font-size:0.95rem;">${task.title}</strong> 
+        <div>
+          <span class="tag">+${task.xp} XP</span>
+          <span class="tag tag-day">Até ${task.deadline}h</span>
+          ${expired ? `<span class="tag tag-alert">⚠️ -${task.penalty} XP</span>` : ''}
+          ${tradeBtnHtml}
+        </div>
       </div>
       ${actionBtnHtml}
     `;
@@ -625,7 +739,7 @@
     if (!task) return;
 
     pendingApprovals.push({ taskId: task.id, childKey: currentUser, title: task.title, xp: task.xp });
-    alert("Missão concluída! Enviada para a aprovação de Os Pais.");
+    alert("Missão enviada para a aprovação dos Pais!");
     renderTasks();
   }
 
@@ -637,7 +751,7 @@
     children[currentUser].expired++;
     appliedPenaltiesLog.push({ id: Date.now(), childKey: currentUser, taskId: task.id, title: task.title, penalty: task.penalty });
 
-    alert(`Prazo expirado! Descontados ${task.penalty} XP.`);
+    alert(`Prazo expirado! Foram descontados ${task.penalty} XP.`);
     updateHeaderStatus();
     renderTasks();
   }
@@ -665,13 +779,15 @@
       let canBuy = currentXp >= reward.cost;
       let buyBtn = canBuy 
         ? `<button class="btn-action store" onclick="requestRedeem(${reward.id})">Resgatar</button>`
-        : `<button class="btn-action" style="background:#cbd5e1; cursor:not-allowed;">Faltam ${reward.cost - currentXp} XP</button>`;
+        : `<button class="btn-action" style="background:#cbd5e1; color:#64748b; box-shadow:none; cursor:not-allowed;">Faltam ${reward.cost - currentXp} XP</button>`;
 
       item.innerHTML = `
-        <div>
-          <span style="font-size:1.4rem;">${reward.icon}</span>
-          <strong>${reward.title}</strong>
-          <span class="tag tag-store">${reward.cost} XP</span>
+        <div style="display:flex; align-items:center; gap:10px;">
+          <span style="font-size:1.6rem;">${reward.icon}</span>
+          <div>
+            <strong style="font-size:0.95rem;">${reward.title}</strong><br>
+            <span class="tag tag-store">${reward.cost} XP</span>
+          </div>
         </div>
         ${buyBtn}
       `;
@@ -684,11 +800,11 @@
     if (!reward) return;
 
     pendingRedemptions.push({ rewardId: reward.id, childKey: currentUser, title: reward.title, cost: reward.cost });
-    alert("Pedido de resgate enviado para Os Pais!");
+    alert("Pedido de resgate enviado para aprovação dos Pais!");
     renderStore();
   }
 
-  /* ABAS DO PAINEL DOS PAIS (AI STUDIO) */
+  /* ABAS DO PAINEL DOS PAIS */
   function setAdminSubTab(tab) {
     activeAdminSubTab = tab;
     ['report', 'pending', 'tasks', 'store', 'members'].forEach(t => {
@@ -716,25 +832,25 @@
         const lvl = getLevelInfo(c.xp);
         html += `
           <div class="report-card-ai">
-            <div class="report-header-ai">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
               <div>
-                <strong>${c.name}</strong><br>
+                <strong>${c.avatar} ${c.name}</strong><br>
                 <span class="tag tag-store">${lvl.name}</span>
               </div>
               <span style="font-size:1.1rem; font-weight:bold; color:var(--primary);">${c.xp} XP</span>
             </div>
-            <div style="font-size:0.85rem; color:#4b5563;">
-              <p style="margin:3px 0;">✅ Feitas nesta semana: <strong>${c.done}</strong></p>
-              <p style="margin:3px 0;">❌ Expiradas / Atrasadas: <strong>${c.expired}</strong></p>
+            <div style="font-size:0.85rem; color:#475569;">
+              <p style="margin:3px 0;">✅ Concluídas nesta semana: <strong>${c.done}</strong></p>
+              <p style="margin:3px 0;">❌ Atrasadas / Expiradas: <strong>${c.expired}</strong></p>
               <p style="margin:3px 0;">📈 Taxa de Sucesso: <strong>${(c.done + c.expired) > 0 ? Math.round((c.done / (c.done + c.expired)) * 100) : 100}%</strong></p>
             </div>
           </div>
         `;
       });
 
-      html += `<h4 style="margin-top:20px; color:#6b7280;">HISTÓRICO RECENTE DE ATIVIDADES</h4>`;
+      html += `<h4 style="margin-top:20px; color:#64748b;">HISTÓRICO RECENTE DE ATIVIDADES</h4>`;
       if (historyLog.length === 0) {
-        html += `<p style="font-size:0.85rem; color:#6b7280;">Nenhuma atividade recente.</p>`;
+        html += `<p style="font-size:0.85rem; color:#64748b;">Nenhuma atividade recente.</p>`;
       } else {
         historyLog.forEach(h => {
           html += `<div class="item-card">
@@ -754,7 +870,7 @@
       `;
 
       if (pendingApprovals.length === 0) {
-        html += `<p style="font-size:0.85rem; color:#6b7280;">Nenhuma tarefa aguardando aprovação.</p>`;
+        html += `<p style="font-size:0.85rem; color:#64748b;">Nenhuma tarefa aguardando aprovação.</p>`;
       } else {
         pendingApprovals.forEach((p, idx) => {
           html += `<div class="item-card">
@@ -766,12 +882,12 @@
 
       html += `<h4 style="color:var(--purple-light); margin-top:20px;">🎁 Resgates da Lojinha Pendentes</h4>`;
       if (pendingRedemptions.length === 0) {
-        html += `<p style="font-size:0.85rem; color:#6b7280;">Nenhum resgate pendente.</p>`;
+        html += `<p style="font-size:0.85rem; color:#64748b;">Nenhum resgate pendente.</p>`;
       } else {
         pendingRedemptions.forEach((r, idx) => {
           html += `<div class="item-card">
             <div><b>${children[r.childKey].name}:</b> ${r.title} (${r.cost} XP)</div>
-            <button class="btn-action store" onclick="approveRedeem(${idx})">Aprovar e ZERAR XP</button>
+            <button class="btn-action store" onclick="approveRedeem(${idx})">Aprovar Resgate</button>
           </div>`;
         });
       }
@@ -779,8 +895,23 @@
       html += `</div>`;
       container.innerHTML = html;
     }
+    else if (activeAdminSubTab === 'tasks') {
+      let html = `<div class="card admin-form">
+        <h3>⚙️ Gerenciar Missões</h3>
+        <h4>➕ Cadastrar Nova Missão</h4>
+        <input type="text" id="new-task-title" placeholder="Título da Missão">
+        <select id="new-task-assignee">
+          <option value="all">Para Todos os Filhos</option>
+          <option value="thiego">Thiego</option>
+          <option value="manuela">Manuela</option>
+          <option value="tayrone">Tayrone</option>
+        </select>
+        <button class="btn-action" style="width:100%; margin-top:8px;" onclick="addNewTask()">Cadastrar Tarefa</button>
+      </div>`;
+      container.innerHTML = html;
+    }
     else {
-      container.innerHTML = `<div class="card"><p style="text-align:center; color:#6b7280;">Selecione outra aba para gerenciar.</p></div>`;
+      container.innerHTML = `<div class="card"><p style="text-align:center; color:#64748b;">Selecione outra opção para gerenciar.</p></div>`;
     }
   }
 
@@ -796,14 +927,24 @@
 
   function approveRedeem(index) {
     const r = pendingRedemptions[index];
-    children[r.childKey].xp = 0;
+    children[r.childKey].xp = Math.max(0, children[r.childKey].xp - r.cost);
     pendingRedemptions.splice(index, 1);
-    alert("Resgate aprovado! Saldo de XP zerado.");
+    alert("Resgate aprovado!");
     renderAdminView();
   }
 
+  function addNewTask() {
+    const title = document.getElementById('new-task-title').value;
+    const assignee = document.getElementById('new-task-assignee').value;
+    if (!title) return alert("Digite o título da tarefa!");
+
+    tasks.push({ id: Date.now(), title, xp: 15, penalty: 20, category: "daily", assignedTo: assignee, days: ['domingo','segunda','terca','quarta','quinta','sexta','sabado'], schedule: "Todos os dias", deadline: "20:00", canTrade: true });
+    alert("Tarefa criada com sucesso!");
+    document.getElementById('new-task-title').value = '';
+  }
+
   function resetWeek() {
-    if (confirm("Zerar o histórico semanal? Os saldos de XP atuais serão mantidos.")) {
+    if (confirm("Zerar o histórico semanal? Os saldos de XP atuais continuarão intactos.")) {
       Object.keys(children).forEach(k => { children[k].done = 0; children[k].expired = 0; });
       historyLog = [];
       renderAdminView();
@@ -811,7 +952,7 @@
   }
 
   function openSuggestionModal() {
-    let text = prompt("💡 Digite sua sugestão:");
+    let text = prompt("💡 Digite sua sugestão para o aplicativo:");
     if (text) {
       alert("Sugestão enviada com sucesso!");
     }
