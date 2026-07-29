@@ -1,9 +1,12 @@
-
 <!DOCTYPE html>
 <html lang="pt-BR">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="A Luta Diária" />
     <title>A Luta Diária 🥊 - QG da Família</title>
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -419,6 +422,44 @@
           }));
         };
 
+        const resetChildXp = (childKey) => {
+          setState(prev => {
+            if (!prev.children || !prev.children[childKey]) return prev;
+            const childName = prev.children[childKey].name;
+            const newHistory = { id: 'h-' + Date.now(), childKey, taskTitle: `XP Zerado (${childName})`, status: 'forgiven', xpChange: 0, timestamp: new Date().toISOString() };
+            return {
+              ...prev,
+              children: {
+                ...prev.children,
+                [childKey]: { ...prev.children[childKey], xp: 0 }
+              },
+              historyLog: [newHistory, ...(prev.historyLog || [])]
+            };
+          });
+        };
+
+        const resetAllChildrenXp = () => {
+          setState(prev => {
+            const updatedChildren = {};
+            Object.keys(prev.children || {}).forEach(k => {
+              updatedChildren[k] = { ...prev.children[k], xp: 0 };
+            });
+            const newHistoryEntries = Object.keys(updatedChildren).map(k => ({
+              id: 'h-' + Date.now() + '-' + k,
+              childKey: k,
+              taskTitle: `XP Zerado para Início Oficial (${updatedChildren[k].name})`,
+              status: 'forgiven',
+              xpChange: 0,
+              timestamp: new Date().toISOString()
+            }));
+            return {
+              ...prev,
+              children: updatedChildren,
+              historyLog: [...newHistoryEntries, ...(prev.historyLog || [])]
+            };
+          });
+        };
+
         const resetChildPassword = (childKey) => {
           setState(prev => ({ ...prev, children: { ...prev.children, [childKey]: { ...prev.children[childKey], passwordHash: null } } }));
         };
@@ -442,7 +483,7 @@
             approveTask, rejectTask, reversePenalty, approveRedemption, rejectRedemption,
             addSuggestion, addTask, updateTask, deleteTask, addReward, updateReward, deleteReward,
             toggleStoreStatus, toggleDayOff, addChild, updateChild, adjustXp, resetChildPassword,
-            resetWeekReport, resetFactoryData
+            resetWeekReport, resetFactoryData, resetChildXp, resetAllChildrenXp
           }}>
             {children}
           </AppContext.Provider>
@@ -510,6 +551,110 @@
         return <canvas ref={canvasRef} className="fixed inset-0 pointer-events-none z-50" style={{ width: '100vw', height: '100vh' }} />;
       }
 
+      // ==================== PWA INSTALL BUTTON ====================
+      function InstallPwaButton() {
+        const [deferredPrompt, setDeferredPrompt] = useState(null);
+        const [showInstructionsModal, setShowInstructionsModal] = useState(false);
+        const [isStandalone, setIsStandalone] = useState(false);
+
+        useEffect(() => {
+          if (window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone) {
+            setIsStandalone(true);
+          }
+
+          const handleBeforeInstall = (e) => {
+            e.preventDefault();
+            setDeferredPrompt(e);
+          };
+
+          window.addEventListener('beforeinstallprompt', handleBeforeInstall);
+          return () => window.removeEventListener('beforeinstallprompt', handleBeforeInstall);
+        }, []);
+
+        const handleInstallClick = async () => {
+          if (deferredPrompt) {
+            deferredPrompt.prompt();
+            const { outcome } = await deferredPrompt.userChoice;
+            if (outcome === 'accepted') {
+              setDeferredPrompt(null);
+            }
+          } else {
+            setShowInstructionsModal(true);
+          }
+        };
+
+        if (isStandalone) {
+          return null;
+        }
+
+        return (
+          <>
+            <button
+              type="button"
+              onClick={handleInstallClick}
+              className="px-2.5 py-1.5 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white font-extrabold text-xs shadow-xs flex items-center gap-1.5 cursor-pointer transition-transform active:scale-95"
+              title="Instalar App na tela inicial do celular"
+            >
+              <span>📲</span>
+              <span className="hidden sm:inline">Instalar App</span>
+            </button>
+
+            {showInstructionsModal && (
+              <div className="fixed inset-0 bg-black/60 backdrop-blur-xs z-50 flex items-center justify-center p-4">
+                <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-3xl max-w-md w-full p-6 shadow-2xl space-y-4 relative">
+                  <div className="flex justify-between items-start">
+                    <div className="flex items-center gap-2 text-indigo-600 dark:text-indigo-400">
+                      <span className="text-2xl">📲</span>
+                      <h3 className="text-base font-black text-zinc-900 dark:text-white">Como Instalar na Tela Inicial</h3>
+                    </div>
+                    <button
+                      onClick={() => setShowInstructionsModal(false)}
+                      className="w-8 h-8 rounded-full bg-zinc-100 dark:bg-zinc-800 text-zinc-500 font-bold flex items-center justify-center hover:bg-zinc-200"
+                    >
+                      ✕
+                    </button>
+                  </div>
+
+                  <p className="text-xs text-zinc-600 dark:text-zinc-300 leading-relaxed">
+                    Adicione <strong>A Luta Diária 🥊</strong> diretamente na tela inicial do seu celular para usar como um app de verdade!
+                  </p>
+
+                  <div className="space-y-3 pt-1 text-xs">
+                    <div className="p-3.5 rounded-2xl bg-indigo-50/70 dark:bg-indigo-950/30 border border-indigo-100 dark:border-indigo-900/50 space-y-1">
+                      <div className="font-extrabold text-indigo-900 dark:text-indigo-200 flex items-center gap-1.5">
+                        🍎 iPhone / iPad (Safari)
+                      </div>
+                      <ol className="list-decimal list-inside text-zinc-700 dark:text-zinc-300 space-y-1 pl-1">
+                        <li>Toque no botão de <strong>Compartilhar (⬆️)</strong> no Safari.</li>
+                        <li>Selecione <strong>"Adicionar à Tela de Início"</strong>.</li>
+                        <li>Toque em <strong>"Adicionar"</strong> no canto superior.</li>
+                      </ol>
+                    </div>
+
+                    <div className="p-3.5 rounded-2xl bg-purple-50/70 dark:bg-purple-950/30 border border-purple-100 dark:border-purple-900/50 space-y-1">
+                      <div className="font-extrabold text-purple-900 dark:text-purple-200 flex items-center gap-1.5">
+                        🤖 Android (Chrome / Edge)
+                      </div>
+                      <ol className="list-decimal list-inside text-zinc-700 dark:text-zinc-300 space-y-1 pl-1">
+                        <li>Toque no menu de <strong>3 pontinhos (⋮)</strong> no navegador.</li>
+                        <li>Selecione <strong>"Instalar aplicativo"</strong> ou <strong>"Adicionar à tela inicial"</strong>.</li>
+                      </ol>
+                    </div>
+                  </div>
+
+                  <button
+                    onClick={() => setShowInstructionsModal(false)}
+                    className="w-full py-2.5 rounded-xl bg-indigo-600 text-white font-bold text-xs shadow-md"
+                  >
+                    Entendido! 👍
+                  </button>
+                </div>
+              </div>
+            )}
+          </>
+        );
+      }
+
       // ==================== NAVBAR COMPONENT ====================
       function Navbar() {
         const { state, currentUser, logout, activeTab, setActiveTab } = useApp();
@@ -533,8 +678,11 @@
                     <p className="text-xs text-zinc-500 dark:text-zinc-400 font-medium">Minhas Tarefas e Missões da Casa</p>
                   </div>
                 </div>
-                <div className="text-xs font-semibold px-3 py-1.5 rounded-full bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-300">
-                  ⏱️ {currentTime || '00:00:00'}
+                <div className="flex items-center gap-2">
+                  <InstallPwaButton />
+                  <div className="text-xs font-semibold px-3 py-1.5 rounded-full bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-300">
+                    ⏱️ {currentTime || '00:00:00'}
+                  </div>
                 </div>
               </div>
             </header>
@@ -564,7 +712,9 @@
                   </div>
                 </div>
 
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-2.5">
+                  <InstallPwaButton />
+
                   {!isAdmin && child && rank && (
                     <div className="flex items-center gap-2 bg-indigo-50 dark:bg-indigo-950/40 border border-indigo-100 dark:border-indigo-900/50 px-3 py-1.5 rounded-xl">
                       <span className="text-xl">{child.avatar}</span>
@@ -579,13 +729,13 @@
 
                   {isAdmin && (
                     <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-purple-50 dark:bg-purple-950/40 text-purple-700 dark:text-purple-300 font-bold text-xs border border-purple-200 dark:border-purple-900/50">
-                      🛡️ <span>Os Pais (Supervisores)</span>
+                      🛡️ <span className="hidden sm:inline">Os Pais (Supervisores)</span>
                     </div>
                   )}
 
                   <button
                     onClick={logout}
-                    className="flex items-center gap-1.5 text-xs font-semibold px-3 py-2 rounded-xl bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors"
+                    className="flex items-center gap-1.5 text-xs font-semibold px-3 py-2 rounded-xl bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors cursor-pointer"
                   >
                     🚪 <span className="hidden sm:inline">Sair</span>
                   </button>
@@ -610,13 +760,13 @@
                 <div className="flex gap-2 mt-3 pt-2 border-t border-zinc-100 dark:border-zinc-800">
                   <button
                     onClick={() => setActiveTab('tasks')}
-                    className={`flex-1 py-2 px-3 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2 ${activeTab === 'tasks' ? 'bg-indigo-600 text-white shadow-md' : 'bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-300'}`}
+                    className={`flex-1 py-2 px-3 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2 cursor-pointer ${activeTab === 'tasks' ? 'bg-indigo-600 text-white shadow-md' : 'bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-300'}`}
                   >
                     📋 Minhas Missões
                   </button>
                   <button
                     onClick={() => setActiveTab('store')}
-                    className={`flex-1 py-2 px-3 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2 ${activeTab === 'store' ? 'bg-purple-600 text-white shadow-md' : 'bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-300'}`}
+                    className={`flex-1 py-2 px-3 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2 cursor-pointer ${activeTab === 'store' ? 'bg-purple-600 text-white shadow-md' : 'bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-300'}`}
                   >
                     🛒 Lojinha de Recompensas
                   </button>
@@ -711,7 +861,6 @@
                     className="w-full px-4 py-2.5 rounded-xl border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-zinc-900 dark:text-white text-sm"
                     required
                   />
-                 
                 </div>
 
                 {errorMsg && (
@@ -1197,13 +1346,15 @@
       function AdminView() {
         const {
           state, currentUser, approveTask, rejectTask, reversePenalty,
-          approveRedemption, rejectRedemption, deleteTask, deleteReward,
+          approveRedemption, rejectRedemption, deleteTask, updateTask, deleteReward,
           toggleStoreStatus, toggleDayOff, adjustXp, resetChildPassword,
-          resetWeekReport, resetFactoryData, addChild, updateChild
+          resetWeekReport, resetFactoryData, addChild, updateChild,
+          addTask, addReward, updateReward, resetChildXp, resetAllChildrenXp
         } = useApp();
 
         const [activeSubTab, setActiveSubTab] = useState('report');
         const [selectedChildForXp, setSelectedChildForXp] = useState('thiego');
+        const [xpType, setXpType] = useState('bonus');
         const [xpDelta, setXpDelta] = useState(20);
         const [xpReason, setXpReason] = useState('Bônus por boa conduta');
 
@@ -1212,15 +1363,63 @@
         const [newChildAvatar, setNewChildAvatar] = useState('🧒');
         const [newChildBirthday, setNewChildBirthday] = useState('');
 
+        // Form state para Nova Tarefa
+        const [newTaskTitle, setNewTaskTitle] = useState('');
+        const [newTaskXp, setNewTaskXp] = useState(20);
+        const [newTaskPenalty, setNewTaskPenalty] = useState(10);
+        const [newTaskCategory, setNewTaskCategory] = useState('daily');
+        const [newTaskAssignedTo, setNewTaskAssignedTo] = useState('all');
+        const [newTaskDeadline, setNewTaskDeadline] = useState('');
+        const [newTaskNeedCheck, setNewTaskNeedCheck] = useState(false);
+
+        // State para Editar Missão
+        const [editingTask, setEditingTask] = useState(null);
+
+        // Form state para Novo Prêmio
+        const [newRewardTitle, setNewRewardTitle] = useState('');
+        const [newRewardCost, setNewRewardCost] = useState(100);
+        const [newRewardIcon, setNewRewardIcon] = useState('🎁');
+        const [newRewardDesc, setNewRewardDesc] = useState('');
+
+        // State para Editar Prêmio
+        const [editingReward, setEditingReward] = useState(null);
+
+        // State para Toast Feedback
+        const [toastMsg, setToastMsg] = useState('');
+        const showToast = (msg) => {
+          setToastMsg(msg);
+          setTimeout(() => setToastMsg(''), 4000);
+        };
+
         if (currentUser !== 'admin') return null;
 
         const childrenList = Object.values(state.children);
 
+        const handleExecuteAdjustment = (forcedType) => {
+          if (!selectedChildForXp) return;
+          const childObj = state.children[selectedChildForXp];
+          if (!childObj) return;
+
+          const type = forcedType || xpType;
+          const amount = Math.abs(xpDelta) || 0;
+          if (amount <= 0) return;
+
+          const finalDelta = type === 'penalty' ? -amount : amount;
+          const defaultReason = type === 'penalty' ? 'Penalidade aplicada pelo supervisor' : 'Bônus aplicado pelo supervisor';
+          const reasonText = xpReason.trim() || defaultReason;
+
+          adjustXp(selectedChildForXp, finalDelta, reasonText);
+
+          if (type === 'penalty') {
+            showToast(`🚨 Penalidade de -${amount} XP aplicada para ${childObj.name}!`);
+          } else {
+            showToast(`✨ Bônus de +${amount} XP adicionado para ${childObj.name}!`);
+          }
+        };
+
         const handleApplyXpAdjustment = (e) => {
           e.preventDefault();
-          if (!selectedChildForXp) return;
-          adjustXp(selectedChildForXp, xpDelta, xpReason);
-          alert(`Ajuste de ${xpDelta > 0 ? '+' : ''}${xpDelta} XP aplicado!`);
+          handleExecuteAdjustment(xpType);
         };
 
         const handleCreateChild = (e) => {
@@ -1229,11 +1428,85 @@
           addChild({ name: newChildName.trim(), age: newChildAge, avatar: newChildAvatar, color: 'bg-indigo-500', birthday: newChildBirthday.trim() || undefined });
           setNewChildName('');
           setNewChildBirthday('');
-          alert('Novo perfil adicionado!');
+          showToast(`Novo perfil de ${newChildName.trim()} adicionado!`);
+        };
+
+        const handleCreateTask = (e) => {
+          e.preventDefault();
+          if (!newTaskTitle.trim()) return;
+          addTask({
+            title: newTaskTitle.trim(),
+            xp: newTaskXp,
+            penalty: newTaskPenalty,
+            type: newTaskCategory,
+            category: newTaskCategory,
+            assignedTo: newTaskAssignedTo,
+            deadline: newTaskDeadline || undefined,
+            needCheck: newTaskNeedCheck,
+            days: []
+          });
+          setNewTaskTitle('');
+          showToast(`Nova missão "${newTaskTitle.trim()}" criada com sucesso!`);
+        };
+
+        const handleUpdateTaskSubmit = (e) => {
+          e.preventDefault();
+          if (!editingTask || !editingTask.title.trim()) return;
+          updateTask({
+            ...editingTask,
+            title: editingTask.title.trim(),
+            xp: Number(editingTask.xp) || 0,
+            penalty: Number(editingTask.penalty) || 0,
+            type: editingTask.category || editingTask.type || 'daily',
+            category: editingTask.category || editingTask.type || 'daily',
+            assignedTo: editingTask.assignedTo || 'all',
+            deadline: editingTask.deadline || undefined,
+            needCheck: !!editingTask.needCheck
+          });
+          setEditingTask(null);
+          showToast(`Missão "${editingTask.title.trim()}" atualizada com sucesso!`);
+        };
+
+        const handleCreateReward = (e) => {
+          e.preventDefault();
+          if (!newRewardTitle.trim()) return;
+          addReward({
+            title: newRewardTitle.trim(),
+            cost: newRewardCost,
+            icon: newRewardIcon.trim() || '🎁',
+            description: newRewardDesc.trim() || undefined
+          });
+          setNewRewardTitle('');
+          setNewRewardDesc('');
+          showToast('Novo prêmio cadastrado na Lojinha!');
+        };
+
+        const handleUpdateRewardSubmit = (e) => {
+          e.preventDefault();
+          if (!editingReward || !editingReward.title.trim()) return;
+          updateReward({
+            id: editingReward.id,
+            title: editingReward.title.trim(),
+            cost: Number(editingReward.cost),
+            icon: editingReward.icon.trim() || '🎁',
+            description: editingReward.description ? editingReward.description.trim() : undefined
+          });
+          setEditingReward(null);
+          showToast('Prêmio atualizado com sucesso!');
         };
 
         return (
           <div className="space-y-5 max-w-4xl mx-auto py-2">
+            {toastMsg && (
+              <div className="bg-emerald-600 text-white font-extrabold text-xs p-3.5 rounded-2xl shadow-md flex justify-between items-center transition-all animate-bounce">
+                <div className="flex items-center gap-2">
+                  <span>✨</span>
+                  <span>{toastMsg}</span>
+                </div>
+                <button onClick={() => setToastMsg('')} className="font-extrabold px-2 py-0.5 hover:bg-emerald-700 rounded-lg cursor-pointer">✕</button>
+              </div>
+            )}
+
             <div className="bg-gradient-to-r from-purple-700 via-indigo-700 to-indigo-800 p-6 rounded-2xl text-white shadow-lg space-y-4">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div className="flex items-center gap-3">
@@ -1263,7 +1536,7 @@
                   <button
                     key={t.key}
                     onClick={() => setActiveSubTab(t.key)}
-                    className={`px-3 py-2 rounded-xl text-xs font-bold ${activeSubTab === t.key ? 'bg-white text-purple-900' : 'bg-white/10 text-white'}`}
+                    className={`px-3 py-2 rounded-xl text-xs font-bold cursor-pointer ${activeSubTab === t.key ? 'bg-white text-purple-900' : 'bg-white/10 text-white'}`}
                   >
                     {t.label}
                   </button>
@@ -1272,10 +1545,10 @@
             </div>
 
             {activeSubTab === 'report' && (
-              <div className="bg-white dark:bg-zinc-900 p-5 rounded-2xl border border-zinc-200 dark:border-zinc-800 space-y-4">
+              <div className="bg-white dark:bg-zinc-900 p-5 rounded-2xl border border-zinc-200 dark:border-zinc-800 space-y-5">
                 <div className="flex justify-between items-center pb-3 border-b">
                   <h3 className="font-bold text-base text-zinc-900 dark:text-white">Relatório de Desempenho Semanal</h3>
-                  <button onClick={() => { if (confirm('Zerar o relatório? O saldo de XP continua salvo.')) resetWeekReport(); }} className="px-3 py-1.5 border rounded-xl text-xs font-bold">Zerar Relatório</button>
+                  <button onClick={() => { resetWeekReport(); showToast('📊 Histórico do relatório semanal zerado!'); }} className="px-3 py-1.5 border rounded-xl text-xs font-bold cursor-pointer hover:bg-zinc-100 dark:hover:bg-zinc-800">Zerar Histórico</button>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
@@ -1292,18 +1565,54 @@
                           <span className="text-2xl">{c.avatar}</span>
                           <div>
                             <h4 className="font-black text-sm">{c.name}</h4>
-                            <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-indigo-50 text-indigo-700">{rank.title}</span>
+                            <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-indigo-50 text-indigo-700 dark:bg-indigo-950 dark:text-indigo-300">{rank.title}</span>
                           </div>
                         </div>
                         <div className="space-y-1 text-xs">
                           <div className="flex justify-between"><span>Feitas:</span><strong className="text-emerald-600">{completed}</strong></div>
                           <div className="flex justify-between"><span>Expiradas:</span><strong className="text-rose-600">{expired}</strong></div>
                           <div className="flex justify-between"><span>Sucesso:</span><strong className="text-indigo-600">{rate}%</strong></div>
-                          <div className="flex justify-between pt-2 border-t font-bold"><span>Saldo XP:</span><strong className="text-indigo-600">{c.xp} XP</strong></div>
+                          <div className="flex justify-between pt-2 border-t font-bold"><span>Saldo XP Atual:</span><strong className="text-indigo-600">{c.xp} XP</strong></div>
                         </div>
                       </div>
                     );
                   })}
+                </div>
+
+                <div className="pt-4 border-t border-zinc-200 dark:border-zinc-800 space-y-3">
+                  <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-2">
+                    <div>
+                      <h4 className="font-extrabold text-sm text-zinc-900 dark:text-white">🔄 Reiniciar / Zerar Pontuação (XP para Testes)</h4>
+                      <p className="text-xs text-zinc-500">Zere os pontos XP para começar a fase oficial de uso após os testes.</p>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        resetAllChildrenXp();
+                        showToast('⚡ XP de TODOS os filhos foi ZERADO para 0 XP!');
+                      }}
+                      className="px-3.5 py-2.5 rounded-xl bg-rose-600 hover:bg-rose-700 active:scale-95 text-white font-black text-xs shadow-md cursor-pointer self-start sm:self-auto flex items-center gap-1.5"
+                    >
+                      <span>⚡ Zerar XP de Todos os Filhos</span>
+                    </button>
+                  </div>
+
+                  <div className="flex flex-wrap gap-2 pt-1">
+                    {childrenList.map(c => (
+                      <button
+                        key={c.key}
+                        type="button"
+                        onClick={() => {
+                          resetChildXp(c.key);
+                          showToast(`⚡ XP do(a) ${c.name} foi ZERADO (0 XP)!`);
+                        }}
+                        className="px-3 py-2 rounded-xl border border-rose-200 dark:border-rose-900/60 bg-rose-50/70 dark:bg-rose-950/30 text-rose-800 dark:text-rose-300 font-bold text-xs hover:bg-rose-100 cursor-pointer flex items-center gap-1.5 active:scale-95"
+                      >
+                        <span>{c.avatar}</span>
+                        <span>Zerar XP de {c.name} ({c.xp} XP)</span>
+                      </button>
+                    ))}
+                  </div>
                 </div>
               </div>
             )}
@@ -1326,8 +1635,8 @@
                               {item.note && <p className="text-xs italic text-amber-800 mt-1">💬 "{item.note}"</p>}
                             </div>
                             <div className="flex gap-2">
-                              <button onClick={() => rejectTask(item.id)} className="px-3 py-1.5 border text-rose-600 rounded-xl text-xs font-bold">Recusar</button>
-                              <button onClick={() => approveTask(item.id)} className="px-4 py-1.5 bg-emerald-600 text-white rounded-xl text-xs font-bold">Aprovar (+{item.xp} XP)</button>
+                              <button onClick={() => rejectTask(item.id)} className="px-3 py-1.5 border text-rose-600 rounded-xl text-xs font-bold cursor-pointer">Recusar</button>
+                              <button onClick={() => approveTask(item.id)} className="px-4 py-1.5 bg-emerald-600 text-white rounded-xl text-xs font-bold cursor-pointer">Aprovar (+{item.xp} XP)</button>
                             </div>
                           </div>
                         );
@@ -1350,7 +1659,7 @@
                               <div className="font-bold text-xs">{child?.avatar} {child?.name} (-{item.penalty} XP)</div>
                               <p className="text-xs">Tarefa: {item.title}</p>
                             </div>
-                            <button onClick={() => reversePenalty(item.id)} className="px-4 py-2 bg-amber-500 text-white text-xs font-bold rounded-xl">Anular (Devolver {item.penalty} XP)</button>
+                            <button onClick={() => reversePenalty(item.id)} className="px-4 py-2 bg-amber-500 text-white text-xs font-bold rounded-xl cursor-pointer">Anular (Devolver {item.penalty} XP)</button>
                           </div>
                         );
                       })}
@@ -1373,8 +1682,8 @@
                               <p className="text-xs mt-1">Quer resgatar: <u>{red.title}</u> (Saldo de XP será ZERADO ao aprovar)</p>
                             </div>
                             <div className="flex gap-2">
-                              <button onClick={() => rejectRedemption(red.id)} className="px-3 py-1.5 border text-xs font-bold rounded-xl">Recusar</button>
-                              <button onClick={() => approveRedemption(red.id)} className="px-4 py-1.5 bg-purple-600 text-white text-xs font-bold rounded-xl">Aprovar e ZERAR XP</button>
+                              <button onClick={() => rejectRedemption(red.id)} className="px-3 py-1.5 border text-xs font-bold rounded-xl cursor-pointer">Recusar</button>
+                              <button onClick={() => approveRedemption(red.id)} className="px-4 py-1.5 bg-purple-600 text-white text-xs font-bold rounded-xl cursor-pointer">Aprovar e ZERAR XP</button>
                             </div>
                           </div>
                         );
@@ -1385,28 +1694,591 @@
               </div>
             )}
 
+            {activeSubTab === 'tasks' && (
+              <div className="bg-white dark:bg-zinc-900 p-5 rounded-2xl border border-zinc-200 dark:border-zinc-800 space-y-6">
+                <div className="flex justify-between items-center pb-3 border-b">
+                  <h3 className="font-bold text-base text-zinc-900 dark:text-white">⚙️ Gerenciar Missões do Lar</h3>
+                  <span className="text-xs font-bold text-zinc-500">Total: {state.tasks.length} missões</span>
+                </div>
+
+                {editingTask ? (
+                  <form onSubmit={handleUpdateTaskSubmit} className="p-4 rounded-2xl bg-amber-50/80 dark:bg-amber-950/40 border border-amber-300 dark:border-amber-900/60 space-y-3">
+                    <div className="flex justify-between items-center">
+                      <h4 className="font-bold text-sm text-amber-900 dark:text-amber-200">✏️ Editar Missão Cadastrada</h4>
+                      <button type="button" onClick={() => setEditingTask(null)} className="text-xs font-bold text-zinc-500 hover:text-zinc-700 cursor-pointer">Cancelar ✕</button>
+                    </div>
+
+                    <div>
+                      <label className="block text-[11px] font-extrabold text-zinc-700 dark:text-zinc-300 mb-1">
+                        📌 Título da Missão:
+                      </label>
+                      <input
+                        type="text"
+                        value={editingTask.title}
+                        onChange={e => setEditingTask({ ...editingTask, title: e.target.value })}
+                        placeholder="Título da missão (ex: Arrumar a cama)"
+                        className="w-full p-2.5 rounded-xl border text-xs font-semibold dark:bg-zinc-800 dark:border-zinc-700"
+                        required
+                      />
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      <div>
+                        <label className="block text-[11px] font-extrabold text-emerald-700 dark:text-emerald-400 mb-1">
+                          ⚡ Recompensa (XP de Ganho +):
+                        </label>
+                        <input
+                          type="number"
+                          value={editingTask.xp}
+                          onChange={e => setEditingTask({ ...editingTask, xp: Number(e.target.value) })}
+                          placeholder="XP ao cumprir"
+                          className="w-full p-2.5 rounded-xl border text-xs font-bold bg-emerald-50/50 border-emerald-200 dark:bg-zinc-800 dark:border-zinc-700"
+                          min={1}
+                          required
+                        />
+                        <p className="text-[10px] text-zinc-500 mt-0.5">Pontos positivos ao cumprir a missão</p>
+                      </div>
+
+                      <div>
+                        <label className="block text-[11px] font-extrabold text-rose-700 dark:text-rose-400 mb-1">
+                          🚨 Penalidade (XP de Desconto -):
+                        </label>
+                        <input
+                          type="number"
+                          value={editingTask.penalty}
+                          onChange={e => setEditingTask({ ...editingTask, penalty: Number(e.target.value) })}
+                          placeholder="XP descontado se falhar"
+                          className="w-full p-2.5 rounded-xl border text-xs font-bold bg-rose-50/50 border-rose-200 dark:bg-zinc-800 dark:border-zinc-700"
+                          min={0}
+                          required
+                        />
+                        <p className="text-[10px] text-zinc-500 mt-0.5">Pontos de penalidade se não fizer</p>
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                      <div>
+                        <label className="block text-[11px] font-extrabold text-zinc-700 dark:text-zinc-300 mb-1">
+                          📂 Categoria de Tarefa:
+                        </label>
+                        <select
+                          value={editingTask.category || editingTask.type || 'daily'}
+                          onChange={e => setEditingTask({ ...editingTask, category: e.target.value, type: e.target.value })}
+                          className="w-full p-2.5 rounded-xl border text-xs font-semibold dark:bg-zinc-800 dark:border-zinc-700"
+                        >
+                          <option value="daily">☀️ Tarefa Diária</option>
+                          <option value="rotation">🔄 Rodízio de Tarefa</option>
+                          <option value="penalty">🚨 Penalidade Especial</option>
+                        </select>
+                      </div>
+
+                      <div>
+                        <label className="block text-[11px] font-extrabold text-zinc-700 dark:text-zinc-300 mb-1">
+                          👥 Atribuído para:
+                        </label>
+                        <select
+                          value={editingTask.assignedTo || 'all'}
+                          onChange={e => setEditingTask({ ...editingTask, assignedTo: e.target.value })}
+                          className="w-full p-2.5 rounded-xl border text-xs font-semibold dark:bg-zinc-800 dark:border-zinc-700"
+                        >
+                          <option value="all">👥 Para Todos os Filhos</option>
+                          {childrenList.map(c => (
+                            <option key={c.key} value={c.key}>{c.avatar} Apenas {c.name}</option>
+                          ))}
+                        </select>
+                      </div>
+
+                      <div>
+                        <label className="block text-[11px] font-extrabold text-zinc-700 dark:text-zinc-300 mb-1">
+                          ⏰ Horário Limite (Opcional):
+                        </label>
+                        <input
+                          type="time"
+                          value={editingTask.deadline || ''}
+                          onChange={e => setEditingTask({ ...editingTask, deadline: e.target.value })}
+                          className="w-full p-2.5 rounded-xl border text-xs font-bold dark:bg-zinc-800 dark:border-zinc-700"
+                        />
+                      </div>
+                    </div>
+
+                    <label className="flex items-center gap-2 p-3 rounded-xl border bg-white dark:bg-zinc-800 dark:border-zinc-700 text-xs font-semibold cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={!!editingTask.needCheck}
+                        onChange={e => setEditingTask({ ...editingTask, needCheck: e.target.checked })}
+                        className="w-4 h-4 rounded text-purple-600"
+                      />
+                      <span>Exige validação do Pai antes de dar os pontos? 🔍</span>
+                    </label>
+
+                    <div className="flex gap-2 pt-1">
+                      <button type="submit" className="px-5 py-2.5 bg-amber-600 hover:bg-amber-700 text-white font-bold text-xs rounded-xl shadow-xs cursor-pointer">
+                        💾 Salvar Alterações
+                      </button>
+                      <button type="button" onClick={() => setEditingTask(null)} className="px-4 py-2.5 bg-zinc-200 dark:bg-zinc-700 text-zinc-800 dark:text-zinc-200 font-bold text-xs rounded-xl cursor-pointer">
+                        Cancelar
+                      </button>
+                    </div>
+                  </form>
+                ) : (
+                  <form onSubmit={handleCreateTask} className="p-4 rounded-2xl bg-zinc-50 dark:bg-zinc-800/40 border border-zinc-200 dark:border-zinc-700/60 space-y-3">
+                    <h4 className="font-bold text-sm text-purple-900 dark:text-purple-200">➕ Cadastrar Nova Missão</h4>
+                    
+                    <div>
+                      <label className="block text-[11px] font-extrabold text-zinc-700 dark:text-zinc-300 mb-1">
+                        📌 Título da Missão:
+                      </label>
+                      <input
+                        type="text"
+                        value={newTaskTitle}
+                        onChange={e => setNewTaskTitle(e.target.value)}
+                        placeholder="Título da missão (ex: Arrumar a cama, Lavar a louça)"
+                        className="w-full p-2.5 rounded-xl border text-xs font-semibold dark:bg-zinc-800 dark:border-zinc-700"
+                        required
+                      />
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      <div>
+                        <label className="block text-[11px] font-extrabold text-emerald-700 dark:text-emerald-400 mb-1">
+                          ⚡ Recompensa (XP de Ganho +):
+                        </label>
+                        <input
+                          type="number"
+                          value={newTaskXp}
+                          onChange={e => setNewTaskXp(Number(e.target.value))}
+                          placeholder="XP ao cumprir"
+                          className="w-full p-2.5 rounded-xl border text-xs font-bold bg-emerald-50/50 border-emerald-200 dark:bg-zinc-800 dark:border-zinc-700"
+                          min={1}
+                          required
+                        />
+                        <p className="text-[10px] text-zinc-500 mt-0.5">Pontos positivos que a criança ganha ao fazer a tarefa</p>
+                      </div>
+
+                      <div>
+                        <label className="block text-[11px] font-extrabold text-rose-700 dark:text-rose-400 mb-1">
+                          🚨 Penalidade (XP de Desconto -):
+                        </label>
+                        <input
+                          type="number"
+                          value={newTaskPenalty}
+                          onChange={e => setNewTaskPenalty(Number(e.target.value))}
+                          placeholder="XP descontado se falhar"
+                          className="w-full p-2.5 rounded-xl border text-xs font-bold bg-rose-50/50 border-rose-200 dark:bg-zinc-800 dark:border-zinc-700"
+                          min={0}
+                          required
+                        />
+                        <p className="text-[10px] text-zinc-500 mt-0.5">Pontos de penalidade descontados se expirar ou não fizer</p>
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                      <div>
+                        <label className="block text-[11px] font-extrabold text-zinc-700 dark:text-zinc-300 mb-1">
+                          📂 Categoria de Tarefa:
+                        </label>
+                        <select
+                          value={newTaskCategory}
+                          onChange={e => setNewTaskCategory(e.target.value)}
+                          className="w-full p-2.5 rounded-xl border text-xs font-semibold dark:bg-zinc-800 dark:border-zinc-700"
+                        >
+                          <option value="daily">☀️ Tarefa Diária</option>
+                          <option value="rotation">🔄 Rodízio de Tarefa</option>
+                          <option value="penalty">🚨 Penalidade Especial</option>
+                        </select>
+                      </div>
+
+                      <div>
+                        <label className="block text-[11px] font-extrabold text-zinc-700 dark:text-zinc-300 mb-1">
+                          👥 Atribuído para:
+                        </label>
+                        <select
+                          value={newTaskAssignedTo}
+                          onChange={e => setNewTaskAssignedTo(e.target.value)}
+                          className="w-full p-2.5 rounded-xl border text-xs font-semibold dark:bg-zinc-800 dark:border-zinc-700"
+                        >
+                          <option value="all">👥 Para Todos os Filhos</option>
+                          {childrenList.map(c => (
+                            <option key={c.key} value={c.key}>{c.avatar} Apenas {c.name}</option>
+                          ))}
+                        </select>
+                      </div>
+
+                      <div>
+                        <label className="block text-[11px] font-extrabold text-zinc-700 dark:text-zinc-300 mb-1">
+                          ⏰ Horário Limite (Opcional):
+                        </label>
+                        <input
+                          type="time"
+                          value={newTaskDeadline}
+                          onChange={e => setNewTaskDeadline(e.target.value)}
+                          className="w-full p-2.5 rounded-xl border text-xs font-bold dark:bg-zinc-800 dark:border-zinc-700"
+                        />
+                      </div>
+                    </div>
+
+                    <label className="flex items-center gap-2 p-3 rounded-xl border bg-white dark:bg-zinc-800 dark:border-zinc-700 text-xs font-semibold cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={newTaskNeedCheck}
+                        onChange={e => setNewTaskNeedCheck(e.target.checked)}
+                        className="w-4 h-4 rounded text-purple-600"
+                      />
+                      <span>Exige validação do Pai antes de dar os pontos? 🔍</span>
+                    </label>
+
+                    <button type="submit" className="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs rounded-xl shadow-xs cursor-pointer">
+                      + Criar Missão
+                    </button>
+                  </form>
+                )}
+
+                <div className="space-y-3">
+                  <h4 className="font-bold text-sm text-zinc-700 dark:text-zinc-300">📋 Lista de Missões Ativas ({state.tasks.length})</h4>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    {state.tasks.map(t => (
+                      <div key={t.id} className="p-4 rounded-2xl border border-zinc-200 dark:border-zinc-800 bg-zinc-50/50 dark:bg-zinc-800/30 flex justify-between items-start gap-3">
+                        <div className="space-y-1">
+                          <div className="flex items-center gap-2">
+                            <span className="font-extrabold text-sm">{t.title}</span>
+                            <span className="px-2 py-0.5 rounded-full text-[10px] font-black bg-indigo-100 text-indigo-800 dark:bg-indigo-950 dark:text-indigo-300">
+                              +{t.xp} XP
+                            </span>
+                            {t.penalty > 0 && (
+                              <span className="px-2 py-0.5 rounded-full text-[10px] font-black bg-rose-100 text-rose-800 dark:bg-rose-950 dark:text-rose-300">
+                                -{t.penalty} XP
+                              </span>
+                            )}
+                          </div>
+                          <p className="text-xs text-zinc-500">
+                            Atribuído a: <strong>{t.assignedTo === 'all' ? 'Todos' : state.children[t.assignedTo]?.name || t.assignedTo}</strong>
+                            {t.deadline && <span> • Horário: {t.deadline}</span>}
+                            {t.needCheck && <span className="text-amber-600 font-semibold"> • Requer validação</span>}
+                          </p>
+                        </div>
+                        <div className="flex gap-1.5 shrink-0">
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setEditingTask({ ...t });
+                            }}
+                            className="px-3 py-1.5 rounded-xl border border-amber-200 dark:border-amber-900 bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-300 font-bold text-xs hover:bg-amber-100 cursor-pointer"
+                          >
+                            ✏️ Editar
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => { if (confirm(`Excluir a missão "${t.title}"?`)) deleteTask(t.id); }}
+                            className="px-3 py-1.5 rounded-xl border border-rose-200 dark:border-rose-900 bg-rose-50 dark:bg-rose-950/40 text-rose-600 dark:text-rose-400 font-bold text-xs hover:bg-rose-100 cursor-pointer"
+                          >
+                            🗑️ Excluir
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {activeSubTab === 'store' && (
+              <div className="bg-white dark:bg-zinc-900 p-5 rounded-2xl border border-zinc-200 dark:border-zinc-800 space-y-6">
+                <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-3 pb-3 border-b">
+                  <div>
+                    <h3 className="font-bold text-base text-zinc-900 dark:text-white">🛒 Gerenciar Lojinha de Recompensas</h3>
+                    <p className="text-xs text-zinc-500">Cadastre, edite e configure prêmios resgatáveis por XP.</p>
+                  </div>
+
+                  <button
+                    onClick={toggleStoreStatus}
+                    className={`px-4 py-2.5 rounded-xl font-extrabold text-xs transition-all cursor-pointer shadow-xs ${
+                      state.isStoreOpen
+                        ? 'bg-emerald-600 text-white hover:bg-emerald-700'
+                        : 'bg-amber-500 text-white hover:bg-amber-600'
+                    }`}
+                  >
+                    {state.isStoreOpen ? '🔓 Loja ABERTA (Clique p/ Fechar)' : '🔒 Loja FECHADA (Clique p/ Abrir)'}
+                  </button>
+                </div>
+
+                {editingReward ? (
+                  <form onSubmit={handleUpdateRewardSubmit} className="p-4 rounded-2xl bg-amber-50/80 dark:bg-amber-950/40 border border-amber-300 dark:border-amber-900/60 space-y-3">
+                    <div className="flex justify-between items-center">
+                      <h4 className="font-bold text-sm text-amber-900 dark:text-amber-200">✏️ Editar Prêmio Exista</h4>
+                      <button type="button" onClick={() => setEditingReward(null)} className="text-xs font-bold text-zinc-500 hover:text-zinc-700 cursor-pointer">Cancelar ✕</button>
+                    </div>
+                    <div className="grid grid-cols-1 sm:grid-cols-4 gap-3">
+                      <input
+                        type="text"
+                        value={editingReward.icon}
+                        onChange={e => setEditingReward({ ...editingReward, icon: e.target.value })}
+                        placeholder="Ícone (ex: 🎮)"
+                        className="p-2.5 rounded-xl border text-xs font-semibold text-center dark:bg-zinc-800 dark:border-zinc-700"
+                        maxLength={4}
+                        required
+                      />
+                      <input
+                        type="text"
+                        value={editingReward.title}
+                        onChange={e => setEditingReward({ ...editingReward, title: e.target.value })}
+                        placeholder="Nome do prêmio"
+                        className="sm:col-span-2 p-2.5 rounded-xl border text-xs font-semibold dark:bg-zinc-800 dark:border-zinc-700"
+                        required
+                      />
+                      <input
+                        type="number"
+                        value={editingReward.cost}
+                        onChange={e => setEditingReward({ ...editingReward, cost: Number(e.target.value) })}
+                        placeholder="Custo XP"
+                        className="p-2.5 rounded-xl border text-xs font-bold dark:bg-zinc-800 dark:border-zinc-700"
+                        min={1}
+                        required
+                      />
+                    </div>
+                    <input
+                      type="text"
+                      value={editingReward.description || ''}
+                      onChange={e => setEditingReward({ ...editingReward, description: e.target.value })}
+                      placeholder="Descrição opcional"
+                      className="w-full p-2.5 rounded-xl border text-xs dark:bg-zinc-800 dark:border-zinc-700"
+                    />
+                    <div className="flex gap-2 pt-1">
+                      <button type="submit" className="px-5 py-2.5 bg-amber-600 hover:bg-amber-700 text-white font-bold text-xs rounded-xl shadow-xs cursor-pointer">
+                        💾 Salvar Alterações
+                      </button>
+                      <button type="button" onClick={() => setEditingReward(null)} className="px-4 py-2.5 bg-zinc-200 dark:bg-zinc-700 text-zinc-800 dark:text-zinc-200 font-bold text-xs rounded-xl cursor-pointer">
+                        Cancelar
+                      </button>
+                    </div>
+                  </form>
+                ) : (
+                  <form onSubmit={handleCreateReward} className="p-4 rounded-2xl bg-zinc-50 dark:bg-zinc-800/40 border border-zinc-200 dark:border-zinc-700/60 space-y-3">
+                    <h4 className="font-bold text-sm text-purple-900 dark:text-purple-200">➕ Cadastrar Novo Prêmio</h4>
+                    <div className="grid grid-cols-1 sm:grid-cols-4 gap-3">
+                      <input
+                        type="text"
+                        value={newRewardIcon}
+                        onChange={e => setNewRewardIcon(e.target.value)}
+                        placeholder="Ícone (ex: 🎮)"
+                        className="p-2.5 rounded-xl border text-xs font-semibold text-center dark:bg-zinc-800 dark:border-zinc-700"
+                        maxLength={4}
+                        required
+                      />
+                      <input
+                        type="text"
+                        value={newRewardTitle}
+                        onChange={e => setNewRewardTitle(e.target.value)}
+                        placeholder="Nome do prêmio (ex: 1h de Videogame)"
+                        className="sm:col-span-2 p-2.5 rounded-xl border text-xs font-semibold dark:bg-zinc-800 dark:border-zinc-700"
+                        required
+                      />
+                      <input
+                        type="number"
+                        value={newRewardCost}
+                        onChange={e => setNewRewardCost(Number(e.target.value))}
+                        placeholder="Custo XP"
+                        className="p-2.5 rounded-xl border text-xs font-bold dark:bg-zinc-800 dark:border-zinc-700"
+                        min={1}
+                        required
+                      />
+                    </div>
+                    <input
+                      type="text"
+                      value={newRewardDesc}
+                      onChange={e => setNewRewardDesc(e.target.value)}
+                      placeholder="Descrição opcional do prêmio"
+                      className="w-full p-2.5 rounded-xl border text-xs dark:bg-zinc-800 dark:border-zinc-700"
+                    />
+                    <button type="submit" className="px-5 py-2.5 bg-purple-600 hover:bg-purple-700 text-white font-bold text-xs rounded-xl shadow-xs cursor-pointer">
+                      + Adicionar Prêmio
+                    </button>
+                  </form>
+                )}
+
+                <div className="space-y-3">
+                  <h4 className="font-bold text-sm text-zinc-700 dark:text-zinc-300">🎁 Prêmios Disponíveis ({state.rewards.length})</h4>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    {state.rewards.map(reward => (
+                      <div key={reward.id} className="p-4 rounded-2xl border border-zinc-200 dark:border-zinc-800 bg-zinc-50/50 dark:bg-zinc-800/30 flex justify-between items-start gap-3">
+                        <div className="flex items-start gap-3">
+                          <span className="text-3xl p-2 bg-white dark:bg-zinc-800 rounded-xl shadow-xs">{reward.icon}</span>
+                          <div>
+                            <h5 className="font-extrabold text-sm">{reward.title}</h5>
+                            <span className="inline-block mt-0.5 px-2.5 py-0.5 rounded-full text-[10px] font-black bg-purple-100 text-purple-800 dark:bg-purple-950 dark:text-purple-300">
+                              {reward.cost} XP
+                            </span>
+                            {reward.description && <p className="text-xs text-zinc-500 mt-1">{reward.description}</p>}
+                          </div>
+                        </div>
+
+                        <div className="flex gap-1.5">
+                          <button
+                            onClick={() => setEditingReward({ ...reward })}
+                            className="px-2.5 py-1.5 rounded-xl border border-amber-200 dark:border-amber-900/60 bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-300 font-bold text-xs hover:bg-amber-100 dark:hover:bg-amber-900/40 cursor-pointer"
+                            title="Editar este prêmio"
+                          >
+                            ✏️ Editar
+                          </button>
+                          <button
+                            onClick={() => { if (confirm(`Excluir o prêmio "${reward.title}"?`)) deleteReward(reward.id); }}
+                            className="px-2.5 py-1.5 rounded-xl border border-rose-200 dark:border-rose-900 bg-rose-50 dark:bg-rose-950/40 text-rose-600 dark:text-rose-400 font-bold text-xs hover:bg-rose-100 dark:hover:bg-rose-900/40 cursor-pointer"
+                            title="Excluir este prêmio"
+                          >
+                            🗑️
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            )}
+
             {activeSubTab === 'members' && (
               <div className="bg-white dark:bg-zinc-900 p-5 rounded-2xl border border-zinc-200 dark:border-zinc-800 space-y-6">
-                <form onSubmit={handleApplyXpAdjustment} className="p-4 rounded-2xl bg-zinc-50 space-y-3">
-                  <h4 className="font-bold text-sm">⚡ Ajuste Rápido de XP</h4>
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                    <select value={selectedChildForXp} onChange={(e) => setSelectedChildForXp(e.target.value)} className="p-2.5 rounded-xl border text-xs font-bold">
-                      {childrenList.map(c => <option key={c.key} value={c.key}>{c.avatar} {c.name} ({c.xp} XP)</option>)}
-                    </select>
-                    <input type="number" value={xpDelta} onChange={(e) => setXpDelta(Number(e.target.value))} className="p-2.5 rounded-xl border text-xs font-bold" />
-                    <input type="text" value={xpReason} onChange={(e) => setXpReason(e.target.value)} placeholder="Motivo" className="p-2.5 rounded-xl border text-xs" />
+                <form onSubmit={handleApplyXpAdjustment} className="p-4.5 rounded-2xl bg-zinc-50 dark:bg-zinc-800/40 border border-zinc-200 dark:border-zinc-700 space-y-4">
+                  <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-1 pb-2 border-b border-zinc-200/80 dark:border-zinc-700/80">
+                    <h4 className="font-bold text-sm text-zinc-900 dark:text-white flex items-center gap-2">
+                      <span className="text-base">⚡</span>
+                      <span>Ajuste Rápido de XP & Penalidades Diretas</span>
+                    </h4>
+                    <p className="text-[11px] text-zinc-500 font-medium">Aplicação imediata de Bônus (+) ou Penalidade (-)</p>
                   </div>
-                  <button type="submit" className="px-4 py-2 bg-indigo-600 text-white rounded-xl text-xs font-bold">Aplicar Ajuste</button>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-4 gap-3">
+                    <div>
+                      <label className="block text-[11px] font-extrabold text-zinc-700 dark:text-zinc-300 mb-1">
+                        👶 Selecione o Filho:
+                      </label>
+                      <select
+                        value={selectedChildForXp}
+                        onChange={(e) => setSelectedChildForXp(e.target.value)}
+                        className="w-full p-2.5 rounded-xl border text-xs font-bold dark:bg-zinc-800 dark:border-zinc-700"
+                      >
+                        {childrenList.map(c => <option key={c.key} value={c.key}>{c.avatar} {c.name} ({c.xp} XP)</option>)}
+                      </select>
+                    </div>
+
+                    <div>
+                      <label className="block text-[11px] font-extrabold text-zinc-700 dark:text-zinc-300 mb-1">
+                        ⚙️ Tipo de Ajuste:
+                      </label>
+                      <select
+                        value={xpType}
+                        onChange={(e) => {
+                          const newType = e.target.value;
+                          setXpType(newType);
+                          if (newType === 'penalty' && xpReason === 'Bônus por boa conduta') {
+                            setXpReason('Penalidade por má conduta');
+                          } else if (newType === 'bonus' && xpReason === 'Penalidade por má conduta') {
+                            setXpReason('Bônus por boa conduta');
+                          }
+                        }}
+                        className={`w-full p-2.5 rounded-xl border text-xs font-extrabold dark:bg-zinc-800 dark:border-zinc-700 ${
+                          xpType === 'penalty'
+                            ? 'bg-rose-50 text-rose-700 border-rose-300 dark:bg-rose-950/40 dark:text-rose-300 dark:border-rose-900'
+                            : 'bg-emerald-50 text-emerald-700 border-emerald-300 dark:bg-emerald-950/40 dark:text-emerald-300 dark:border-emerald-900'
+                        }`}
+                      >
+                        <option value="bonus">➕ Bônus (+ Recompensa Extra)</option>
+                        <option value="penalty">🚨 Penalidade (- Desconto de XP)</option>
+                      </select>
+                    </div>
+
+                    <div>
+                      <label className="block text-[11px] font-extrabold text-zinc-700 dark:text-zinc-300 mb-1">
+                        🔢 Valor do Ajuste (XP):
+                      </label>
+                      <input
+                        type="number"
+                        value={xpDelta}
+                        onChange={(e) => setXpDelta(Math.abs(Number(e.target.value)) || 0)}
+                        className="w-full p-2.5 rounded-xl border text-xs font-bold dark:bg-zinc-800 dark:border-zinc-700"
+                        min={1}
+                        required
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-[11px] font-extrabold text-zinc-700 dark:text-zinc-300 mb-1">
+                        💬 Motivo / Justificativa:
+                      </label>
+                      <input
+                        type="text"
+                        value={xpReason}
+                        onChange={(e) => setXpReason(e.target.value)}
+                        placeholder={xpType === 'penalty' ? "Ex: Desobediência / Mal comportamento" : "Ex: Ajudou em casa / Boa conduta"}
+                        className="w-full p-2.5 rounded-xl border text-xs dark:bg-zinc-800 dark:border-zinc-700"
+                        required
+                      />
+                    </div>
+                  </div>
+
+                  <div className="flex flex-wrap items-center justify-between gap-3 pt-2">
+                    <div className="flex flex-wrap gap-2">
+                      <button
+                        type="button"
+                        onClick={() => handleExecuteAdjustment('bonus')}
+                        className="px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white rounded-xl text-xs font-extrabold shadow-xs cursor-pointer flex items-center gap-1.5"
+                      >
+                        <span>➕ Aplicar Bônus (+{Math.abs(xpDelta)} XP)</span>
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => handleExecuteAdjustment('penalty')}
+                        className="px-4 py-2.5 bg-rose-600 hover:bg-rose-700 active:scale-95 text-white rounded-xl text-xs font-extrabold shadow-xs cursor-pointer flex items-center gap-1.5"
+                      >
+                        <span>🚨 Aplicar Penalidade (-{Math.abs(xpDelta)} XP)</span>
+                      </button>
+                    </div>
+
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (selectedChildForXp) {
+                          resetChildXp(selectedChildForXp);
+                          showToast(`⚡ XP do(a) ${state.children[selectedChildForXp]?.name || selectedChildForXp} foi ZERADO (0 XP)!`);
+                        }
+                      }}
+                      className="px-3.5 py-2.5 bg-zinc-200 dark:bg-zinc-700 hover:bg-zinc-300 dark:hover:bg-zinc-600 text-zinc-800 dark:text-zinc-200 rounded-xl text-xs font-bold cursor-pointer flex items-center gap-1"
+                    >
+                      <span>⚡ Zerar XP (0 XP)</span>
+                    </button>
+                  </div>
                 </form>
 
                 <div className="pt-4 border-t space-y-3">
-                  <h4 className="font-bold text-sm">🎂 Datas de Aniversário & Senhas</h4>
+                  <h4 className="font-bold text-sm text-zinc-900 dark:text-white">🎂 Datas de Aniversário, Senhas & Controles de XP</h4>
                   <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                     {childrenList.map(c => (
-                      <div key={c.key} className="p-4 border rounded-2xl space-y-2">
+                      <div key={c.key} className="p-4 border rounded-2xl space-y-3 bg-zinc-50/50 dark:bg-zinc-800/30">
                         <div className="flex justify-between items-center">
-                          <span className="font-bold text-xs">{c.avatar} {c.name}</span>
-                          <button onClick={() => { resetChildPassword(c.key); alert(`Senha de ${c.name} redefinida!`); }} className="text-[10px] px-2 py-1 border rounded">Reset Senha</button>
+                          <span className="font-bold text-xs">{c.avatar} {c.name} ({c.xp} XP)</span>
+                          <div className="flex gap-1">
+                            <button
+                              type="button"
+                              onClick={() => {
+                                resetChildXp(c.key);
+                                showToast(`⚡ XP do(a) ${c.name} zerado!`);
+                              }}
+                              className="text-[10px] px-2 py-1 bg-rose-100 dark:bg-rose-950/60 text-rose-700 dark:text-rose-300 font-bold rounded cursor-pointer"
+                              title="Zerar XP deste filho"
+                            >
+                              Zerar XP
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => {
+                                resetChildPassword(c.key);
+                                showToast(`🔑 Senha do(a) ${c.name} redefinida!`);
+                              }}
+                              className="text-[10px] px-2 py-1 border rounded font-semibold cursor-pointer"
+                              title="Resetar senha deste filho"
+                            >
+                              Reset Senha
+                            </button>
+                          </div>
                         </div>
                         <div>
                           <label className="block text-[10px] font-bold text-zinc-500">🎂 Data Aniversário:</label>
@@ -1512,7 +2384,7 @@
             <main className="px-4 py-4">
               {!currentUser ? (
                 <LoginModal />
-              ) : currentUser === 'admin' ? (
+              ) : activeTab === 'admin' && currentUser === 'admin' ? (
                 <AdminView />
               ) : activeTab === 'tasks' ? (
                 <TasksView />
