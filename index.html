@@ -9,14 +9,17 @@
     @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap');
     body { font-family: 'Plus+Jakarta+Sans', sans-serif; }
     .glass-card { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); }
+    /* Scrollbar suave para as abas no celular */
+    .no-scrollbar::-webkit-scrollbar { display: none; }
+    .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
   </style>
 </head>
 <body class="bg-slate-100 min-h-screen text-slate-800 pb-12">
 
-  <!-- NOTIFICAÇÃO FLUTUANTE DE TEMPO E ALERTAS -->
-  <div id="toast-container" class="fixed top-4 right-4 z-50 flex flex-col gap-2 max-w-sm w-full px-4"></div>
+  <!-- TOAST DE NOTIFICAÇÕES -->
+  <div id="toast-container" class="fixed top-4 right-4 z-50 flex flex-col gap-2 max-w-sm w-full px-4 pointer-events-none"></div>
 
-  <!-- CABEÇALHO DA APLICAÇÃO -->
+  <!-- CABEÇALHO -->
   <header class="bg-indigo-900 text-white shadow-lg sticky top-0 z-40">
     <div class="max-w-4xl mx-auto px-4 py-3 flex justify-between items-center">
       <div class="flex items-center space-x-2">
@@ -25,14 +28,14 @@
       </div>
       <div id="header-user-info" class="hidden flex items-center gap-3">
         <span id="current-user-name" class="font-bold text-indigo-100"></span>
-        <button onclick="logout()" class="text-xs bg-indigo-800 hover:bg-indigo-700 text-indigo-200 px-3 py-1.5 rounded-lg font-semibold transition">Sair</button>
+        <button onclick="logout()" class="text-xs bg-indigo-800 hover:bg-indigo-700 text-indigo-200 px-3 py-1.5 rounded-lg font-semibold transition cursor-pointer">Sair</button>
       </div>
     </div>
   </header>
 
   <main class="max-w-4xl mx-auto px-4 mt-6">
 
-    <!-- TELA DE LOGIN / SELEÇÃO DE PERFIL -->
+    <!-- TELA DE LOGIN / PERFIS -->
     <section id="screen-login" class="max-w-md mx-auto space-y-4">
       <div class="glass-card rounded-3xl p-8 shadow-xl border border-slate-200 text-center">
         <div class="text-5xl mb-3">🛡️</div>
@@ -62,7 +65,7 @@
       </div>
     </section>
 
-    <!-- MODAL DE SENHA E PRIMEIRO ACESSO -->
+    <!-- MODAL DE AUTENTICAÇÃO -->
     <div id="modal-auth" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm hidden flex items-center justify-center p-4 z-50">
       <div class="bg-white rounded-3xl p-6 max-w-sm w-full space-y-4 shadow-2xl">
         <h3 id="auth-title" class="font-bold text-lg text-slate-800">Autenticação</h3>
@@ -78,19 +81,19 @@
       </div>
     </div>
 
-    <!-- ÁREA DAS CRIANÇAS -->
+    <!-- TELA DAS CRIANÇAS -->
     <section id="screen-child" class="hidden space-y-6">
       
-      <!-- CARD DO MODO DESCANSO -->
+      <!-- BANNER MODO DESCANSO -->
       <div id="rest-mode-banner" class="hidden bg-emerald-500 text-white p-4 rounded-3xl shadow-lg flex items-center gap-4">
         <span class="text-4xl">🏖️</span>
         <div>
           <h3 class="font-extrabold text-lg">Modo Descanso / Folga Ativado!</h3>
-          <p class="text-emerald-100 text-sm">Os pais pausaram a rotina de tarefas por hoje. Aproveite para descansar!</p>
+          <p class="text-emerald-100 text-sm">Os pais deram uma pausa nas tarefas por hoje. Aproveite o descanso!</p>
         </div>
       </div>
 
-      <!-- PAINEL DE PERFIL DA CRIANÇA (VISUAL PURPLE AI STUDIO) -->
+      <!-- CARTÃO DE PERFIL DA CRIANÇA -->
       <div class="bg-gradient-to-r from-purple-800 via-indigo-800 to-slate-900 rounded-3xl p-6 text-white shadow-xl relative overflow-hidden">
         <div class="flex justify-between items-start relative z-10">
           <div class="flex items-center gap-4">
@@ -105,10 +108,13 @@
             <span id="child-xp" class="text-4xl font-black text-amber-300">0 XP</span>
           </div>
         </div>
-        <div class="mt-4 pt-4 border-t border-white/10 flex justify-between items-center text-xs">
-          <span>Complete missões para acumular XP e resgatar recompensas!</span>
-          <button onclick="openSuggestionModal()" class="bg-amber-400 hover:bg-amber-300 text-slate-900 font-extrabold px-3 py-1.5 rounded-xl shadow transition flex items-center gap-1">
-            <span>💡</span> Mandar Sugestão
+
+        <div class="mt-5 pt-4 border-t border-white/10 flex flex-wrap gap-2 justify-between items-center text-xs">
+          <button onclick="openChildShopModal()" class="bg-emerald-500 hover:bg-emerald-400 text-white font-extrabold px-4 py-2 rounded-xl shadow transition flex items-center gap-1.5 cursor-pointer">
+            <span>🛒</span> Ver Lojinha de Prêmios
+          </button>
+          <button onclick="openSuggestionModal()" class="bg-amber-400 hover:bg-amber-300 text-slate-900 font-extrabold px-4 py-2 rounded-xl shadow transition flex items-center gap-1.5 cursor-pointer">
+            <span>💡</span> Mandar Sugestão aos Pais
           </button>
         </div>
       </div>
@@ -116,22 +122,22 @@
       <!-- SOLICITAÇÕES DE TROCA RECEBIDAS -->
       <div id="trade-requests-container" class="space-y-3"></div>
 
-      <!-- SELETOR DE FILTROS DAS TAREFAS -->
+      <!-- NAVEGAÇÃO DE FILTROS DAS TAREFAS -->
       <div class="bg-white p-2 rounded-2xl shadow-sm border border-slate-200 flex gap-1">
-        <button onclick="setFilter('hoje')" id="filter-hoje" class="flex-1 py-2 rounded-xl text-xs font-bold transition bg-purple-700 text-white">Hoje</button>
-        <button onclick="setFilter('diarias')" id="filter-diarias" class="flex-1 py-2 rounded-xl text-xs font-bold transition text-slate-600 hover:bg-slate-100">Diárias</button>
-        <button onclick="setFilter('flexiveis')" id="filter-flexiveis" class="flex-1 py-2 rounded-xl text-xs font-bold transition text-slate-600 hover:bg-slate-100">Flexíveis</button>
-        <button onclick="setFilter('todas')" id="filter-todas" class="flex-1 py-2 rounded-xl text-xs font-bold transition text-slate-600 hover:bg-slate-100">Todas</button>
+        <button onclick="setFilter('hoje')" id="filter-hoje" class="flex-1 py-2 rounded-xl text-xs font-bold transition bg-purple-700 text-white cursor-pointer">Hoje</button>
+        <button onclick="setFilter('diarias')" id="filter-diarias" class="flex-1 py-2 rounded-xl text-xs font-bold transition text-slate-600 hover:bg-slate-100 cursor-pointer">Diárias</button>
+        <button onclick="setFilter('flexiveis')" id="filter-flexiveis" class="flex-1 py-2 rounded-xl text-xs font-bold transition text-slate-600 hover:bg-slate-100 cursor-pointer">Flexíveis</button>
+        <button onclick="setFilter('todas')" id="filter-todas" class="flex-1 py-2 rounded-xl text-xs font-bold transition text-slate-600 hover:bg-slate-100 cursor-pointer">Todas</button>
       </div>
 
       <!-- LISTA DE TAREFAS -->
       <div id="child-tasks-list" class="space-y-3"></div>
     </section>
 
-    <!-- PAINEL DOS PAIS (VISUAL PURPLE ADMIN) -->
+    <!-- PAINEL DOS PAIS -->
     <section id="screen-parents" class="hidden space-y-6">
       
-      <!-- CONTROLE DO MODO DESCANSO -->
+      <!-- CONTROLE MODO DESCANSO -->
       <div class="bg-purple-950 text-white p-4 rounded-3xl flex justify-between items-center shadow-md border border-purple-800">
         <div class="flex items-center gap-3">
           <span class="text-2xl">🏖️</span>
@@ -146,15 +152,16 @@
         </label>
       </div>
 
-      <!-- NAVEGAÇÃO DE SUB-ABAS -->
-      <div class="flex border-b border-slate-200 space-x-4 overflow-x-auto pb-1">
-        <button onclick="setParentTab('relatorio')" id="ptab-relatorio" class="pb-3 text-sm font-bold border-b-2 border-purple-700 text-purple-700 whitespace-nowrap">📊 Visão Geral & Sugestões</button>
-        <button onclick="setParentTab('pendentes')" id="ptab-pendentes" class="pb-3 text-sm font-bold border-b-2 border-transparent text-slate-500 hover:text-slate-800 whitespace-nowrap">📌 Validações Pendentes</button>
-        <button onclick="setParentTab('missoes')" id="ptab-missoes" class="pb-3 text-sm font-bold border-b-2 border-transparent text-slate-500 hover:text-slate-800 whitespace-nowrap">⚙️ Cadastrar Missões</button>
-        <button onclick="setParentTab('membros')" id="ptab-membros" class="pb-3 text-sm font-bold border-b-2 border-transparent text-slate-500 hover:text-slate-800 whitespace-nowrap">👑 Gestão de Membros & Senhas</button>
+      <!-- NAVEGAÇÃO RESPONSIVA DAS ABAS DOS PAIS (COM SCROLL HORIZONTAL NO MOBILE) -->
+      <div class="bg-white p-2 rounded-2xl shadow-sm border border-slate-200 flex space-x-1 overflow-x-auto no-scrollbar">
+        <button onclick="setParentTab('relatorio')" id="ptab-relatorio" class="px-4 py-2.5 rounded-xl text-xs font-bold whitespace-nowrap transition bg-purple-700 text-white cursor-pointer">📊 Visão Geral</button>
+        <button onclick="setParentTab('pendentes')" id="ptab-pendentes" class="px-4 py-2.5 rounded-xl text-xs font-bold whitespace-nowrap transition text-slate-600 hover:bg-slate-100 cursor-pointer">📌 Validações</button>
+        <button onclick="setParentTab('missoes')" id="ptab-missoes" class="px-4 py-2.5 rounded-xl text-xs font-bold whitespace-nowrap transition text-slate-600 hover:bg-slate-100 cursor-pointer">⚙️ Missões</button>
+        <button onclick="setParentTab('lojinha')" id="ptab-lojinha" class="px-4 py-2.5 rounded-xl text-xs font-bold whitespace-nowrap transition text-slate-600 hover:bg-slate-100 cursor-pointer">🛒 Lojinha</button>
+        <button onclick="setParentTab('membros')" id="ptab-membros" class="px-4 py-2.5 rounded-xl text-xs font-bold whitespace-nowrap transition text-slate-600 hover:bg-slate-100 cursor-pointer">👑 Membros & Senhas</button>
       </div>
 
-      <!-- CONTEÚDO DAS SUB-ABAS DOS PAIS -->
+      <!-- CONTEÚDO DAS SUB-ABAS -->
       <div id="parent-content">
 
         <!-- SUB-ABA: VISÃO GERAL E SUGESTÕES -->
@@ -189,11 +196,16 @@
           </div>
         </div>
 
-        <!-- SUB-ABA: PENDENTES (VALIDAÇÃO DOS PAIS) -->
-        <div id="parent-sub-pendentes" class="hidden space-y-4">
+        <!-- SUB-ABA: VALIDAÇÕES PENDENTES -->
+        <div id="parent-sub-pendentes" class="hidden space-y-6">
           <div class="bg-white rounded-3xl p-6 shadow-sm border border-slate-200">
-            <h3 class="font-bold text-lg mb-4">Tarefas Concluídas Aguardando Aprovação</h3>
+            <h3 class="font-bold text-lg mb-4">Tarefas Concluídas Aguardando Validação</h3>
             <div id="parent-pending-tasks" class="space-y-3"></div>
+          </div>
+
+          <div class="bg-white rounded-3xl p-6 shadow-sm border border-slate-200">
+            <h3 class="font-bold text-lg mb-4">Resgates da Lojinha Aguardando Entrega</h3>
+            <div id="parent-pending-rewards" class="space-y-3"></div>
           </div>
         </div>
 
@@ -248,13 +260,42 @@
                 </div>
               </div>
 
-              <button type="submit" class="w-full py-3 bg-purple-700 hover:bg-purple-800 text-white font-bold rounded-xl transition">Salvar Missão</button>
+              <button type="submit" class="w-full py-3 bg-purple-700 hover:bg-purple-800 text-white font-bold rounded-xl transition cursor-pointer">Salvar Missão</button>
             </form>
           </div>
 
           <div class="bg-white rounded-3xl p-6 shadow-sm border border-slate-200">
             <h3 class="font-bold text-lg mb-4">Missões Cadastradas</h3>
             <div id="parent-all-tasks" class="space-y-3"></div>
+          </div>
+        </div>
+
+        <!-- SUB-ABA: GERENCIAR LOJINHA -->
+        <div id="parent-sub-lojinha" class="hidden space-y-6">
+          <div class="bg-white rounded-3xl p-6 shadow-sm border border-slate-200">
+            <h3 class="font-bold text-lg mb-4">Cadastrar Novo Prêmio na Lojinha</h3>
+            <form onsubmit="handleCreateReward(event)" class="space-y-4">
+              <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div class="md:col-span-2">
+                  <label class="block text-xs font-bold text-slate-600 mb-1">Nome do Prêmio</label>
+                  <input type="text" id="reward-title" required placeholder="Ex: 30min de Videogame ou Passeio no parque" class="w-full p-3 rounded-xl border border-slate-200 text-sm">
+                </div>
+                <div>
+                  <label class="block text-xs font-bold text-slate-600 mb-1">Ícone / Emoji</label>
+                  <input type="text" id="reward-icon" required value="🎮" class="w-full p-3 rounded-xl border border-slate-200 text-sm">
+                </div>
+              </div>
+              <div>
+                <label class="block text-xs font-bold text-slate-600 mb-1">Custo em XP</label>
+                <input type="number" id="reward-cost" value="100" min="10" required class="w-full p-3 rounded-xl border border-slate-200 text-sm">
+              </div>
+              <button type="submit" class="w-full py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl transition cursor-pointer">Adicionar Prêmio</button>
+            </form>
+          </div>
+
+          <div class="bg-white rounded-3xl p-6 shadow-sm border border-slate-200">
+            <h3 class="font-bold text-lg mb-4">Prêmios Ativos na Lojinha</h3>
+            <div id="parent-all-rewards" class="space-y-3"></div>
           </div>
         </div>
 
@@ -271,7 +312,7 @@
 
   </main>
 
-  <!-- MODAL DE MANDAR SUGESTÃO -->
+  <!-- MODAL DE SUGESTÃO -->
   <div id="modal-suggestion" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm hidden flex items-center justify-center p-4 z-50">
     <div class="bg-white rounded-3xl p-6 max-w-sm w-full space-y-4 shadow-2xl">
       <h3 class="font-bold text-lg text-slate-800 flex items-center gap-2"><span>💡</span> Sugestão para os Pais</h3>
@@ -283,11 +324,24 @@
     </div>
   </div>
 
-  <!-- MODAL DE SOLICITAÇÃO DE TROCA -->
+  <!-- MODAL DE LOJINHA DAS CRIANÇAS -->
+  <div id="modal-child-shop" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm hidden flex items-center justify-center p-4 z-50">
+    <div class="bg-white rounded-3xl p-6 max-w-md w-full space-y-4 shadow-2xl max-h-[85vh] flex flex-col">
+      <div class="flex justify-between items-center">
+        <h3 class="font-bold text-lg text-slate-800 flex items-center gap-2"><span>🛒</span> Lojinha de Recompensas</h3>
+        <button onclick="closeChildShopModal()" class="text-slate-400 font-bold hover:text-slate-600">✕</button>
+      </div>
+      <p class="text-xs text-slate-500">Troque seu XP acumulado por recompensas incríveis!</p>
+      
+      <div id="child-shop-rewards-list" class="space-y-3 overflow-y-auto pr-1 flex-1"></div>
+    </div>
+  </div>
+
+  <!-- MODAL DE PEDIR TROCA DE TAREFA -->
   <div id="modal-trade" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm hidden flex items-center justify-center p-4 z-50">
     <div class="bg-white rounded-3xl p-6 max-w-sm w-full space-y-4 shadow-2xl">
       <h3 class="font-bold text-lg text-slate-800 flex items-center gap-2"><span>🔄</span> Pedir Troca de Tarefa</h3>
-      <p class="text-xs text-slate-500">Se seu irmão aceitar, ele realiza essa tarefa no seu lugar hoje e ganha o XP. Amanhã a escala do rodízio volta ao normal!</p>
+      <p class="text-xs text-slate-500">Se seu irmão aceitar, ele fará essa tarefa no seu lugar hoje e ganhará o XP. Amanhã a escala volta ao normal!</p>
       <input type="hidden" id="trade-task-id">
       <select id="trade-target-user" class="w-full p-3 rounded-xl border border-slate-200 text-sm font-bold"></select>
       <div class="flex justify-end gap-2">
@@ -298,8 +352,8 @@
   </div>
 
   <script>
-    // BANCO DE DADOS LOCAL PERSISTENTE (LOCALSTORAGE)
-    const STORAGE_KEY = 'alutadiaria_data_v2';
+    // BANCO DE DADOS LOCAL
+    const STORAGE_KEY = 'alutadiaria_data_v3';
 
     const defaultData = {
       restMode: false,
@@ -308,11 +362,12 @@
         Manuela: { xp: 200, level: 2, avatar: '👧', password: null },
         Tayrone: { xp: 90, level: 1, avatar: '🧒', password: null }
       },
-      tasks: [
-        { id: 101, title: 'Lavar a Louça do Almoço', icon: '🍽️', assignee: 'Thiego', category: 'diarias', deadline: '14:00', xp: 50, penalty: 10, status: 'pending_user' },
-        { id: 102, title: 'Arrumar a Cama', icon: '🛏️', assignee: 'Manuela', category: 'diarias', deadline: '10:00', xp: 30, penalty: 0, status: 'pending_user' },
-        { id: 103, title: 'Organizar os Brinquedos', icon: '🧸', assignee: 'Tayrone', category: 'flexiveis', deadline: '18:00', xp: 40, penalty: 5, status: 'pending_user' }
+      tasks: [],
+      rewards: [
+        { id: 1, title: '30 Minutos de Videogame Extra', icon: '🎮', cost: 100 },
+        { id: 2, title: 'Escolher o Filme do Fim de Semana', icon: '🍿', cost: 150 }
       ],
+      rewardRedemptions: [],
       suggestions: [],
       tradeRequests: [],
       notifiedTasks: []
@@ -324,12 +379,11 @@
       localStorage.setItem(STORAGE_KEY, JSON.stringify(appData));
     }
 
-    // ESTADO DA SESSÃO ATUAL
     let currentUser = null;
     let selectedProfileForLogin = null;
     let activeFilter = 'hoje';
 
-    // FUNÇÃO CORRIGIDA DE ABRIR O MODAL
+    // LOGIN & AUTENTICAÇÃO
     function openAuthModal(name) {
       selectedProfileForLogin = name;
       const modal = document.getElementById('modal-auth');
@@ -412,7 +466,7 @@
       document.getElementById('header-user-info').classList.add('hidden');
     }
 
-    // MODO DESCANSO / FOLGA
+    // MODO DESCANSO
     function toggleRestMode(enabled) {
       appData.restMode = enabled;
       saveData();
@@ -453,9 +507,9 @@
       ['hoje', 'diarias', 'flexiveis', 'todas'].forEach(f => {
         const btn = document.getElementById(`filter-${f}`);
         if (f === filter) {
-          btn.className = "flex-1 py-2 rounded-xl text-xs font-bold transition bg-purple-700 text-white";
+          btn.className = "flex-1 py-2 rounded-xl text-xs font-bold transition bg-purple-700 text-white cursor-pointer";
         } else {
-          btn.className = "flex-1 py-2 rounded-xl text-xs font-bold transition text-slate-600 hover:bg-slate-100";
+          btn.className = "flex-1 py-2 rounded-xl text-xs font-bold transition text-slate-600 hover:bg-slate-100 cursor-pointer";
         }
       });
       renderChildTasks();
@@ -471,7 +525,7 @@
       if (activeFilter === 'flexiveis') filtered = filtered.filter(t => t.category === 'flexiveis');
 
       if (filtered.length === 0) {
-        list.innerHTML = `<div class="bg-white p-8 text-center rounded-3xl border border-slate-200 text-slate-400 font-semibold">Nenhuma missão encontrada.</div>`;
+        list.innerHTML = `<div class="bg-white p-8 text-center rounded-3xl border border-slate-200 text-slate-400 font-semibold">Nenhuma missão no momento.</div>`;
         return;
       }
 
@@ -495,9 +549,9 @@
           </div>
           <div class="flex items-center gap-2">
             ${isPendingParent ? 
-              `<span class="text-xs bg-amber-100 text-amber-800 font-bold px-3 py-1.5 rounded-xl">Em Aprovação</span>` :
-              `<button onclick="openTradeModal(${t.id})" class="p-2 text-xs bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-xl transition" title="Pedir Troca com um Irmão">🔄</button>
-               <button onclick="requestCompleteTask(${t.id})" class="px-4 py-2 text-xs bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl transition shadow">Concluir</button>`
+              `<span class="text-xs bg-amber-100 text-amber-800 font-bold px-3 py-1.5 rounded-xl">Em Validação</span>` :
+              `<button onclick="openTradeModal(${t.id})" class="p-2 text-xs bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-xl transition cursor-pointer" title="Pedir Troca">🔄</button>
+               <button onclick="requestCompleteTask(${t.id})" class="px-4 py-2 text-xs bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl transition shadow cursor-pointer">Concluir</button>`
             }
           </div>
         `;
@@ -512,6 +566,68 @@
         saveData();
         showToast('🚀 Missão enviada para validação dos pais!');
         renderChildTasks();
+      }
+    }
+
+    // LOJINHA DAS CRIANÇAS
+    function openChildShopModal() {
+      renderChildShop();
+      document.getElementById('modal-child-shop').classList.remove('hidden');
+    }
+
+    function closeChildShopModal() {
+      document.getElementById('modal-child-shop').classList.add('hidden');
+    }
+
+    function renderChildShop() {
+      const list = document.getElementById('child-shop-rewards-list');
+      list.innerHTML = '';
+
+      const userXP = appData.users[currentUser].xp;
+
+      if (appData.rewards.length === 0) {
+        list.innerHTML = `<p class="text-slate-400 text-sm text-center py-4">Nenhuma recompensa cadastrada pelos pais ainda.</p>`;
+        return;
+      }
+
+      appData.rewards.forEach(r => {
+        const canAfford = userXP >= r.cost;
+        list.innerHTML += `
+          <div class="p-4 bg-slate-50 border border-slate-200 rounded-2xl flex justify-between items-center">
+            <div class="flex items-center gap-3">
+              <span class="text-3xl">${r.icon}</span>
+              <div>
+                <h4 class="font-bold text-slate-800 text-sm">${r.title}</h4>
+                <span class="text-xs font-bold text-purple-700">${r.cost} XP</span>
+              </div>
+            </div>
+            <button onclick="redeemReward(${r.id})" ${!canAfford ? 'disabled' : ''} class="px-4 py-2 text-xs font-bold rounded-xl shadow transition ${canAfford ? 'bg-emerald-600 text-white hover:bg-emerald-700 cursor-pointer' : 'bg-slate-200 text-slate-400 cursor-not-allowed'}">
+              ${canAfford ? 'Resgatar' : 'XP Insuficiente'}
+            </button>
+          </div>
+        `;
+      });
+    }
+
+    function redeemReward(rewardId) {
+      const reward = appData.rewards.find(r => r.id === rewardId);
+      const user = appData.users[currentUser];
+
+      if (reward && user.xp >= reward.cost) {
+        user.xp -= reward.cost;
+        appData.rewardRedemptions.push({
+          id: Date.now(),
+          rewardTitle: reward.title,
+          rewardIcon: reward.icon,
+          user: currentUser,
+          cost: reward.cost,
+          status: 'pending'
+        });
+
+        saveData();
+        showToast('🎉 Prêmio resgatado! Aguarde a entrega dos pais.');
+        renderChildArea();
+        renderChildShop();
       }
     }
 
@@ -561,12 +677,10 @@
         card.className = "bg-amber-50 border border-amber-200 p-4 rounded-2xl flex items-center justify-between";
         card.innerHTML = `
           <div>
-            <span class="text-xs font-bold text-amber-800">Solicitação de Troca de Tarefa</span>
-            <p class="text-xs text-amber-900 mt-0.5"><b>${r.from}</b> quer que você faça <b>"${r.taskTitle}"</b> hoje.</p>
+            <span class="text-xs font-bold text-amber-800">Solicitação de Troca</span>
+            <p class="text-xs text-amber-900 mt-0.5"><b>${r.from}</b> pediu para você fazer <b>"${r.taskTitle}"</b> hoje.</p>
           </div>
-          <div class="flex gap-2">
-            <button onclick="acceptTrade(${r.id})" class="px-3 py-1.5 bg-emerald-600 text-white text-xs font-bold rounded-xl">Aceitar</button>
-          </div>
+          <button onclick="acceptTrade(${r.id})" class="px-3 py-1.5 bg-emerald-600 text-white text-xs font-bold rounded-xl cursor-pointer">Aceitar</button>
         `;
         container.appendChild(card);
       });
@@ -582,7 +696,7 @@
         }
         appData.tradeRequests.splice(reqIndex, 1);
         saveData();
-        showToast('Troca aceita com sucesso!');
+        showToast('Troca aceita!');
         renderChildArea();
       }
     }
@@ -614,14 +728,14 @@
 
     // PAINEL DOS PAIS
     function setParentTab(tab) {
-      ['relatorio', 'pendentes', 'missoes', 'membros'].forEach(t => {
+      ['relatorio', 'pendentes', 'missoes', 'lojinha', 'membros'].forEach(t => {
         const btn = document.getElementById(`ptab-${t}`);
         const content = document.getElementById(`parent-sub-${t}`);
         if (t === tab) {
-          btn.className = "pb-3 text-sm font-bold border-b-2 border-purple-700 text-purple-700 whitespace-nowrap";
+          btn.className = "px-4 py-2.5 rounded-xl text-xs font-bold whitespace-nowrap transition bg-purple-700 text-white cursor-pointer";
           content.classList.remove('hidden');
         } else {
-          btn.className = "pb-3 text-sm font-bold border-b-2 border-transparent text-slate-500 hover:text-slate-800 whitespace-nowrap";
+          btn.className = "px-4 py-2.5 rounded-xl text-xs font-bold whitespace-nowrap transition text-slate-600 hover:bg-slate-100 cursor-pointer";
           content.classList.add('hidden');
         }
       });
@@ -634,10 +748,11 @@
       document.getElementById('p-xp-manuela').innerText = `${appData.users.Manuela.xp} XP`;
       document.getElementById('p-xp-tayrone').innerText = `${appData.users.Tayrone.xp} XP`;
 
+      // Sugestões
       const sugList = document.getElementById('parent-suggestions-list');
       sugList.innerHTML = '';
       if (appData.suggestions.length === 0) {
-        sugList.innerHTML = `<p class="text-slate-400 text-sm">Nenhuma sugestão enviada pelas crianças.</p>`;
+        sugList.innerHTML = `<p class="text-slate-400 text-sm">Nenhuma sugestão recebida.</p>`;
       } else {
         appData.suggestions.forEach(s => {
           sugList.innerHTML += `
@@ -651,46 +766,92 @@
         });
       }
 
-      const pendingContainer = document.getElementById('parent-pending-tasks');
-      pendingContainer.innerHTML = '';
+      // Tarefas Pendentes
+      const pendingTasksContainer = document.getElementById('parent-pending-tasks');
+      pendingTasksContainer.innerHTML = '';
       const pendingTasks = appData.tasks.filter(t => t.status === 'pending_approval');
 
       if (pendingTasks.length === 0) {
-        pendingContainer.innerHTML = `<p class="text-slate-400 text-sm">Nenhuma tarefa pendente de aprovação.</p>`;
+        pendingTasksContainer.innerHTML = `<p class="text-slate-400 text-sm">Nenhuma tarefa aguardando aprovação.</p>`;
       } else {
         pendingTasks.forEach(t => {
-          pendingContainer.innerHTML += `
+          pendingTasksContainer.innerHTML += `
             <div class="p-4 bg-purple-50 border border-purple-200 rounded-2xl flex items-center justify-between">
               <div>
                 <span class="text-xs font-bold text-purple-800">${t.assignee} concluiu:</span>
                 <h4 class="font-bold text-slate-800 text-sm">${t.title}</h4>
                 <span class="text-xs text-amber-600 font-bold">+${t.xp} XP</span>
               </div>
-              <div class="flex gap-2">
-                <button onclick="approveTask(${t.id})" class="px-3 py-1.5 bg-emerald-600 text-white text-xs font-bold rounded-xl">Aprovar (+XP)</button>
+              <button onclick="approveTask(${t.id})" class="px-3 py-1.5 bg-emerald-600 text-white text-xs font-bold rounded-xl cursor-pointer">Aprovar (+XP)</button>
+            </div>
+          `;
+        });
+      }
+
+      // Resgates da Lojinha Pendentes
+      const pendingRewardsContainer = document.getElementById('parent-pending-rewards');
+      pendingRewardsContainer.innerHTML = '';
+      const pendingRewards = appData.rewardRedemptions.filter(r => r.status === 'pending');
+
+      if (pendingRewards.length === 0) {
+        pendingRewardsContainer.innerHTML = `<p class="text-slate-400 text-sm">Nenhum resgate pendente.</p>`;
+      } else {
+        pendingRewards.forEach(r => {
+          pendingRewardsContainer.innerHTML += `
+            <div class="p-4 bg-emerald-50 border border-emerald-200 rounded-2xl flex items-center justify-between">
+              <div>
+                <span class="text-xs font-bold text-emerald-800">${r.user} resgatou:</span>
+                <h4 class="font-bold text-slate-800 text-sm">${r.rewardIcon} ${r.rewardTitle}</h4>
+                <span class="text-xs text-emerald-700 font-bold">Custo: ${r.cost} XP</span>
+              </div>
+              <button onclick="deliverReward(${r.id})" class="px-3 py-1.5 bg-emerald-600 text-white text-xs font-bold rounded-xl cursor-pointer">Marcar Entregue</button>
+            </div>
+          `;
+        });
+      }
+
+      // Missões Cadastradas
+      const allTasksContainer = document.getElementById('parent-all-tasks');
+      allTasksContainer.innerHTML = '';
+      if (appData.tasks.length === 0) {
+        allTasksContainer.innerHTML = `<p class="text-slate-400 text-sm">Nenhuma missão cadastrada ainda.</p>`;
+      } else {
+        appData.tasks.forEach(t => {
+          allTasksContainer.innerHTML += `
+            <div class="p-3 bg-slate-50 border border-slate-200 rounded-xl flex justify-between items-center text-xs">
+              <div>
+                <span class="font-bold text-slate-800">${t.icon} ${t.title}</span>
+                <span class="text-slate-500 ml-2">(${t.assignee}) - ⏰ ${t.deadline}</span>
+              </div>
+              <div class="flex items-center gap-2">
+                <span class="font-bold text-amber-600">+${t.xp} XP</span>
+                <button onclick="deleteTask(${t.id})" class="text-rose-600 font-bold px-2 py-1 bg-rose-50 rounded-lg cursor-pointer">Excluir</button>
               </div>
             </div>
           `;
         });
       }
 
-      const allTasksContainer = document.getElementById('parent-all-tasks');
-      allTasksContainer.innerHTML = '';
-      appData.tasks.forEach(t => {
-        allTasksContainer.innerHTML += `
-          <div class="p-3 bg-slate-50 border border-slate-200 rounded-xl flex justify-between items-center text-xs">
-            <div>
-              <span class="font-bold text-slate-800">${t.icon} ${t.title}</span>
-              <span class="text-slate-500 ml-2">(${t.assignee}) - ⏰ ${t.deadline}</span>
+      // Prêmios Cadastrados na Lojinha
+      const allRewardsContainer = document.getElementById('parent-all-rewards');
+      allRewardsContainer.innerHTML = '';
+      if (appData.rewards.length === 0) {
+        allRewardsContainer.innerHTML = `<p class="text-slate-400 text-sm">Nenhum prêmio cadastrado.</p>`;
+      } else {
+        appData.rewards.forEach(r => {
+          allRewardsContainer.innerHTML += `
+            <div class="p-3 bg-slate-50 border border-slate-200 rounded-xl flex justify-between items-center text-xs">
+              <div>
+                <span class="font-bold text-slate-800">${r.icon} ${r.title}</span>
+                <span class="text-purple-700 font-bold ml-2">(${r.cost} XP)</span>
+              </div>
+              <button onclick="deleteReward(${r.id})" class="text-rose-600 font-bold px-2 py-1 bg-rose-50 rounded-lg cursor-pointer">Excluir</button>
             </div>
-            <div class="flex items-center gap-2">
-              <span class="font-bold text-amber-600">+${t.xp} XP</span>
-              <button onclick="deleteTask(${t.id})" class="text-rose-600 font-bold px-2 py-1 bg-rose-50 rounded-lg">Excluir</button>
-            </div>
-          </div>
-        `;
-      });
+          `;
+        });
+      }
 
+      // Membros
       const membersContainer = document.getElementById('parent-members-list');
       membersContainer.innerHTML = '';
       Object.keys(appData.users).forEach(u => {
@@ -702,8 +863,8 @@
               <span class="text-xs text-slate-500 block">Senha: ${user.password ? '******' : 'Não cadastrada'}</span>
             </div>
             <div class="flex gap-2">
-              <button onclick="resetPassword('${u}')" class="px-3 py-1 bg-amber-100 text-amber-800 text-xs font-bold rounded-xl">Resetar Senha</button>
-              <button onclick="adjustXP('${u}', 50)" class="px-3 py-1 bg-emerald-100 text-emerald-800 text-xs font-bold rounded-xl">+50 XP</button>
+              <button onclick="resetPassword('${u}')" class="px-3 py-1 bg-amber-100 text-amber-800 text-xs font-bold rounded-xl cursor-pointer">Resetar Senha</button>
+              <button onclick="adjustXP('${u}', 50)" class="px-3 py-1 bg-emerald-100 text-emerald-800 text-xs font-bold rounded-xl cursor-pointer">+50 XP</button>
             </div>
           </div>
         `;
@@ -719,6 +880,16 @@
         }
         saveData();
         showToast('Aprovação realizada e XP creditado!');
+        renderParentsArea();
+      }
+    }
+
+    function deliverReward(redemptionId) {
+      const item = appData.rewardRedemptions.find(r => r.id === redemptionId);
+      if (item) {
+        item.status = 'delivered';
+        saveData();
+        showToast('Prêmio marcado como entregue!');
         renderParentsArea();
       }
     }
@@ -744,10 +915,34 @@
       renderParentsArea();
     }
 
+    function handleCreateReward(e) {
+      e.preventDefault();
+      const title = document.getElementById('reward-title').value;
+      const icon = document.getElementById('reward-icon').value;
+      const cost = parseInt(document.getElementById('reward-cost').value);
+
+      appData.rewards.push({
+        id: Date.now(),
+        title, icon, cost
+      });
+
+      saveData();
+      showToast('Novo prêmio cadastrado na lojinha!');
+      e.target.reset();
+      renderParentsArea();
+    }
+
     function deleteTask(taskId) {
       appData.tasks = appData.tasks.filter(t => t.id !== taskId);
       saveData();
       showToast('Missão removida!');
+      renderParentsArea();
+    }
+
+    function deleteReward(rewardId) {
+      appData.rewards = appData.rewards.filter(r => r.id !== rewardId);
+      saveData();
+      showToast('Prêmio removido!');
       renderParentsArea();
     }
 
@@ -769,7 +964,7 @@
       }
     }
 
-    // MONITOR DE ALERTAS DE HORÁRIO DE TAREFAS
+    // MONITOR DE ALERTAS DE HORÁRIO
     function checkTaskDeadlines() {
       if (appData.restMode) return;
 
@@ -785,7 +980,6 @@
 
         const key60 = `${t.id}_60`;
         if (diffMinutes <= 60 && diffMinutes > 30 && !appData.notifiedTasks.includes(key60)) {
-          triggerSoundAlert();
           showToast(`⚠️ Falta 1 hora para o prazo de "${t.title}"!`);
           appData.notifiedTasks.push(key60);
           saveData();
@@ -793,7 +987,6 @@
 
         const key30 = `${t.id}_30`;
         if (diffMinutes <= 30 && diffMinutes > 0 && !appData.notifiedTasks.includes(key30)) {
-          triggerSoundAlert();
           showToast(`🚨 URGENTE: Faltam 30 minutos para o prazo de "${t.title}"!`);
           appData.notifiedTasks.push(key30);
           saveData();
@@ -801,29 +994,12 @@
       });
     }
 
-    function triggerSoundAlert() {
-      try {
-        const ctx = new (window.AudioContext || window.webkitAudioContext)();
-        const osc = ctx.createOscillator();
-        const gain = ctx.createGain();
-        osc.connect(gain);
-        gain.connect(ctx.destination);
-        osc.type = 'sine';
-        osc.frequency.setValueAtTime(587.33, ctx.currentTime);
-        gain.gain.setValueAtTime(0.1, ctx.currentTime);
-        osc.start();
-        osc.stop(ctx.currentTime + 0.3);
-      } catch (e) {
-        console.log('Áudio aguardando interação.');
-      }
-    }
-
     setInterval(checkTaskDeadlines, 30000);
 
     function showToast(msg) {
       const container = document.getElementById('toast-container');
       const toast = document.createElement('div');
-      toast.className = "bg-slate-900 text-white text-xs font-bold px-4 py-3 rounded-2xl shadow-xl flex items-center justify-between";
+      toast.className = "bg-slate-900 text-white text-xs font-bold px-4 py-3 rounded-2xl shadow-xl flex items-center justify-between pointer-events-auto";
       toast.innerText = msg;
       container.appendChild(toast);
       setTimeout(() => toast.remove(), 4000);
