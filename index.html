@@ -595,118 +595,204 @@
     let target = prompt(`Trocar "${task.title}" com quem?\nOpções: ${siblings.join(', ')}`);
     if (target && children[target]) {
       task.assignedTo = target;
-      alert(`Troca realizada com sucesso! A tarefa agora é de ${children[target].name}.`);
+      alert(`A tarefa foi repassada para ${children[target].name.split(' ')[0]}.`);
       renderTasks();
-    } else if (target) {
-      alert("Usuário inválido.");
     }
   }
 
   function renderStore() {
-    const container = document.getElementById('store-list');
-    container.innerHTML = '';
+    const list = document.getElementById('store-list');
+    list.innerHTML = '';
+    let currentXp = children[currentUser].xp;
 
     rewards.forEach(reward => {
       const item = document.createElement('div');
       item.className = 'item-card';
 
-      const userXp = children[currentUser].xp;
-      const canAfford = userXp >= reward.cost;
+      let canBuy = currentXp >= reward.cost;
+      let buyBtn = canBuy 
+        ? `<button class="btn-action store" onclick="requestRedeem(${reward.id})">Resgatar (Zerar XP)</button>`
+        : `<button class="btn-action" style="background:#cbd5e1; cursor:not-allowed;">Faltam ${reward.cost - currentXp} XP</button>`;
 
       item.innerHTML = `
         <div>
-          <strong>${reward.icon} ${reward.title}</strong>
+          <span style="font-size:1.4rem;">${reward.icon}</span>
+          <strong>${reward.title}</strong>
           <span class="tag tag-store">${reward.cost} XP</span>
         </div>
-        <button class="btn-action store" ${!canAfford ? 'disabled style="opacity:0.5; cursor:not-allowed;"' : ''} onclick="redeemReward(${reward.id})">
-          Resgatar
-        </button>
+        ${buyBtn}
       `;
-      container.appendChild(item);
+      list.appendChild(item);
     });
   }
 
-  function redeemReward(rewardId) {
+  function requestRedeem(rewardId) {
     const reward = rewards.find(r => r.id === rewardId);
     if (!reward) return;
 
-    if (children[currentUser].xp >= reward.cost) {
-      pendingRedemptions.push({ id: Date.now(), childKey: currentUser, title: reward.title, cost: reward.cost });
-      alert("Pedido de resgate enviado para a aprovação dos pais!");
-    } else {
-      alert("XP insuficiente!");
+    if (confirm(`Deseja resgatar "${reward.title}"? Ao ser aprovado pelos seus Pais, seu saldo de XP será ZERADO!`)) {
+      pendingRedemptions.push({ rewardId: reward.id, childKey: currentUser, title: reward.title });
+      alert("Pedido de resgate enviado para Os Pais!");
+      renderStore();
+    }
+  }
+
+  function openSuggestionModal() {
+    let text = prompt("💡 Digite sua sugestão ou ideia para o aplicativo:");
+    if (text) {
+      let author = currentUser ? (currentUser === 'admin' ? 'Os Pais' : children[currentUser].name) : 'Anônimo';
+      suggestionsLog.push({ author: author, text: text, date: new Date().toLocaleTimeString() });
+      alert("Sugestão enviada com sucesso! Os Pais verão no painel.");
     }
   }
 
   function renderAdminView() {
     const container = document.getElementById('admin-content');
-    container.innerHTML = `
-      <div class="report-grid">
+    
+    let storeHtml = `<h4>🛒 Pedidos de Resgate da Lojinha (Zera XP)</h4>`;
+    if (pendingRedemptions.length === 0) {
+      storeHtml += `<p style="font-size:0.85rem; color:#6b7280;">Nenhum pedido de resgate pendente.</p>`;
+    } else {
+      pendingRedemptions.forEach((item, index) => {
+        storeHtml += `
+          <div class="item-card" style="background:#f3e8ff;">
+            <div><strong>${children[item.childKey].name}</strong> quer resgatar: <u>${item.title}</u></div>
+            <button class="btn-action store" onclick="approveRedeem(${index})">Aprovar e ZERAR XP</button>
+          </div>
+        `;
+      });
+    }
+
+    let approvalsHtml = `<hr><h4>📌 Tarefas Concluídas (Aguardando Check)</h4>`;
+    if (pendingApprovals.length === 0) {
+      approvalsHtml += `<p style="font-size:0.85rem; color:#6b7280;">Nenhuma tarefa aguardando aprovação.</p>`;
+    } else {
+      pendingApprovals.forEach((item, index) => {
+        approvalsHtml += `
+          <div class="item-card">
+            <div><strong>${children[item.childKey].name}</strong> concluiu: <u>${item.title}</u></div>
+            <button class="btn-action" onclick="approveTask(${index})">Aprovar Check (+${item.xp} XP)</button>
+          </div>
+        `;
+      });
+    }
+
+    let reverseHtml = `<hr><h4>🔄 Reverter Penalidade (Devolver XP)</h4>`;
+    if (appliedPenaltiesLog.length === 0) {
+      reverseHtml += `<p style="font-size:0.85rem; color:#6b7280;">Nenhuma penalidade para reverter.</p>`;
+    } else {
+      appliedPenaltiesLog.forEach((item, index) => {
+        reverseHtml += `
+          <div class="item-card" style="background:#fff7ed;">
+            <div><strong>${children[item.childKey].name}</strong> perdeu -${item.penalty} XP em <u>${item.title}</u></div>
+            <button class="btn-action" style="background:var(--warning);" onclick="reversePenalty(${index})">Devolver XP</button>
+          </div>
+        `;
+      });
+    }
+
+    let suggestionsHtml = `<hr><h4>💡 Sugestões Enviadas pelas Crianças</h4>`;
+    if (suggestionsLog.length === 0) {
+      suggestionsHtml += `<p style="font-size:0.85rem; color:#6b7280;">Nenhuma sugestão enviada ainda.</p>`;
+    } else {
+      suggestionsLog.forEach(s => {
+        suggestionsHtml += `
+          <div class="item-card" style="background:#f0fdf4;">
+            <div><strong>${s.author}:</strong> "${s.text}"</div>
+            <span style="font-size:0.75rem; color:#6b7280;">${s.date}</span>
+          </div>
+        `;
+      });
+    }
+
+    let reportHtml = `<hr><h4>📊 Relatório de Desempenho Semanal</h4><div class="report-grid">`;
+    Object.keys(children).forEach(key => {
+      const child = children[key];
+      const completed = historyLog.filter(h => h.childKey === key && h.status === 'completed').length;
+      const expired = historyLog.filter(h => h.childKey === key && h.status === 'expired').length;
+      const lvl = getLevelInfo(child.xp);
+
+      reportHtml += `
         <div class="report-card">
-          <h4>✅ Tarefas Pendentes de Aprovação</h4>
-          <div id="admin-pending-tasks"></div>
+          <strong style="font-size:1.1rem; color:var(--primary);">${child.name.split(' ')[0]}</strong>
+          <p style="margin:3px 0; font-size:0.85rem; color:var(--purple);">Nível ${lvl.level}: ${lvl.name}</p>
+          <p style="margin:3px 0; font-size:0.9rem;">✅ Feitas: <strong>${completed}</strong></p>
+          <p style="margin:3px 0; font-size:0.9rem; color:var(--danger);">❌ Expiradas: <strong>${expired}</strong></p>
+          <p style="margin:3px 0; font-size:0.85rem; color:#6b7280;">Saldo XP: <strong>${child.xp}</strong></p>
         </div>
-        <div class="report-card">
-          <h4>🎁 Resgates Pendentes</h4>
-          <div id="admin-pending-store"></div>
-        </div>
+      `;
+    });
+    reportHtml += `</div><button style="margin-top:10px; font-size:0.8rem;" onclick="resetWeek()">Zerar Relatório Semanal</button>`;
+
+    let resetPassHtml = `
+      <hr>
+      <h4>🔑 Redefinir Senha das Crianças</h4>
+      <div class="admin-form">
+        <select id="reset-user-select">
+          <option value="thiego">👦 Thiego</option>
+          <option value="manuela">👧 Manuela</option>
+          <option value="tayrone">🧒 Tayrone</option>
+        </select>
+        <input type="password" id="reset-new-pass" placeholder="Digite a nova senha">
+        <button class="btn-action" style="margin-top:5px;" onclick="resetChildPassword()">Resetar Senha</button>
       </div>
     `;
 
-    const pendingTasksDiv = document.getElementById('admin-pending-tasks');
-    if (pendingApprovals.length === 0) {
-      pendingTasksDiv.innerHTML = '<p style="font-size:0.85rem; color:#6b7280;">Nenhuma tarefa aguardando.</p>';
-    } else {
-      pendingApprovals.forEach((p, index) => {
-        const item = document.createElement('div');
-        item.style.margin = "8px 0";
-        item.innerHTML = `
-          <small><b>${children[p.childKey].name}</b>: ${p.title} (+${p.xp} XP)</small><br>
-          <button onclick="approveTask(${index})" style="background:var(--accent); color:white; border:none; padding:4px 8px; border-radius:4px; cursor:pointer; font-size:0.75rem;">Aprovar</button>
-        `;
-        pendingTasksDiv.appendChild(item);
-      });
-    }
+    container.innerHTML = storeHtml + approvalsHtml + reverseHtml + suggestionsHtml + reportHtml + resetPassHtml;
+  }
 
-    const pendingStoreDiv = document.getElementById('admin-pending-store');
-    if (pendingRedemptions.length === 0) {
-      pendingStoreDiv.innerHTML = '<p style="font-size:0.85rem; color:#6b7280;">Nenhum resgate aguardando.</p>';
-    } else {
-      pendingRedemptions.forEach((r, index) => {
-        const item = document.createElement('div');
-        item.style.margin = "8px 0";
-        item.innerHTML = `
-          <small><b>${children[r.childKey].name}</b>: ${r.title} (${r.cost} XP)</small><br>
-          <button onclick="approveRedemption(${index})" style="background:var(--purple); color:white; border:none; padding:4px 8px; border-radius:4px; cursor:pointer; font-size:0.75rem;">Aprovar Resgate</button>
-        `;
-        pendingStoreDiv.appendChild(item);
-      });
-    }
+  function approveRedeem(index) {
+    const item = pendingRedemptions[index];
+    children[item.childKey].xp = 0;
+    alert(`Resgate aprovado! O saldo de XP de ${children[item.childKey].name} foi ZERADO!`);
+    pendingRedemptions.splice(index, 1);
+    renderAdminView();
   }
 
   function approveTask(index) {
-    const item = pendingApprovals[index];
-    children[item.childKey].xp += item.xp;
+    const app = pendingApprovals[index];
+    children[app.childKey].xp += app.xp;
+    
+    const task = tasks.find(t => t.id === app.taskId);
+    if (task) {
+      if (task.id === 5) bathroomIndex = (bathroomIndex + 1) % bathroomRotation.length, task.assignedTo = bathroomRotation[bathroomIndex];
+      else if (task.id === 6) dishIndex = (dishIndex + 1) % generalRotation.length, task.assignedTo = generalRotation[dishIndex];
+      else if (task.id === 2) trashIndex = (trashIndex + 1) % generalRotation.length, task.assignedTo = generalRotation[trashIndex];
+      else if (task.id === 3) dogIndex = (dogIndex + 1) % generalRotation.length, task.assignedTo = generalRotation[dogIndex];
+    }
+
+    historyLog.unshift({ childKey: app.childKey, taskTitle: app.title, status: 'completed', xp: app.xp });
+    alert(`Aprovado! +${app.xp} XP dados para ${children[app.childKey].name}.`);
     pendingApprovals.splice(index, 1);
-    alert("Tarefa aprovada!");
     renderAdminView();
   }
 
-  function approveRedemption(index) {
-    const item = pendingRedemptions[index];
-    children[item.childKey].xp = Math.max(0, children[item.childKey].xp - item.cost);
-    pendingRedemptions.splice(index, 1);
-    alert("Resgate aprovado!");
+  function reversePenalty(index) {
+    const logItem = appliedPenaltiesLog[index];
+    children[logItem.childKey].xp += logItem.penalty;
+    alert(`Penalidade revertida! ${logItem.penalty} XP foram devolvidos.`);
+    appliedPenaltiesLog.splice(index, 1);
     renderAdminView();
   }
 
-  function openSuggestionModal() {
-    const msg = prompt("Escreva sua sugestão para Os Pais:");
-    if (msg) {
-      suggestionsLog.push({ user: currentUser || "Anônimo", msg });
-      alert("Sugestão enviada!");
+  function resetChildPassword() {
+    const selected = document.getElementById('reset-user-select').value;
+    const newPass = document.getElementById('reset-new-pass').value;
+    if (!newPass) return alert("Digite a nova senha!");
+    children[selected].password = newPass;
+    alert(`Senha de ${children[selected].name.split(' ')[0]} redefinida!`);
+    document.getElementById('reset-new-pass').value = '';
+  }
+
+  function resetWeek() {
+    if (confirm("Zerar o relatório semanal? Os saldos de XP continuarão intactos.")) {
+      historyLog = [];
+      renderAdminView();
     }
   }
+
+  checkFirstAccess();
 </script>
+
 </body>
 </html>
