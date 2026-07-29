@@ -1,1 +1,1545 @@
 
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>A Luta Diária 🥊 - QG da Família</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        darkMode: 'class',
+        theme: {
+          extend: {
+            colors: {
+              brand: {
+                50: '#eef2ff',
+                100: '#e0e7ff',
+                500: '#6366f1',
+                600: '#4f46e5',
+                700: '#4338ca',
+              }
+            }
+          }
+        }
+      }
+    </script>
+    <!-- React 18 & ReactDOM 18 -->
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+    <!-- Babel Standalone for in-browser JSX parsing -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  </head>
+  <body class="bg-zinc-100 dark:bg-zinc-950 text-zinc-900 dark:text-zinc-100 font-sans selection:bg-indigo-500 selection:text-white pb-12 min-h-screen">
+    <div id="root"></div>
+
+    <script type="text/babel">
+      const { useState, useEffect, createContext, useContext, useRef } = React;
+
+      // ==================== INITIAL DATA & TYPES ====================
+      const bathroomRotationSequence = ['thiego', 'manuela', 'tayrone'];
+      const generalRotationSequence = ['thiego', 'manuela', 'tayrone'];
+      const daysOfWeek = ['domingo', 'segunda', 'terca', 'quarta', 'quinta', 'sexta', 'sabado'];
+
+      const initialAppState = {
+        children: {
+          thiego: { key: 'thiego', name: 'Thiego', age: 14, xp: 100, passwordHash: null, avatar: '👦', color: 'bg-indigo-500', birthday: '2012-08-15' },
+          manuela: { key: 'manuela', name: 'Manuela', age: 14, xp: 120, passwordHash: null, avatar: '👧', color: 'bg-rose-500', birthday: '2012-03-20' },
+          tayrone: { key: 'tayrone', name: 'Tayrone', age: 9, xp: 80, passwordHash: null, avatar: '🧒', color: 'bg-amber-500', birthday: '2017-11-05' }
+        },
+        adminPassword: 'admin1234',
+        rotations: { bathroomIndex: 0, dishIndex: 0, trashIndex: 0, dogIndex: 0 },
+        isStoreOpen: true,
+        isDayOff: false,
+        tasks: [
+          { id: 1, title: 'Arrumar a Cama', description: 'Dobrar o lençol, arrumar os travesseiros e deixar o quarto organizado.', xp: 10, penalty: 15, type: 'daily', assignedTo: 'all', schedule: 'Todos os dias', deadline: '12:00', needCheck: true, canTrade: false, category: 'daily', days: ['domingo', 'segunda', 'terca', 'quarta', 'quinta', 'sexta', 'sabado'] },
+          { id: 2, title: 'Tirar o Lixo', description: 'Recolher o lixo da cozinha e dos banheiros e colocar na lixeira da rua.', xp: 15, penalty: 25, type: 'rotation', assignedTo: generalRotationSequence[0], schedule: 'Seg, Qua e Sex', deadline: '12:00', needCheck: true, canTrade: true, category: 'rotation', days: ['segunda', 'quarta', 'sexta'] },
+          { id: 3, title: 'Água e Comida da Cachorra', description: 'Lavar os potes, abastecer com água fresca e servir a porção de ração.', xp: 15, penalty: 25, type: 'daily', assignedTo: generalRotationSequence[0], schedule: 'Todos os dias', deadline: '09:00', needCheck: true, canTrade: true, category: 'daily', days: ['domingo', 'segunda', 'terca', 'quarta', 'quinta', 'sexta', 'sabado'] },
+          { id: 4, title: 'Limpar o Quarto', description: 'Varrer o chão, tirar o pó dos móveis e guardar todas as roupas e sapatos.', xp: 25, penalty: 40, type: 'weekly', assignedTo: 'all', schedule: 'Toda Quarta-feira', deadline: '18:00', needCheck: true, canTrade: false, category: 'rotation', days: ['quarta'] },
+          { id: 5, title: 'Lavar Banheiro', description: 'Lavar o vaso, a pia, passar pano no chão e recolher o lixo.', xp: 50, penalty: 75, type: 'rotation', assignedTo: bathroomRotationSequence[0], schedule: 'Toda Quinta-feira', deadline: '17:00', needCheck: true, canTrade: true, category: 'rotation', days: ['quinta'] },
+          { id: 6, title: 'Secar Louça da Janta', description: 'Secar pratos, talheres, copos e panelas e guardar nos armários.', xp: 20, penalty: 30, type: 'rotation', assignedTo: generalRotationSequence[0], schedule: 'Todos os dias', deadline: '21:00', needCheck: true, canTrade: true, category: 'daily', days: ['domingo', 'segunda', 'terca', 'quarta', 'quinta', 'sexta', 'sabado'] },
+          { id: 7, title: '30 Minutos de Leitura', description: 'Ler um livro de sua escolha por no mínimo 30 minutos diários.', xp: 30, penalty: 0, type: 'flexible', assignedTo: 'all', schedule: '3x por semana (Livre escolha)', deadline: '21:00', needCheck: true, canTrade: false, category: 'flexible', days: ['domingo', 'segunda', 'terca', 'quarta', 'quinta', 'sexta', 'sabado'] }
+        ],
+        rewards: [
+          { id: 101, title: '30 Minutos a mais de Videogame / Celular', description: 'Ganhe tempo extra de tela no final de semana.', cost: 50, icon: '🎮', available: true },
+          { id: 102, title: 'Escolher o Filme da Sexta à Noite', description: 'Sua escolha de filme com direito a pipoca na sessão de cinema em família.', cost: 80, icon: '🍿', available: true },
+          { id: 103, title: 'Escolher o Lanche do Fim de Semana', description: 'Decida o pedido do iFood ou jantar especial da família.', cost: 120, icon: '🍔', available: true },
+          { id: 104, title: 'R$ 15,00 no PIX (Mesada Extra)', description: 'Transferência direta de R$ 15 para sua conta ou cofrinho.', cost: 200, icon: '💵', available: true }
+        ],
+        pendingApprovals: [],
+        pendingRedemptions: [],
+        appliedPenaltiesLog: [],
+        suggestionsLog: [],
+        historyLog: [
+          { id: 'h-1', childKey: 'manuela', taskTitle: 'Arrumar a Cama', status: 'completed', xpChange: 10, timestamp: new Date(Date.now() - 3600000 * 5).toISOString() },
+          { id: 'h-2', childKey: 'thiego', taskTitle: '30 Minutos de Leitura', status: 'completed', xpChange: 30, timestamp: new Date(Date.now() - 3600000 * 24).toISOString() }
+        ],
+        pendingSwaps: []
+      };
+
+      function getDaysUntilBirthday(birthdayStr) {
+        if (!birthdayStr) return null;
+        const parts = birthdayStr.split('-');
+        if (parts.length < 3) return null;
+        const month = parseInt(parts[1], 10) - 1;
+        const day = parseInt(parts[2], 10);
+        if (isNaN(month) || isNaN(day)) return null;
+
+        const now = new Date();
+        const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+        let nextBirthday = new Date(now.getFullYear(), month, day);
+
+        if (nextBirthday < today) {
+          nextBirthday = new Date(now.getFullYear() + 1, month, day);
+        }
+
+        const diffTime = nextBirthday.getTime() - today.getTime();
+        const days = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+        const monthNames = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
+        const formattedDate = `${day} de ${monthNames[month]}`;
+        return { days, formattedDate };
+      }
+
+      const LEVEL_RANKS = [
+        { level: 1, name: 'Iniciante Preguiçoso 😴', minXp: 0, maxXp: 30, color: 'text-zinc-600 bg-zinc-100 dark:bg-zinc-800' },
+        { level: 2, name: 'Caçador de Meia Perdida 🧦', minXp: 30, maxXp: 70, color: 'text-blue-600 bg-blue-50 dark:bg-blue-900/40' },
+        { level: 3, name: 'Dobrador de Lençol 🛏️', minXp: 70, maxXp: 120, color: 'text-sky-600 bg-sky-50 dark:bg-sky-900/40' },
+        { level: 4, name: 'Mestre do Escorredor 🍽️', minXp: 120, maxXp: 200, color: 'text-teal-600 bg-teal-50 dark:bg-teal-900/40' },
+        { level: 5, name: 'General da Vassoura 🧹', minXp: 200, maxXp: 350, color: 'text-indigo-600 bg-indigo-50 dark:bg-indigo-900/40' },
+        { level: 6, name: 'Guardião do Sabão 🧼', minXp: 350, maxXp: 600, color: 'text-purple-600 bg-purple-50 dark:bg-purple-900/40' },
+        { level: 7, name: 'Soberano da Louça 👑', minXp: 600, maxXp: 1000, color: 'text-fuchsia-600 bg-fuchsia-50 dark:bg-fuchsia-900/40' },
+        { level: 8, name: 'Lorde do Pano de Chão 🧽', minXp: 1000, maxXp: 1600, color: 'text-rose-600 bg-rose-50 dark:bg-rose-900/40' },
+        { level: 9, name: 'Destruidor da Sujeira ⚡', minXp: 1600, maxXp: 2500, color: 'text-amber-600 bg-amber-50 dark:bg-amber-900/40' },
+        { level: 10, name: 'Lenda Suprema do Lar 🏆', minXp: 2500, maxXp: 4000, color: 'text-emerald-600 bg-emerald-50 dark:bg-emerald-900/40' }
+      ];
+
+      function getRankForXp(xp) {
+        for (let i = LEVEL_RANKS.length - 1; i >= 0; i--) {
+          if (xp >= LEVEL_RANKS[i].minXp) {
+            const current = LEVEL_RANKS[i];
+            const next = LEVEL_RANKS[i + 1];
+            if (!next) {
+              const extraLevel = current.level + Math.floor((xp - current.minXp) / 2000);
+              return { level: extraLevel, title: `Super Lenda nível ${extraLevel} 🌟`, name: `Super Lenda nível ${extraLevel} 🌟`, progress: 100, nextXp: 'Max', color: current.color };
+            }
+            const range = next.minXp - current.minXp;
+            const gained = xp - current.minXp;
+            const pct = Math.min(100, Math.max(0, Math.round((gained / range) * 100)));
+            return { level: current.level, title: current.name, name: current.name, progress: pct, nextXp: next.minXp, color: current.color };
+          }
+        }
+        return { level: 1, title: LEVEL_RANKS[0].name, name: LEVEL_RANKS[0].name, progress: 0, nextXp: 30, color: LEVEL_RANKS[0].color };
+      }
+
+      // ==================== APP CONTEXT ====================
+      const STORAGE_KEY = 'qg_familia_app_state_v1';
+      const CURRENT_USER_KEY = 'qg_familia_current_user_v1';
+      const AppContext = createContext();
+
+      function AppProvider({ children }) {
+        const [state, setState] = useState(() => {
+          try {
+            const saved = localStorage.getItem(STORAGE_KEY);
+            if (saved) return { ...initialAppState, ...JSON.parse(saved) };
+          } catch (e) {}
+          return initialAppState;
+        });
+
+        const [currentUser, setCurrentUser] = useState(() => {
+          try { return localStorage.getItem(CURRENT_USER_KEY) || null; } catch { return null; }
+        });
+
+        const [activeTab, setActiveTab] = useState('tasks');
+        const [confettiActive, setConfettiActive] = useState(false);
+
+        useEffect(() => {
+          try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch (err) {}
+        }, [state]);
+
+        useEffect(() => {
+          if (currentUser) localStorage.setItem(CURRENT_USER_KEY, currentUser);
+          else localStorage.removeItem(CURRENT_USER_KEY);
+        }, [currentUser]);
+
+        const triggerConfetti = () => {
+          setConfettiActive(true);
+          setTimeout(() => setConfettiActive(false), 3200);
+        };
+
+        const checkFirstAccess = (userKey) => {
+          if (userKey === 'admin') return false;
+          const child = state.children[userKey];
+          return child ? child.passwordHash === null : false;
+        };
+
+        const login = (userKey, passwordInput) => {
+          if (!passwordInput || !passwordInput.trim()) return { success: false, message: 'Por favor, digite a senha!' };
+          if (userKey === 'admin') {
+            if (passwordInput === state.adminPassword) {
+              setCurrentUser('admin');
+              setActiveTab('admin');
+              return { success: true };
+            }
+            return { success: false, message: 'Senha incorreta para o Supervisor (Pai)!' };
+          }
+          const child = state.children[userKey];
+          if (!child) return { success: false, message: 'Usuário não encontrado!' };
+          if (child.passwordHash === null) {
+            setState(prev => ({
+              ...prev,
+              children: { ...prev.children, [userKey]: { ...prev.children[userKey], passwordHash: passwordInput } }
+            }));
+            setCurrentUser(userKey);
+            setActiveTab('tasks');
+            return { success: true, message: 'Senha cadastrada com sucesso!' };
+          }
+          if (child.passwordHash === passwordInput) {
+            setCurrentUser(userKey);
+            setActiveTab('tasks');
+            return { success: true };
+          }
+          return { success: false, message: 'Senha incorreta!' };
+        };
+
+        const logout = () => {
+          setCurrentUser(null);
+          setActiveTab('tasks');
+        };
+
+        const completeTask = (taskId, note) => {
+          if (!currentUser || currentUser === 'admin') return { success: false, message: 'Ação não permitida.' };
+          if (state.isDayOff) return { success: false, message: 'Hoje é Dia de Folga! 🌴 Tarefas pausadas.' };
+
+          const task = state.tasks.find(t => t.id === taskId);
+          if (!task) return { success: false, message: 'Tarefa não encontrada.' };
+
+          if (task.needCheck) {
+            const alreadyPending = state.pendingApprovals.some(p => p.taskId === taskId && p.childKey === currentUser);
+            if (alreadyPending) return { success: false, message: 'Já está aguardando aprovação do Pai!' };
+            const newApproval = { id: 'appr-' + Date.now(), taskId: task.id, childKey: currentUser, title: task.title, xp: task.xp, requestedAt: new Date().toISOString(), note };
+            setState(prev => ({ ...prev, pendingApprovals: [newApproval, ...prev.pendingApprovals] }));
+            return { success: true, pending: true, message: 'Enviado para a validação do Pai!' };
+          }
+
+          let updatedRotations = { ...state.rotations };
+          let updatedTasks = [...state.tasks];
+          if (task.id === 5) {
+            updatedRotations.bathroomIndex = (updatedRotations.bathroomIndex + 1) % bathroomRotationSequence.length;
+            updatedTasks = updatedTasks.map(t => t.id === 5 ? { ...t, assignedTo: bathroomRotationSequence[updatedRotations.bathroomIndex] } : t);
+          } else if (task.id === 6) {
+            updatedRotations.dishIndex = (updatedRotations.dishIndex + 1) % generalRotationSequence.length;
+            updatedTasks = updatedTasks.map(t => t.id === 6 ? { ...t, assignedTo: generalRotationSequence[updatedRotations.dishIndex] } : t);
+          } else if (task.id === 2) {
+            updatedRotations.trashIndex = (updatedRotations.trashIndex + 1) % generalRotationSequence.length;
+            updatedTasks = updatedTasks.map(t => t.id === 2 ? { ...t, assignedTo: generalRotationSequence[updatedRotations.trashIndex] } : t);
+          } else if (task.id === 3) {
+            updatedRotations.dogIndex = (updatedRotations.dogIndex + 1) % generalRotationSequence.length;
+            updatedTasks = updatedTasks.map(t => t.id === 3 ? { ...t, assignedTo: generalRotationSequence[updatedRotations.dogIndex] } : t);
+          }
+
+          const newHistory = { id: 'h-' + Date.now(), childKey: currentUser, taskTitle: task.title, status: 'completed', xpChange: task.xp, timestamp: new Date().toISOString() };
+          setState(prev => ({
+            ...prev, rotations: updatedRotations, tasks: updatedTasks,
+            children: { ...prev.children, [currentUser]: { ...prev.children[currentUser], xp: prev.children[currentUser].xp + task.xp } },
+            historyLog: [newHistory, ...prev.historyLog]
+          }));
+          triggerConfetti();
+          return { success: true, pending: false, xpGained: task.xp, message: `Excelente! Você ganhou +${task.xp} XP!` };
+        };
+
+        const applyPenalty = (taskId) => {
+          if (!currentUser || currentUser === 'admin') return { success: false, message: 'Ação inválida.', penaltyApplied: 0 };
+          if (state.isDayOff) return { success: false, message: 'Hoje é Dia de Folga! Nenhuma penalidade.', penaltyApplied: 0 };
+          const task = state.tasks.find(t => t.id === taskId);
+          if (!task) return { success: false, message: 'Tarefa não encontrada.', penaltyApplied: 0 };
+          const child = state.children[currentUser];
+
+          const newPenaltyLog = { id: 'pen-' + Date.now(), childKey: currentUser, taskId: task.id, title: task.title, penalty: task.penalty, appliedAt: new Date().toISOString() };
+          const newHistory = { id: 'h-' + Date.now(), childKey: currentUser, taskTitle: task.title, status: 'expired', xpChange: -task.penalty, timestamp: new Date().toISOString() };
+          const newXp = Math.max(0, child.xp - task.penalty);
+
+          setState(prev => ({
+            ...prev,
+            children: { ...prev.children, [currentUser]: { ...prev.children[currentUser], xp: newXp } },
+            appliedPenaltiesLog: [newPenaltyLog, ...(prev.appliedPenaltiesLog || [])],
+            historyLog: [newHistory, ...prev.historyLog]
+          }));
+          return { success: true, penaltyApplied: task.penalty, message: `Prazo expirou! Descontados ${task.penalty} XP. Peça aos Pais para reverterem se houver justificativa!` };
+        };
+
+        const createTaskSwap = (fromTaskId, toChildKey, toTaskId) => {
+          if (!currentUser || currentUser === 'admin') return { success: false, message: 'Selecione um perfil de criança.' };
+          if (state.isDayOff) return { success: false, message: 'Trocas desativadas no Dia de Folga.' };
+          const newSwap = { id: 'swap-' + Date.now(), fromChildKey: currentUser, toChildKey, fromTaskId, toTaskId, status: 'pending', requestedAt: new Date().toISOString() };
+          setState(prev => ({ ...prev, pendingSwaps: [newSwap, ...(prev.pendingSwaps || [])] }));
+          return { success: true, message: `Proposta de troca enviada! O irmão precisa aceitar no painel dele.` };
+        };
+
+        const acceptTaskSwap = (swapId) => {
+          const swap = (state.pendingSwaps || []).find(s => s.id === swapId);
+          if (!swap) return;
+          setState(prev => ({
+            ...prev,
+            tasks: prev.tasks.map(t => {
+              if (t.id === swap.fromTaskId) return { ...t, assignedTo: swap.toChildKey };
+              if (t.id === swap.toTaskId) return { ...t, assignedTo: swap.fromChildKey };
+              return t;
+            }),
+            pendingSwaps: (prev.pendingSwaps || []).filter(s => s.id !== swapId)
+          }));
+        };
+
+        const rejectTaskSwap = (swapId) => {
+          setState(prev => ({ ...prev, pendingSwaps: (prev.pendingSwaps || []).filter(s => s.id !== swapId) }));
+        };
+
+        const requestRedemption = (rewardId) => {
+          if (!currentUser || currentUser === 'admin') return { success: false, message: 'Selecione um perfil de criança.' };
+          const reward = state.rewards.find(r => r.id === rewardId);
+          if (!reward) return { success: false, message: 'Prêmio não encontrado.' };
+          const child = state.children[currentUser];
+          if (child.xp < reward.cost) return { success: false, message: `Saldo insuficiente! Precisa de ${reward.cost} XP (Seu saldo: ${child.xp} XP).` };
+
+          const newRedemption = { id: 'red-' + Date.now(), rewardId: reward.id, childKey: currentUser, title: reward.title, cost: reward.cost, requestedAt: new Date().toISOString(), approved: false };
+          setState(prev => ({ ...prev, pendingRedemptions: [newRedemption, ...prev.pendingRedemptions] }));
+          triggerConfetti();
+          return { success: true, message: `Pedido de resgate enviado para Os Pais!` };
+        };
+
+        const approveTask = (approvalId) => {
+          const approval = state.pendingApprovals.find(p => p.id === approvalId);
+          if (!approval) return;
+          const childKey = approval.childKey;
+          const newHistory = { id: 'h-' + Date.now(), childKey, taskTitle: approval.title, status: 'completed', xpChange: approval.xp, timestamp: new Date().toISOString() };
+          setState(prev => ({
+            ...prev,
+            children: { ...prev.children, [childKey]: { ...prev.children[childKey], xp: (prev.children[childKey]?.xp || 0) + approval.xp } },
+            pendingApprovals: prev.pendingApprovals.filter(p => p.id !== approvalId),
+            historyLog: [newHistory, ...prev.historyLog]
+          }));
+        };
+
+        const rejectTask = (approvalId) => {
+          setState(prev => ({ ...prev, pendingApprovals: prev.pendingApprovals.filter(p => p.id !== approvalId) }));
+        };
+
+        const reversePenalty = (penaltyLogId) => {
+          const penaltyItem = (state.appliedPenaltiesLog || []).find(p => p.id === penaltyLogId);
+          if (!penaltyItem) return;
+          const childKey = penaltyItem.childKey;
+          const newHistory = { id: 'h-' + Date.now(), childKey, taskTitle: `Penalidade Revertida: ${penaltyItem.title}`, status: 'forgiven', xpChange: penaltyItem.penalty, timestamp: new Date().toISOString() };
+          setState(prev => ({
+            ...prev,
+            children: { ...prev.children, [childKey]: { ...prev.children[childKey], xp: (prev.children[childKey]?.xp || 0) + penaltyItem.penalty } },
+            appliedPenaltiesLog: (prev.appliedPenaltiesLog || []).filter(p => p.id !== penaltyLogId),
+            historyLog: [newHistory, ...prev.historyLog]
+          }));
+        };
+
+        const approveRedemption = (redemptionId) => {
+          const redemption = state.pendingRedemptions.find(r => r.id === redemptionId);
+          if (!redemption) return;
+          const childKey = redemption.childKey;
+          const newHistory = { id: 'h-' + Date.now(), childKey, taskTitle: `Resgate Aprovado (XP Zerado): ${redemption.title}`, status: 'reward_redeemed', xpChange: 0, timestamp: new Date().toISOString() };
+          setState(prev => ({
+            ...prev,
+            children: { ...prev.children, [childKey]: { ...prev.children[childKey], xp: 0 } },
+            pendingRedemptions: prev.pendingRedemptions.filter(r => r.id !== redemptionId),
+            historyLog: [newHistory, ...prev.historyLog]
+          }));
+        };
+
+        const rejectRedemption = (redemptionId) => {
+          setState(prev => ({ ...prev, pendingRedemptions: prev.pendingRedemptions.filter(r => r.id !== redemptionId) }));
+        };
+
+        const addSuggestion = (text) => {
+          if (!text || !text.trim()) return;
+          let authorName = currentUser === 'admin' ? 'Os Pais' : (currentUser && state.children[currentUser] ? state.children[currentUser].name : 'Anônimo');
+          const newSuggestion = { id: 'sug-' + Date.now(), author: authorName, text: text.trim(), date: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) };
+          setState(prev => ({ ...prev, suggestionsLog: [newSuggestion, ...(prev.suggestionsLog || [])] }));
+        };
+
+        const addTask = (newTaskData) => {
+          const nextId = Math.max(0, ...state.tasks.map(t => t.id)) + 1;
+          setState(prev => ({ ...prev, tasks: [...prev.tasks, { ...newTaskData, id: nextId }] }));
+        };
+
+        const updateTask = (updatedTask) => {
+          setState(prev => ({ ...prev, tasks: prev.tasks.map(t => t.id === updatedTask.id ? updatedTask : t) }));
+        };
+
+        const deleteTask = (taskId) => {
+          setState(prev => ({ ...prev, tasks: prev.tasks.filter(t => t.id !== taskId) }));
+        };
+
+        const addReward = (newRewardData) => {
+          const nextId = Math.max(100, ...state.rewards.map(r => r.id)) + 1;
+          setState(prev => ({ ...prev, rewards: [...prev.rewards, { ...newRewardData, id: nextId }] }));
+        };
+
+        const updateReward = (updatedReward) => {
+          setState(prev => ({ ...prev, rewards: prev.rewards.map(r => r.id === updatedReward.id ? updatedReward : r) }));
+        };
+
+        const deleteReward = (rewardId) => {
+          setState(prev => ({ ...prev, rewards: prev.rewards.filter(r => r.id !== rewardId) }));
+        };
+
+        const toggleStoreStatus = () => {
+          setState(prev => ({ ...prev, isStoreOpen: !prev.isStoreOpen }));
+        };
+
+        const toggleDayOff = () => {
+          setState(prev => ({ ...prev, isDayOff: !prev.isDayOff }));
+        };
+
+        const addChild = (childData) => {
+          const key = childData.name.toLowerCase().trim().replace(/\s+/g, '_');
+          if (state.children[key]) return;
+          const newChild = { ...childData, key, xp: 0, passwordHash: null };
+          setState(prev => ({ ...prev, children: { ...prev.children, [key]: newChild } }));
+        };
+
+        const updateChild = (childKey, data) => {
+          if (!state.children[childKey]) return;
+          setState(prev => ({ ...prev, children: { ...prev.children, [childKey]: { ...prev.children[childKey], ...data } } }));
+        };
+
+        const adjustXp = (childKey, delta, reason) => {
+          const child = state.children[childKey];
+          if (!child) return;
+          const newXp = Math.max(0, child.xp + delta);
+          const newHistory = { id: 'h-' + Date.now(), childKey, taskTitle: `Ajuste Pai: ${reason}`, status: delta >= 0 ? 'bonus' : 'expired', xpChange: delta, timestamp: new Date().toISOString() };
+          setState(prev => ({
+            ...prev,
+            children: { ...prev.children, [childKey]: { ...prev.children[childKey], xp: newXp } },
+            historyLog: [newHistory, ...prev.historyLog]
+          }));
+        };
+
+        const resetChildPassword = (childKey) => {
+          setState(prev => ({ ...prev, children: { ...prev.children, [childKey]: { ...prev.children[childKey], passwordHash: null } } }));
+        };
+
+        const resetWeekReport = () => {
+          setState(prev => ({ ...prev, historyLog: [] }));
+        };
+
+        const resetFactoryData = () => {
+          setState(initialAppState);
+          localStorage.removeItem(STORAGE_KEY);
+          localStorage.removeItem(CURRENT_USER_KEY);
+          setCurrentUser(null);
+        };
+
+        return (
+          <AppContext.Provider value={{
+            state, currentUser, activeTab, confettiActive, triggerConfetti,
+            login, logout, checkFirstAccess, setActiveTab, completeTask, applyPenalty,
+            createTaskSwap, acceptTaskSwap, rejectTaskSwap, requestRedemption,
+            approveTask, rejectTask, reversePenalty, approveRedemption, rejectRedemption,
+            addSuggestion, addTask, updateTask, deleteTask, addReward, updateReward, deleteReward,
+            toggleStoreStatus, toggleDayOff, addChild, updateChild, adjustXp, resetChildPassword,
+            resetWeekReport, resetFactoryData
+          }}>
+            {children}
+          </AppContext.Provider>
+        );
+      }
+
+      function useApp() {
+        return useContext(AppContext);
+      }
+
+      // ==================== CONFETTI CANVAS COMPONENT ====================
+      function Confetti({ active }) {
+        const canvasRef = useRef(null);
+        useEffect(() => {
+          if (!active) return;
+          const canvas = canvasRef.current;
+          if (!canvas) return;
+          const ctx = canvas.getContext('2d');
+          canvas.width = window.innerWidth;
+          canvas.height = window.innerHeight;
+
+          const particles = [];
+          const colors = ['#4f46e5', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899', '#3b82f6'];
+          for (let i = 0; i < 90; i++) {
+            particles.push({
+              x: canvas.width / 2 + (Math.random() - 0.5) * 300,
+              y: canvas.height / 3 + (Math.random() - 0.5) * 100,
+              size: Math.random() * 8 + 6,
+              color: colors[Math.floor(Math.random() * colors.length)],
+              vx: (Math.random() - 0.5) * 12,
+              vy: Math.random() * -10 - 4,
+              rotation: Math.random() * 360,
+              vRot: (Math.random() - 0.5) * 10,
+              opacity: 1
+            });
+          }
+
+          let animId;
+          let startTime = Date.now();
+          const render = () => {
+            const elapsed = Date.now() - startTime;
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            particles.forEach(p => {
+              p.x += p.vx;
+              p.y += p.vy;
+              p.vy += 0.25;
+              p.rotation += p.vRot;
+              if (elapsed > 1800) p.opacity -= 0.02;
+              ctx.save();
+              ctx.globalAlpha = Math.max(0, p.opacity);
+              ctx.translate(p.x, p.y);
+              ctx.rotate((p.rotation * Math.PI) / 180);
+              ctx.fillStyle = p.color;
+              ctx.fillRect(-p.size / 2, -p.size / 2, p.size, p.size);
+              ctx.restore();
+            });
+            if (elapsed < 3000) animId = requestAnimationFrame(render);
+            else ctx.clearRect(0, 0, canvas.width, canvas.height);
+          };
+          render();
+          return () => { if (animId) cancelAnimationFrame(animId); };
+        }, [active]);
+
+        if (!active) return null;
+        return <canvas ref={canvasRef} className="fixed inset-0 pointer-events-none z-50" style={{ width: '100vw', height: '100vh' }} />;
+      }
+
+      // ==================== NAVBAR COMPONENT ====================
+      function Navbar() {
+        const { state, currentUser, logout, activeTab, setActiveTab } = useApp();
+        const [currentTime, setCurrentTime] = useState('');
+
+        useEffect(() => {
+          const update = () => setCurrentTime(new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit', second: '2-digit' }));
+          update();
+          const timer = setInterval(update, 1000);
+          return () => clearInterval(timer);
+        }, []);
+
+        if (!currentUser) {
+          return (
+            <header className="bg-white/80 dark:bg-zinc-900/80 backdrop-blur-md border-b border-zinc-200 dark:border-zinc-800 sticky top-0 z-30 px-4 py-3 shadow-xs">
+              <div className="max-w-4xl mx-auto flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-indigo-600 flex items-center justify-center text-white shadow-md text-xl">🥊</div>
+                  <div>
+                    <h1 className="text-xl font-black tracking-tight text-zinc-900 dark:text-white">A Luta Diária 🥊</h1>
+                    <p className="text-xs text-zinc-500 dark:text-zinc-400 font-medium">Minhas Tarefas e Missões da Casa</p>
+                  </div>
+                </div>
+                <div className="text-xs font-semibold px-3 py-1.5 rounded-full bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-300">
+                  ⏱️ {currentTime || '00:00:00'}
+                </div>
+              </div>
+            </header>
+          );
+        }
+
+        const isAdmin = currentUser === 'admin';
+        const child = !isAdmin ? state.children[currentUser] : null;
+        const rank = child ? getRankForXp(child.xp) : null;
+
+        return (
+          <header className="bg-white dark:bg-zinc-900 border-b border-zinc-200 dark:border-zinc-800 sticky top-0 z-30 shadow-xs">
+            <div className="max-w-4xl mx-auto px-4 py-3">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-indigo-600 flex items-center justify-center text-white shadow-md text-xl">🥊</div>
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <h1 className="text-lg font-black tracking-tight text-zinc-900 dark:text-white">A Luta Diária 🥊</h1>
+                      <span className="hidden sm:inline-flex items-center gap-1 text-[11px] font-semibold px-2 py-0.5 rounded-md bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-300">
+                        ⏱️ {currentTime}
+                      </span>
+                    </div>
+                    <p className="text-xs text-zinc-500 dark:text-zinc-400">
+                      {isAdmin ? 'Painel de Os Pais (Supervisores)' : child?.name}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-3">
+                  {!isAdmin && child && rank && (
+                    <div className="flex items-center gap-2 bg-indigo-50 dark:bg-indigo-950/40 border border-indigo-100 dark:border-indigo-900/50 px-3 py-1.5 rounded-xl">
+                      <span className="text-xl">{child.avatar}</span>
+                      <div className="text-right">
+                        <div className="flex items-center justify-end gap-1 font-bold text-indigo-600 dark:text-indigo-400 text-sm">
+                          ⚡ <span>{child.xp} XP</span>
+                        </div>
+                        <div className="text-[10px] text-zinc-500 dark:text-zinc-400 font-medium">Nível {rank.level}</div>
+                      </div>
+                    </div>
+                  )}
+
+                  {isAdmin && (
+                    <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-purple-50 dark:bg-purple-950/40 text-purple-700 dark:text-purple-300 font-bold text-xs border border-purple-200 dark:border-purple-900/50">
+                      🛡️ <span>Os Pais (Supervisores)</span>
+                    </div>
+                  )}
+
+                  <button
+                    onClick={logout}
+                    className="flex items-center gap-1.5 text-xs font-semibold px-3 py-2 rounded-xl bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors"
+                  >
+                    🚪 <span className="hidden sm:inline">Sair</span>
+                  </button>
+                </div>
+              </div>
+
+              {!isAdmin && child && rank && (
+                <div className="mt-2 pt-2 border-t border-zinc-100 dark:border-zinc-800/80">
+                  <div className="flex items-center justify-between text-xs font-medium text-zinc-500 dark:text-zinc-400 mb-1">
+                    <span className="text-indigo-600 dark:text-indigo-400 font-bold">
+                      Nível {rank.level}: {rank.title}
+                    </span>
+                    <span>{rank.nextXp === 'Max' ? 'Nível Máximo! 🎉' : `Próximo nível: ${rank.nextXp} XP (${rank.progress}%)`}</span>
+                  </div>
+                  <div className="w-full h-2 bg-zinc-100 dark:bg-zinc-800 rounded-full overflow-hidden">
+                    <div className="h-full bg-gradient-to-r from-indigo-500 via-purple-500 to-emerald-400 rounded-full transition-all duration-500" style={{ width: `${rank.progress}%` }} />
+                  </div>
+                </div>
+              )}
+
+              {!isAdmin && (
+                <div className="flex gap-2 mt-3 pt-2 border-t border-zinc-100 dark:border-zinc-800">
+                  <button
+                    onClick={() => setActiveTab('tasks')}
+                    className={`flex-1 py-2 px-3 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2 ${activeTab === 'tasks' ? 'bg-indigo-600 text-white shadow-md' : 'bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-300'}`}
+                  >
+                    📋 Minhas Missões
+                  </button>
+                  <button
+                    onClick={() => setActiveTab('store')}
+                    className={`flex-1 py-2 px-3 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2 ${activeTab === 'store' ? 'bg-purple-600 text-white shadow-md' : 'bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-300'}`}
+                  >
+                    🛒 Lojinha de Recompensas
+                  </button>
+                </div>
+              )}
+            </div>
+          </header>
+        );
+      }
+
+      // ==================== LOGIN MODAL ====================
+      function LoginModal() {
+        const { state, login, checkFirstAccess } = useApp();
+        const [selectedKey, setSelectedKey] = useState('thiego');
+        const [passwordInput, setPasswordInput] = useState('');
+        const [errorMsg, setErrorMsg] = useState(null);
+
+        const isFirstAccess = checkFirstAccess(selectedKey);
+
+        const handleUserChange = (key) => {
+          setSelectedKey(key);
+          setPasswordInput('');
+          setErrorMsg(null);
+        };
+
+        const handleSubmit = (e) => {
+          e.preventDefault();
+          setErrorMsg(null);
+          const result = login(selectedKey, passwordInput);
+          if (!result.success && result.message) setErrorMsg(result.message);
+        };
+
+        const childrenList = Object.values(state.children);
+
+        return (
+          <div className="min-h-[85vh] flex items-center justify-center p-4">
+            <div className="w-full max-w-md bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl shadow-xl overflow-hidden">
+              <div className="bg-gradient-to-r from-indigo-600 via-indigo-700 to-purple-700 p-6 text-white text-center relative">
+                <div className="inline-flex p-3 rounded-2xl bg-white/10 backdrop-blur-md mb-3 text-3xl shadow-inner">🥊</div>
+                <h2 className="text-2xl font-black tracking-tight">A Luta Diária 🥊</h2>
+                <p className="text-xs text-indigo-100 font-medium mt-1">Minhas Tarefas e Missões da Casa</p>
+              </div>
+
+              <form onSubmit={handleSubmit} className="p-6 space-y-5">
+                <div>
+                  <label className="block text-xs font-bold uppercase tracking-wider text-zinc-500 dark:text-zinc-400 mb-2">Quem é você?</label>
+                  <div className="grid grid-cols-2 gap-2">
+                    {childrenList.map((child) => (
+                      <button
+                        key={child.key}
+                        type="button"
+                        onClick={() => handleUserChange(child.key)}
+                        className={`p-3 rounded-xl border text-left transition-all flex items-center gap-2.5 ${selectedKey === child.key ? 'border-indigo-600 bg-indigo-50/70 dark:bg-indigo-950/40 text-indigo-900 dark:text-indigo-200 ring-2 ring-indigo-500/20' : 'border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-800/50 text-zinc-700 dark:text-zinc-300'}`}
+                      >
+                        <span className="text-2xl">{child.avatar}</span>
+                        <div className="overflow-hidden">
+                          <div className="text-xs font-bold truncate">{child.name}</div>
+                          <div className="text-[10px] text-zinc-500">{child.age} anos · {child.xp} XP</div>
+                        </div>
+                      </button>
+                    ))}
+
+                    <button
+                      type="button"
+                      onClick={() => handleUserChange('admin')}
+                      className={`p-3 rounded-xl border text-left transition-all flex items-center gap-2.5 col-span-2 ${selectedKey === 'admin' ? 'border-purple-600 bg-purple-50/80 dark:bg-purple-950/40 text-purple-900 dark:text-purple-200 ring-2 ring-purple-500/20' : 'border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-800/50 text-zinc-700 dark:text-zinc-300'}`}
+                    >
+                      <div className="w-8 h-8 rounded-lg bg-purple-600 text-white flex items-center justify-center shrink-0">🛡️</div>
+                      <div>
+                        <div className="text-xs font-bold">🔑 Os Pais (Supervisores)</div>
+                        <div className="text-[10px] text-zinc-500">Acesso total e gerenciamento</div>
+                      </div>
+                    </button>
+                  </div>
+                </div>
+
+                {isFirstAccess && (
+                  <div className="p-3 rounded-xl bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-900/50 text-amber-800 dark:text-amber-300 text-xs flex items-start gap-2">
+                    ✨ <div><span className="font-bold block">Primeiro acesso!</span>Crie uma senha de acesso para o seu perfil.</div>
+                  </div>
+                )}
+
+                <div>
+                  <label className="block text-xs font-bold uppercase tracking-wider text-zinc-500 dark:text-zinc-400 mb-1.5">
+                    {isFirstAccess ? 'Crie sua Senha:' : 'Sua Senha:'}
+                  </label>
+                  <input
+                    type="password"
+                    value={passwordInput}
+                    onChange={(e) => setPasswordInput(e.target.value)}
+                    placeholder={isFirstAccess ? 'Digite sua nova senha' : 'Digite sua senha cadastrada'}
+                    className="w-full px-4 py-2.5 rounded-xl border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-zinc-900 dark:text-white text-sm"
+                    required
+                  />
+                  {selectedKey === 'admin' && (
+                    <p className="text-[11px] text-zinc-400 mt-1">
+                      Senha padrão do pai: <code className="bg-zinc-100 dark:bg-zinc-800 px-1 py-0.5 rounded text-indigo-600 font-mono">admin1234</code>
+                    </p>
+                  )}
+                </div>
+
+                {errorMsg && (
+                  <div className="p-3 rounded-xl bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-900/50 text-rose-700 dark:text-rose-300 text-xs font-medium">
+                    ⚠️ {errorMsg}
+                  </div>
+                )}
+
+                <button
+                  type="submit"
+                  className="w-full py-3 px-4 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-sm shadow-md transition-all flex items-center justify-center gap-2 cursor-pointer"
+                >
+                  <span>{isFirstAccess ? 'Cadastrar Senha e Entrar' : 'Entrar no App'}</span> →
+                </button>
+              </form>
+            </div>
+          </div>
+        );
+      }
+
+      // ==================== TRADE MODAL ====================
+      function TradeModal({ task, onClose }) {
+        const { state, currentUser, createTaskSwap } = useApp();
+        const [selectedSibling, setSelectedSibling] = useState('');
+        const [selectedSiblingTaskId, setSelectedSiblingTaskId] = useState(null);
+        const [tradeMsg, setTradeMsg] = useState(null);
+
+        const todayKey = daysOfWeek[new Date().getDay()];
+        const siblings = Object.values(state.children).filter(c => c.key !== currentUser);
+
+        const siblingTodayTasks = state.tasks.filter(t => {
+          if (t.assignedTo !== selectedSibling) return false;
+          if (!t.days || t.days.length === 0) return true;
+          return t.days.includes(todayKey);
+        });
+
+        const handleConfirmTrade = () => {
+          if (!selectedSibling || !selectedSiblingTaskId) return;
+          const res = createTaskSwap(task.id, selectedSibling, selectedSiblingTaskId);
+          if (res.message) {
+            setTradeMsg(res.message);
+            setTimeout(() => onClose(), 2000);
+          }
+        };
+
+        return (
+          <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-xs flex items-center justify-center p-4">
+            <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl w-full max-w-md p-5 shadow-2xl space-y-4">
+              <div className="flex items-center justify-between pb-3 border-b border-zinc-100 dark:border-zinc-800">
+                <div className="font-bold text-sm text-indigo-600 flex items-center gap-2">🔄 Propor Troca de Tarefa</div>
+                <button onClick={onClose} className="text-zinc-400 hover:text-zinc-600">✕</button>
+              </div>
+
+              <div>
+                <p className="text-xs text-zinc-500 font-bold">Sua missão a ser trocada:</p>
+                <div className="mt-1 p-3 rounded-xl bg-indigo-50 dark:bg-indigo-950/30 border border-indigo-100 dark:border-indigo-900/40">
+                  <h4 className="font-bold text-sm text-zinc-900 dark:text-white">{task.title}</h4>
+                  <p className="text-xs text-zinc-500">+{task.xp} XP · Prazo: {task.deadline}h</p>
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-zinc-700 dark:text-zinc-300 mb-2">1. Escolha o irmão:</label>
+                <div className="grid grid-cols-2 gap-2">
+                  {siblings.map(s => (
+                    <button
+                      key={s.key}
+                      onClick={() => { setSelectedSibling(s.key); setSelectedSiblingTaskId(null); }}
+                      className={`p-3 rounded-xl border text-left flex items-center justify-between ${selectedSibling === s.key ? 'border-indigo-600 bg-indigo-50 text-indigo-900 font-bold' : 'border-zinc-200 bg-zinc-50'}`}
+                    >
+                      <span className="text-xl">{s.avatar} {s.name}</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {selectedSibling && (
+                <div>
+                  <label className="block text-xs font-bold text-zinc-700 dark:text-zinc-300 mb-2">2. Escolha qual tarefa de hoje dele você assume:</label>
+                  {siblingTodayTasks.length === 0 ? (
+                    <p className="text-xs text-zinc-500 p-3 bg-zinc-50 rounded-xl text-center">Nenhuma tarefa agendada hoje para este irmão.</p>
+                  ) : (
+                    <div className="space-y-2">
+                      {siblingTodayTasks.map(st => (
+                        <button
+                          key={st.id}
+                          onClick={() => setSelectedSiblingTaskId(st.id)}
+                          className={`w-full p-3 rounded-xl border text-left flex justify-between ${selectedSiblingTaskId === st.id ? 'border-indigo-600 bg-indigo-50 font-bold' : 'border-zinc-200 bg-zinc-50'}`}
+                        >
+                          <div>
+                            <h5 className="text-xs font-bold">{st.title}</h5>
+                            <p className="text-[10px] text-zinc-500">+{st.xp} XP · Até {st.deadline}h</p>
+                          </div>
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {tradeMsg && <div className="p-3 rounded-xl bg-emerald-50 text-emerald-700 text-xs font-bold text-center">✨ {tradeMsg}</div>}
+
+              <div className="flex gap-2 pt-2">
+                <button onClick={onClose} className="flex-1 py-2.5 rounded-xl border border-zinc-200 text-xs font-bold">Cancelar</button>
+                <button disabled={!selectedSibling || !selectedSiblingTaskId || !!tradeMsg} onClick={handleConfirmTrade} className="flex-1 py-2.5 rounded-xl bg-indigo-600 text-white text-xs font-bold disabled:opacity-50">Enviar Proposta</button>
+              </div>
+            </div>
+          </div>
+        );
+      }
+
+      // ==================== TASKS VIEW ====================
+      function TasksView() {
+        const { state, currentUser, completeTask, applyPenalty, acceptTaskSwap, rejectTaskSwap } = useApp();
+        const [tradeTask, setTradeTask] = useState(null);
+        const [filterType, setFilterType] = useState('daily');
+        const [currentTime, setCurrentTime] = useState('');
+        const [actionAlert, setActionAlert] = useState(null);
+        const [noteTaskModal, setNoteTaskModal] = useState(null);
+        const [submissionNote, setSubmissionNote] = useState('');
+
+        useEffect(() => {
+          const updateTime = () => {
+            const now = new Date();
+            const hh = String(now.getHours()).padStart(2, '0');
+            const mm = String(now.getMinutes()).padStart(2, '0');
+            setCurrentTime(`${hh}:${mm}`);
+          };
+          updateTime();
+          const interval = setInterval(updateTime, 10000);
+          return () => clearInterval(interval);
+        }, []);
+
+        if (!currentUser || currentUser === 'admin') return null;
+
+        const child = state.children[currentUser];
+        const todayKey = daysOfWeek[new Date().getDay()];
+        const bdayInfo = child?.birthday ? getDaysUntilBirthday(child.birthday) : null;
+
+        const myPendingSwaps = (state.pendingSwaps || []).filter(s => s.toChildKey === currentUser && s.status === 'pending');
+
+        const isExpired = (deadline) => {
+          if (!deadline || !currentTime) return false;
+          return currentTime > deadline;
+        };
+
+        const handleComplete = (task) => {
+          if (task.needCheck) {
+            setNoteTaskModal(task);
+            setSubmissionNote('');
+            return;
+          }
+          const res = completeTask(task.id);
+          if (res.message) {
+            setActionAlert({ type: res.pending ? 'info' : 'success', message: res.message });
+            setTimeout(() => setActionAlert(null), 4000);
+          }
+        };
+
+        const handleConfirmSubmissionWithNote = () => {
+          if (!noteTaskModal) return;
+          const res = completeTask(noteTaskModal.id, submissionNote);
+          setNoteTaskModal(null);
+          setSubmissionNote('');
+          if (res.message) {
+            setActionAlert({ type: 'info', message: res.message });
+            setTimeout(() => setActionAlert(null), 4000);
+          }
+        };
+
+        const handlePenaltyClick = (task) => {
+          const res = applyPenalty(task.id);
+          if (res.message) {
+            setActionAlert({ type: 'warning', message: res.message });
+            setTimeout(() => setActionAlert(null), 4000);
+          }
+        };
+
+        const myTasks = state.tasks.filter(t => {
+          const isAssigned = t.assignedTo === 'all' || t.assignedTo === currentUser;
+          if (!isAssigned) return false;
+          if (filterType !== 'all') {
+            const cat = t.category || t.type;
+            if (cat !== filterType) return false;
+          }
+          return true;
+        });
+
+        const isTaskForToday = (task) => {
+          if (!task.days || task.days.length === 0) return true;
+          return task.days.includes(todayKey);
+        };
+
+        const categories = [
+          { key: 'daily', title: '☀️ Tarefas Diárias' },
+          { key: 'rotation', title: '🔄 Tarefas de Rodízio' },
+          { key: 'flexible', title: '📚 Tarefas Flexíveis' }
+        ];
+
+        const futureTasks = myTasks.filter(t => !isTaskForToday(t));
+
+        const renderTaskItem = (task, isForToday) => {
+          const expired = !state.isDayOff && isForToday && isExpired(task.deadline);
+          const isPending = state.pendingApprovals.some(p => p.taskId === task.id && p.childKey === currentUser);
+
+          return (
+            <div
+              key={task.id}
+              className={`p-4 rounded-2xl border transition-all shadow-xs ${
+                state.isDayOff
+                  ? 'bg-amber-50/20 border-amber-200'
+                  : !isForToday
+                  ? 'bg-zinc-50/80 border-zinc-200 opacity-70'
+                  : expired
+                  ? 'border-rose-300 bg-rose-50/30'
+                  : isPending
+                  ? 'border-amber-300 bg-amber-50/20'
+                  : 'bg-white dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800'
+              }`}
+            >
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div className="space-y-1.5">
+                  <div className="flex items-center flex-wrap gap-2">
+                    <h3 className="font-bold text-sm text-zinc-900 dark:text-white">{task.title}</h3>
+                    <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-black bg-indigo-50 dark:bg-indigo-950 text-indigo-700 dark:text-indigo-300">
+                      +{task.xp} XP
+                    </span>
+                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-bold bg-sky-50 dark:bg-sky-950 text-sky-700 dark:text-sky-300">
+                      ⏱️ Até {task.deadline}h
+                    </span>
+                    {expired && (
+                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-bold bg-rose-100 dark:bg-rose-950 text-rose-800 dark:text-rose-300">
+                        ⚠️ Perda: -{task.penalty} XP
+                      </span>
+                    )}
+                    {isForToday && task.canTrade && !expired && !isPending && !state.isDayOff && (
+                      <button
+                        onClick={() => setTradeTask(task)}
+                        className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-bold bg-indigo-100 text-indigo-700 hover:bg-indigo-200"
+                      >
+                        🔄 Propor Troca
+                      </button>
+                    )}
+                  </div>
+                  {task.description && <p className="text-xs text-zinc-600 dark:text-zinc-400">{task.description}</p>}
+                  <div className="text-[11px] text-zinc-400 font-medium">📅 Dia: {task.schedule}</div>
+                </div>
+
+                <div className="shrink-0 flex items-center gap-2 pt-2 sm:pt-0">
+                  {state.isDayOff ? (
+                    <span className="px-4 py-2 rounded-xl bg-amber-100 text-amber-800 font-bold text-xs">🌴 Pausado (Folga)</span>
+                  ) : !isForToday ? (
+                    <span className="px-3 py-1.5 rounded-xl bg-zinc-100 text-zinc-500 text-xs font-bold">👀 Visualização ({task.schedule})</span>
+                  ) : isPending ? (
+                    <div className="px-4 py-2 rounded-xl bg-amber-500 text-white font-bold text-xs">⏳ Aguardando Os Pais...</div>
+                  ) : expired ? (
+                    <button onClick={() => handlePenaltyClick(task)} className="px-4 py-2 rounded-xl bg-rose-600 text-white font-bold text-xs">Expirou (-{task.penalty} XP)</button>
+                  ) : (
+                    <button onClick={() => handleComplete(task)} className="px-5 py-2.5 rounded-xl bg-emerald-600 text-white font-bold text-xs shadow-md">✓ Concluir</button>
+                  )}
+                </div>
+              </div>
+            </div>
+          );
+        };
+
+        return (
+          <div className="space-y-4 max-w-4xl mx-auto py-2">
+            {actionAlert && (
+              <div className={`p-4 rounded-2xl border text-sm font-semibold flex items-center gap-2 ${actionAlert.type === 'success' ? 'bg-emerald-50 text-emerald-900 border-emerald-200' : 'bg-indigo-50 text-indigo-900 border-indigo-200'}`}>
+                ✨ <span>{actionAlert.message}</span>
+              </div>
+            )}
+
+            {bdayInfo !== null && (
+              <div className={`p-4 rounded-2xl border shadow-md flex items-center gap-3.5 ${bdayInfo.days === 0 ? 'bg-gradient-to-r from-pink-500 via-rose-500 to-purple-600 text-white' : 'bg-gradient-to-r from-purple-900 via-indigo-900 to-purple-950 text-white'}`}>
+                <div className="text-3xl">🎂</div>
+                <div>
+                  <h3 className="font-black text-sm">{bdayInfo.days === 0 ? 'PARABÉNS! HOJE É O SEU ANIVERSÁRIO!' : '🎂 Contagem Regressiva para seu Aniversário'}</h3>
+                  <p className="text-xs text-purple-100">
+                    {bdayInfo.days === 0 ? `Que seu dia seja repleto de XP e comemorações, ${child.name}!` : `Faltam apenas ${bdayInfo.days} dia${bdayInfo.days > 1 ? 's' : ''} para o seu aniversário (${bdayInfo.formattedDate})!`}
+                  </p>
+                </div>
+              </div>
+            )}
+
+            {myPendingSwaps.length > 0 && (
+              <div className="space-y-3">
+                {myPendingSwaps.map(swap => {
+                  const fromChild = state.children[swap.fromChildKey];
+                  const fromTask = state.tasks.find(t => t.id === swap.fromTaskId);
+                  const toTask = state.tasks.find(t => t.id === swap.toTaskId);
+                  return (
+                    <div key={swap.id} className="p-4 rounded-2xl bg-indigo-50 border-2 border-indigo-300 flex flex-col sm:flex-row justify-between gap-3">
+                      <div>
+                        <h4 className="font-extrabold text-sm text-indigo-950">🔄 Proposta de Troca de Tarefa!</h4>
+                        <p className="text-xs text-indigo-900 mt-0.5">
+                          <strong>{fromChild?.name}</strong> quer trocar <strong>"{fromTask?.title}"</strong> (+{fromTask?.xp} XP) pela sua tarefa <strong>"{toTask?.title}"</strong> (+{toTask?.xp} XP).
+                        </p>
+                      </div>
+                      <div className="flex gap-2">
+                        <button onClick={() => acceptTaskSwap(swap.id)} className="px-3.5 py-2 bg-emerald-600 text-white font-bold text-xs rounded-xl">Aceitar</button>
+                        <button onClick={() => rejectTaskSwap(swap.id)} className="px-3.5 py-2 bg-zinc-200 text-zinc-700 font-bold text-xs rounded-xl">Recusar</button>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+
+            {state.isDayOff && (
+              <div className="p-5 rounded-2xl bg-amber-500/10 border-2 border-amber-500/40 text-amber-950 flex items-center gap-3.5">
+                <div className="text-3xl">🌴</div>
+                <div>
+                  <h3 className="font-extrabold text-base">Hoje é Dia de Folga! 🏖️</h3>
+                  <p className="text-xs text-amber-800">Os Pais ativaram o Dia de Folga. Todas as tarefas e prazos foram pausados temporariamente.</p>
+                </div>
+              </div>
+            )}
+
+            <div className="bg-white dark:bg-zinc-900 p-4 rounded-2xl border border-zinc-200 dark:border-zinc-800 flex flex-wrap items-center justify-between gap-3">
+              <div>
+                <h2 className="text-lg font-black text-zinc-900 dark:text-white flex items-center gap-2">📋 Missões de Hoje ({child.name.split(' ')[0]})</h2>
+                <p className="text-xs text-zinc-500">Cumpra suas tarefas antes do horário limite.</p>
+              </div>
+
+              <div className="flex items-center gap-1.5 overflow-x-auto">
+                {[
+                  { key: 'daily', label: 'Diárias' },
+                  { key: 'rotation', label: 'Rodízio' },
+                  { key: 'flexible', label: 'Flexíveis' },
+                  { key: 'all', label: 'Todas' }
+                ].map(f => (
+                  <button
+                    key={f.key}
+                    onClick={() => setFilterType(f.key)}
+                    className={`px-3 py-1.5 rounded-xl text-xs font-bold ${filterType === f.key ? 'bg-indigo-600 text-white' : 'bg-zinc-100 text-zinc-600'}`}
+                  >
+                    {f.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div className="space-y-5">
+              {myTasks.length === 0 ? (
+                <div className="bg-white dark:bg-zinc-900 p-8 rounded-2xl border border-zinc-200 text-center space-y-2">
+                  <span className="text-4xl block">🎉</span>
+                  <h3 className="font-bold">Nenhuma missão encontrada nesta categoria!</h3>
+                </div>
+              ) : (
+                <>
+                  {categories.map(cat => {
+                    const catTasks = myTasks.filter(t => (t.category || t.type) === cat.key && isTaskForToday(t));
+                    if (catTasks.length === 0) return null;
+                    return (
+                      <div key={cat.key} className="space-y-2">
+                        <div className="text-xs font-black uppercase text-indigo-600 border-b pb-1 flex justify-between">
+                          <span>{cat.title} (Hoje)</span>
+                          <span>{catTasks.length} missões</span>
+                        </div>
+                        <div className="space-y-2">{catTasks.map(t => renderTaskItem(t, true))}</div>
+                      </div>
+                    );
+                  })}
+
+                  {futureTasks.length > 0 && (
+                    <div className="space-y-2 pt-2">
+                      <div className="text-xs font-black uppercase text-zinc-500 border-b pb-1 flex justify-between">
+                        <span>📅 Outros Dias (Visualização)</span>
+                        <span>{futureTasks.length} itens</span>
+                      </div>
+                      <div className="space-y-2">{futureTasks.map(t => renderTaskItem(t, false))}</div>
+                    </div>
+                  )}
+                </>
+              )}
+            </div>
+
+            {tradeTask && <TradeModal task={tradeTask} onClose={() => setTradeTask(null)} />}
+
+            {noteTaskModal && (
+              <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4">
+                <div className="bg-white dark:bg-zinc-900 border rounded-2xl max-w-md p-5 space-y-4">
+                  <h3 className="font-bold text-sm">🔍 Validação com o Supervisor</h3>
+                  <p className="text-xs text-zinc-600">A missão "{noteTaskModal.title}" exige validação do Pai para liberar os +{noteTaskModal.xp} XP.</p>
+                  <textarea
+                    value={submissionNote}
+                    onChange={(e) => setSubmissionNote(e.target.value)}
+                    placeholder="Adicionar recado opcional..."
+                    className="w-full p-3 rounded-xl border text-xs"
+                    rows={3}
+                  />
+                  <div className="flex gap-2">
+                    <button onClick={() => setNoteTaskModal(null)} className="flex-1 py-2 rounded-xl border text-xs font-bold">Cancelar</button>
+                    <button onClick={handleConfirmSubmissionWithNote} className="flex-1 py-2 rounded-xl bg-indigo-600 text-white text-xs font-bold">Enviar para o Pai</button>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+        );
+      }
+
+      // ==================== STORE VIEW ====================
+      function StoreView() {
+        const { state, currentUser, requestRedemption } = useApp();
+        const [storeAlert, setStoreAlert] = useState(null);
+
+        if (!currentUser || currentUser === 'admin') return null;
+
+        const child = state.children[currentUser];
+        const isStoreOpen = state.isStoreOpen;
+
+        const handleRedeem = (reward) => {
+          const res = requestRedemption(reward.id);
+          if (res.message) {
+            setStoreAlert({ type: res.success ? 'success' : 'error', message: res.message });
+            setTimeout(() => setStoreAlert(null), 4000);
+          }
+        };
+
+        return (
+          <div className="space-y-4 max-w-4xl mx-auto py-2">
+            {storeAlert && (
+              <div className={`p-4 rounded-2xl border text-sm font-semibold ${storeAlert.type === 'success' ? 'bg-emerald-50 text-emerald-900' : 'bg-rose-50 text-rose-900'}`}>
+                {storeAlert.message}
+              </div>
+            )}
+
+            {!isStoreOpen ? (
+              <div className="p-6 rounded-2xl bg-amber-50 border-2 border-dashed border-amber-400 text-amber-900 text-center space-y-2">
+                <div className="text-3xl">🔒</div>
+                <h3 className="text-lg font-black">Loja Será Aberta Em Breve!</h3>
+                <p className="text-xs text-amber-800 max-w-lg mx-auto">Continue cumprindo suas missões e acumulando XP!</p>
+              </div>
+            ) : (
+              <div className="p-6 rounded-2xl bg-gradient-to-r from-purple-600 to-indigo-700 text-white shadow-lg space-y-2">
+                <div className="text-xs font-extrabold uppercase tracking-widest text-purple-200">✨ Lojinha de Recompensas Aberta</div>
+                <h3 className="text-2xl font-black">Troque seus XP por Recompensas Incríveis!</h3>
+                <p className="text-xs text-purple-100">Você possui <strong className="text-amber-300 text-sm">{child.xp} XP</strong> disponíveis.</p>
+              </div>
+            )}
+
+            <div className="bg-white dark:bg-zinc-900 p-5 rounded-2xl border border-zinc-200 dark:border-zinc-800 space-y-4">
+              <div className="flex justify-between items-center pb-3 border-b">
+                <h3 className="font-bold text-base text-zinc-900 dark:text-white">🛒 Lojinha de Prêmios</h3>
+                <span className="text-xs font-bold text-zinc-500">Seu saldo: <strong className="text-indigo-600">{child.xp} XP</strong></span>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                {state.rewards.map(reward => {
+                  const canAfford = child.xp >= reward.cost;
+                  return (
+                    <div key={reward.id} className="p-4 rounded-2xl border flex flex-col justify-between space-y-3 bg-white dark:bg-zinc-900">
+                      <div>
+                        <div className="flex justify-between items-start">
+                          <span className="text-3xl p-2 bg-zinc-100 dark:bg-zinc-800 rounded-xl">{reward.icon}</span>
+                          <span className="px-3 py-1 rounded-full text-xs font-black bg-purple-100 text-purple-800">{reward.cost} XP</span>
+                        </div>
+                        <h4 className="font-bold text-sm mt-2">{reward.title}</h4>
+                        {reward.description && <p className="text-xs text-zinc-500 mt-1">{reward.description}</p>}
+                      </div>
+                      <div className="pt-2 border-t">
+                        {!isStoreOpen ? (
+                          <button disabled className="w-full py-2.5 rounded-xl bg-zinc-200 text-zinc-500 text-xs font-bold">🔒 Bloqueado</button>
+                        ) : canAfford ? (
+                          <button onClick={() => handleRedeem(reward)} className="w-full py-2.5 rounded-xl bg-purple-600 text-white text-xs font-bold">Resgatar (Zerar XP)</button>
+                        ) : (
+                          <button disabled className="w-full py-2.5 rounded-xl bg-zinc-100 text-zinc-400 text-xs">Faltam {reward.cost - child.xp} XP</button>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
+        );
+      }
+
+      // ==================== ADMIN VIEW ====================
+      function AdminView() {
+        const {
+          state, currentUser, approveTask, rejectTask, reversePenalty,
+          approveRedemption, rejectRedemption, deleteTask, deleteReward,
+          toggleStoreStatus, toggleDayOff, adjustXp, resetChildPassword,
+          resetWeekReport, resetFactoryData, addChild, updateChild
+        } = useApp();
+
+        const [activeSubTab, setActiveSubTab] = useState('report');
+        const [selectedChildForXp, setSelectedChildForXp] = useState('thiego');
+        const [xpDelta, setXpDelta] = useState(20);
+        const [xpReason, setXpReason] = useState('Bônus por boa conduta');
+
+        const [newChildName, setNewChildName] = useState('');
+        const [newChildAge, setNewChildAge] = useState(10);
+        const [newChildAvatar, setNewChildAvatar] = useState('🧒');
+        const [newChildBirthday, setNewChildBirthday] = useState('');
+
+        if (currentUser !== 'admin') return null;
+
+        const childrenList = Object.values(state.children);
+
+        const handleApplyXpAdjustment = (e) => {
+          e.preventDefault();
+          if (!selectedChildForXp) return;
+          adjustXp(selectedChildForXp, xpDelta, xpReason);
+          alert(`Ajuste de ${xpDelta > 0 ? '+' : ''}${xpDelta} XP aplicado!`);
+        };
+
+        const handleCreateChild = (e) => {
+          e.preventDefault();
+          if (!newChildName.trim()) return;
+          addChild({ name: newChildName.trim(), age: newChildAge, avatar: newChildAvatar, color: 'bg-indigo-500', birthday: newChildBirthday.trim() || undefined });
+          setNewChildName('');
+          setNewChildBirthday('');
+          alert('Novo perfil adicionado!');
+        };
+
+        return (
+          <div className="space-y-5 max-w-4xl mx-auto py-2">
+            <div className="bg-gradient-to-r from-purple-700 via-indigo-700 to-indigo-800 p-6 rounded-2xl text-white shadow-lg space-y-4">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div className="flex items-center gap-3">
+                  <div className="w-12 h-12 rounded-2xl bg-white/10 flex items-center justify-center text-2xl">🛠️</div>
+                  <div>
+                    <h2 className="text-xl font-black">Painel de Os Pais (Supervisores)</h2>
+                    <p className="text-xs text-purple-200">Gerencie missões, aprove validações, reverta penalidades e configure prêmios.</p>
+                  </div>
+                </div>
+
+                <button
+                  onClick={toggleDayOff}
+                  className={`px-4 py-2.5 rounded-xl font-black text-xs transition-all cursor-pointer ${state.isDayOff ? 'bg-amber-400 text-amber-950' : 'bg-white/15 text-white'}`}
+                >
+                  🌴 {state.isDayOff ? 'Dia de Folga ATIVADO' : 'Ativar Dia de Folga 🌴'}
+                </button>
+              </div>
+
+              <div className="flex flex-wrap gap-1.5 pt-3 border-t border-white/10">
+                {[
+                  { key: 'report', label: '📊 Relatório Semanal' },
+                  { key: 'approvals', label: `📌 Pendentes (${state.pendingApprovals.length + state.pendingRedemptions.length})` },
+                  { key: 'tasks', label: '⚙️ Missões' },
+                  { key: 'store', label: '🛒 Lojinha' },
+                  { key: 'members', label: '👑 Membros & Ajustes' }
+                ].map(t => (
+                  <button
+                    key={t.key}
+                    onClick={() => setActiveSubTab(t.key)}
+                    className={`px-3 py-2 rounded-xl text-xs font-bold ${activeSubTab === t.key ? 'bg-white text-purple-900' : 'bg-white/10 text-white'}`}
+                  >
+                    {t.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {activeSubTab === 'report' && (
+              <div className="bg-white dark:bg-zinc-900 p-5 rounded-2xl border border-zinc-200 dark:border-zinc-800 space-y-4">
+                <div className="flex justify-between items-center pb-3 border-b">
+                  <h3 className="font-bold text-base text-zinc-900 dark:text-white">Relatório de Desempenho Semanal</h3>
+                  <button onClick={() => { if (confirm('Zerar o relatório? O saldo de XP continua salvo.')) resetWeekReport(); }} className="px-3 py-1.5 border rounded-xl text-xs font-bold">Zerar Relatório</button>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                  {childrenList.map(c => {
+                    const completed = state.historyLog.filter(h => h.childKey === c.key && h.status === 'completed').length;
+                    const expired = state.historyLog.filter(h => h.childKey === c.key && h.status === 'expired').length;
+                    const total = completed + expired;
+                    const rate = total > 0 ? Math.round((completed / total) * 100) : 100;
+                    const rank = getRankForXp(c.xp);
+
+                    return (
+                      <div key={c.key} className="p-4 rounded-2xl border bg-zinc-50 dark:bg-zinc-800/30 space-y-2">
+                        <div className="flex items-center gap-2">
+                          <span className="text-2xl">{c.avatar}</span>
+                          <div>
+                            <h4 className="font-black text-sm">{c.name}</h4>
+                            <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-indigo-50 text-indigo-700">{rank.title}</span>
+                          </div>
+                        </div>
+                        <div className="space-y-1 text-xs">
+                          <div className="flex justify-between"><span>Feitas:</span><strong className="text-emerald-600">{completed}</strong></div>
+                          <div className="flex justify-between"><span>Expiradas:</span><strong className="text-rose-600">{expired}</strong></div>
+                          <div className="flex justify-between"><span>Sucesso:</span><strong className="text-indigo-600">{rate}%</strong></div>
+                          <div className="flex justify-between pt-2 border-t font-bold"><span>Saldo XP:</span><strong className="text-indigo-600">{c.xp} XP</strong></div>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+
+            {activeSubTab === 'approvals' && (
+              <div className="bg-white dark:bg-zinc-900 p-5 rounded-2xl border border-zinc-200 dark:border-zinc-800 space-y-5">
+                <div className="space-y-3">
+                  <h3 className="font-bold text-base">📌 Validações de Missões ({state.pendingApprovals.length})</h3>
+                  {state.pendingApprovals.length === 0 ? (
+                    <p className="text-xs text-zinc-500 italic p-4 bg-zinc-50 rounded-xl">Nenhuma validação pendente.</p>
+                  ) : (
+                    <div className="space-y-2">
+                      {state.pendingApprovals.map(item => {
+                        const child = state.children[item.childKey];
+                        return (
+                          <div key={item.id} className="p-4 rounded-2xl border border-amber-200 bg-amber-50/30 flex justify-between items-center">
+                            <div>
+                              <div className="font-bold text-xs">{child?.avatar} {child?.name} (+{item.xp} XP)</div>
+                              <p className="text-xs mt-0.5">Pediu validação para: <strong>{item.title}</strong></p>
+                              {item.note && <p className="text-xs italic text-amber-800 mt-1">💬 "{item.note}"</p>}
+                            </div>
+                            <div className="flex gap-2">
+                              <button onClick={() => rejectTask(item.id)} className="px-3 py-1.5 border text-rose-600 rounded-xl text-xs font-bold">Recusar</button>
+                              <button onClick={() => approveTask(item.id)} className="px-4 py-1.5 bg-emerald-600 text-white rounded-xl text-xs font-bold">Aprovar (+{item.xp} XP)</button>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
+                </div>
+
+                <div className="pt-4 border-t space-y-3">
+                  <h3 className="font-bold text-base">⚖️ Anular Penalidade (Motivo Justo)</h3>
+                  {(!state.appliedPenaltiesLog || state.appliedPenaltiesLog.length === 0) ? (
+                    <p className="text-xs text-zinc-500 italic p-4 bg-zinc-50 rounded-xl">Nenhuma penalidade para perdoar.</p>
+                  ) : (
+                    <div className="space-y-2">
+                      {state.appliedPenaltiesLog.map(item => {
+                        const child = state.children[item.childKey];
+                        return (
+                          <div key={item.id} className="p-4 rounded-2xl border border-amber-200 bg-amber-50/40 flex justify-between items-center">
+                            <div>
+                              <div className="font-bold text-xs">{child?.avatar} {child?.name} (-{item.penalty} XP)</div>
+                              <p className="text-xs">Tarefa: {item.title}</p>
+                            </div>
+                            <button onClick={() => reversePenalty(item.id)} className="px-4 py-2 bg-amber-500 text-white text-xs font-bold rounded-xl">Anular (Devolver {item.penalty} XP)</button>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
+                </div>
+
+                <div className="pt-4 border-t space-y-3">
+                  <h3 className="font-bold text-base">🛒 Resgates da Lojinha ({state.pendingRedemptions.length})</h3>
+                  {state.pendingRedemptions.length === 0 ? (
+                    <p className="text-xs text-zinc-500 italic p-4 bg-zinc-50 rounded-xl">Nenhum pedido de resgate pendente.</p>
+                  ) : (
+                    <div className="space-y-2">
+                      {state.pendingRedemptions.map(red => {
+                        const child = state.children[red.childKey];
+                        return (
+                          <div key={red.id} className="p-4 rounded-2xl border border-purple-200 bg-purple-50/30 flex justify-between items-center">
+                            <div>
+                              <div className="font-bold text-xs">{child?.avatar} {child?.name}</div>
+                              <p className="text-xs mt-1">Quer resgatar: <u>{red.title}</u> (Saldo de XP será ZERADO ao aprovar)</p>
+                            </div>
+                            <div className="flex gap-2">
+                              <button onClick={() => rejectRedemption(red.id)} className="px-3 py-1.5 border text-xs font-bold rounded-xl">Recusar</button>
+                              <button onClick={() => approveRedemption(red.id)} className="px-4 py-1.5 bg-purple-600 text-white text-xs font-bold rounded-xl">Aprovar e ZERAR XP</button>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {activeSubTab === 'members' && (
+              <div className="bg-white dark:bg-zinc-900 p-5 rounded-2xl border border-zinc-200 dark:border-zinc-800 space-y-6">
+                <form onSubmit={handleApplyXpAdjustment} className="p-4 rounded-2xl bg-zinc-50 space-y-3">
+                  <h4 className="font-bold text-sm">⚡ Ajuste Rápido de XP</h4>
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                    <select value={selectedChildForXp} onChange={(e) => setSelectedChildForXp(e.target.value)} className="p-2.5 rounded-xl border text-xs font-bold">
+                      {childrenList.map(c => <option key={c.key} value={c.key}>{c.avatar} {c.name} ({c.xp} XP)</option>)}
+                    </select>
+                    <input type="number" value={xpDelta} onChange={(e) => setXpDelta(Number(e.target.value))} className="p-2.5 rounded-xl border text-xs font-bold" />
+                    <input type="text" value={xpReason} onChange={(e) => setXpReason(e.target.value)} placeholder="Motivo" className="p-2.5 rounded-xl border text-xs" />
+                  </div>
+                  <button type="submit" className="px-4 py-2 bg-indigo-600 text-white rounded-xl text-xs font-bold">Aplicar Ajuste</button>
+                </form>
+
+                <div className="pt-4 border-t space-y-3">
+                  <h4 className="font-bold text-sm">🎂 Datas de Aniversário & Senhas</h4>
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                    {childrenList.map(c => (
+                      <div key={c.key} className="p-4 border rounded-2xl space-y-2">
+                        <div className="flex justify-between items-center">
+                          <span className="font-bold text-xs">{c.avatar} {c.name}</span>
+                          <button onClick={() => { resetChildPassword(c.key); alert(`Senha de ${c.name} redefinida!`); }} className="text-[10px] px-2 py-1 border rounded">Reset Senha</button>
+                        </div>
+                        <div>
+                          <label className="block text-[10px] font-bold text-zinc-500">🎂 Data Aniversário:</label>
+                          <input
+                            type="date"
+                            value={c.birthday || ''}
+                            onChange={(e) => updateChild(c.key, { birthday: e.target.value })}
+                            className="w-full p-2 border rounded-xl text-xs font-bold"
+                          />
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="pt-4 border-t space-y-3">
+                  <h4 className="font-bold text-sm">➕ Adicionar Novo Filho</h4>
+                  <form onSubmit={handleCreateChild} className="p-4 border rounded-2xl space-y-3">
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                      <input type="text" value={newChildName} onChange={e => setNewChildName(e.target.value)} placeholder="Nome" className="p-2 border rounded-xl text-xs" required />
+                      <input type="number" value={newChildAge} onChange={e => setNewChildAge(Number(e.target.value))} className="p-2 border rounded-xl text-xs" min={1} />
+                      <input type="text" value={newChildAvatar} onChange={e => setNewChildAvatar(e.target.value)} className="p-2 border rounded-xl text-xs text-center" maxLength={4} />
+                      <input type="date" value={newChildBirthday} onChange={e => setNewChildBirthday(e.target.value)} className="p-2 border rounded-xl text-xs font-bold" />
+                    </div>
+                    <button type="submit" className="px-4 py-2 bg-emerald-600 text-white rounded-xl text-xs font-bold">Cadastrar Perfil</button>
+                  </form>
+                </div>
+
+                <div className="pt-4 border-t border-rose-100 flex justify-between items-center p-3 bg-rose-50 rounded-2xl">
+                  <div>
+                    <span className="text-xs font-bold text-rose-900 block">Restaurar Configurações Iniciais</span>
+                    <span className="text-[11px] text-rose-700">Reseta todas as missões e dados para o padrão inicial.</span>
+                  </div>
+                  <button onClick={() => { if (confirm('Restaurar padrão inicial?')) resetFactoryData(); }} className="px-3 py-2 bg-rose-600 text-white rounded-xl text-xs font-bold">Restaurar</button>
+                </div>
+              </div>
+            )}
+          </div>
+        );
+      }
+
+      // ==================== SUGGESTION MODAL ====================
+      function SuggestionModal() {
+        const { addSuggestion } = useApp();
+        const [isOpen, setIsOpen] = useState(false);
+        const [text, setText] = useState('');
+        const [sentSuccess, setSentSuccess] = useState(false);
+
+        const handleSubmit = (e) => {
+          e.preventDefault();
+          if (!text.trim()) return;
+          addSuggestion(text);
+          setText('');
+          setSentSuccess(true);
+          setTimeout(() => { setSentSuccess(false); setIsOpen(false); }, 2000);
+        };
+
+        return (
+          <>
+            <footer className="text-center py-4 mt-6">
+              <button onClick={() => setIsOpen(true)} className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border bg-white text-zinc-600 text-xs font-semibold shadow-xs">
+                💡 <span>Mandar uma Sugestão</span>
+              </button>
+            </footer>
+
+            {isOpen && (
+              <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60">
+                <div className="w-full max-w-md bg-white dark:bg-zinc-900 rounded-2xl p-6 border shadow-xl space-y-4 relative">
+                  <button onClick={() => setIsOpen(false)} className="absolute top-4 right-4 text-zinc-400">✕</button>
+                  <h3 className="font-bold text-base">💡 Mandar uma Sugestão</h3>
+                  {sentSuccess ? (
+                    <p className="text-xs text-emerald-600 font-bold text-center py-4">Sugestão enviada para Os Pais!</p>
+                  ) : (
+                    <form onSubmit={handleSubmit} className="space-y-3">
+                      <textarea
+                        required
+                        rows={4}
+                        value={text}
+                        onChange={e => setText(e.target.value)}
+                        placeholder="Digite sua ideia..."
+                        className="w-full p-3 rounded-xl border text-xs"
+                      />
+                      <div className="flex justify-end gap-2">
+                        <button type="button" onClick={() => setIsOpen(false)} className="px-4 py-2 text-xs font-bold text-zinc-600">Cancelar</button>
+                        <button type="submit" className="px-4 py-2 bg-amber-500 text-white text-xs font-bold rounded-xl">Enviar</button>
+                      </div>
+                    </form>
+                  )}
+                </div>
+              </div>
+            )}
+          </>
+        );
+      }
+
+      // ==================== MAIN APP CONTENT ====================
+      function MainAppContent() {
+        const { currentUser, activeTab, confettiActive } = useApp();
+        return (
+          <div className="min-h-screen bg-zinc-100 dark:bg-zinc-950 text-zinc-900 dark:text-zinc-100 font-sans pb-12">
+            <Confetti active={confettiActive} />
+            <Navbar />
+            <main className="px-4 py-4">
+              {!currentUser ? (
+                <LoginModal />
+              ) : currentUser === 'admin' ? (
+                <AdminView />
+              ) : activeTab === 'tasks' ? (
+                <TasksView />
+              ) : (
+                <StoreView />
+              )}
+            </main>
+            <SuggestionModal />
+          </div>
+        );
+      }
+
+      function App() {
+        return (
+          <AppProvider>
+            <MainAppContent />
+          </AppProvider>
+        );
+      }
+
+      // Render React App
+      const rootElement = document.getElementById('root');
+      ReactDOM.createRoot(rootElement).render(<App />);
+    </script>
+  </body>
+</html>
