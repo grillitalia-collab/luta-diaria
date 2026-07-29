@@ -129,10 +129,6 @@
             background-color: var(--danger);
         }
 
-        .btn-warning {
-            background-color: var(--warning);
-        }
-
         .hidden {
             display: none !important;
         }
@@ -210,7 +206,6 @@
         }
 
         .btn-sm-success { background: var(--primary); color: white; }
-        .btn-sm-danger { background: var(--danger); color: white; }
 
         .tabs {
             display: flex;
@@ -267,6 +262,16 @@
             width: 100%;
             max-width: 400px;
         }
+
+        .info-first-access {
+            background-color: #eff6ff;
+            border: 1px solid #bfdbfe;
+            color: #1e40af;
+            padding: 0.6rem;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            margin-bottom: 1rem;
+        }
     </style>
 </head>
 <body>
@@ -280,9 +285,12 @@
     <!-- TELA DE LOGIN -->
     <div id="login-screen" class="card">
         <h2>🔑 Entrar no App</h2>
+        <div id="first-access-msg" class="info-first-access hidden">
+            ✨ <b>Primeiro Acesso!</b> Digite a senha que você deseja usar a partir de hoje.
+        </div>
         <div class="form-group">
             <label>Quem é você?</label>
-            <select id="user-select">
+            <select id="user-select" onchange="checkUserFirstAccess()">
                 <option value="Thiego">👦 Thiego</option>
                 <option value="Manuela">👧 Manuela</option>
                 <option value="Tayrone">👦 Tayrone</option>
@@ -290,15 +298,14 @@
             </select>
         </div>
         <div class="form-group">
-            <label>Senha:</label>
+            <label id="pass-label">Senha:</label>
             <input type="password" id="user-password" placeholder="Digite sua senha">
         </div>
-        <button class="btn" onclick="login()">Entrar</button>
+        <button class="btn" id="login-btn" onclick="login()">Entrar</button>
     </div>
 
-    <!-- TELA PRINCIPAL (APÓS LOGIN) -->
+    <!-- TELA PRINCIPAL -->
     <div id="app-screen" class="hidden">
-        <!-- HEADER DO USUÁRIO -->
         <div class="user-header">
             <div class="user-info">
                 <h3 id="display-name">Carregando...</h3>
@@ -312,47 +319,40 @@
 
         <br>
 
-        <!-- NAVEGAÇÃO / ABAS -->
         <div class="tabs" id="user-tabs">
             <div class="tab active" onclick="switchTab('tasks')">📋 Tarefas</div>
             <div class="tab" onclick="switchTab('store')">🎁 Lojinha</div>
             <div class="tab" onclick="switchTab('penalties')">⚠️ Penalidades</div>
         </div>
 
-        <!-- ABA TAREFAS -->
+        <!-- TAREFAS -->
         <div id="tab-tasks" class="tab-content">
             <div class="card">
                 <h2>📋 Minhas Missões Hoje</h2>
-                <ul class="task-list" id="task-list-container">
-                    <!-- Tarefas injetadas via JS -->
-                </ul>
+                <ul class="task-list" id="task-list-container"></ul>
             </div>
         </div>
 
-        <!-- ABA LOJINHA -->
+        <!-- LOJINHA -->
         <div id="tab-store" class="tab-content hidden">
             <div class="card">
                 <h2>🎁 Resgatar Recompensas</h2>
                 <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1rem;">
-                    Resgate seus prêmios com o XP acumulado! O valor do item será descontado do seu saldo.
+                    Resgate seus prêmios com o XP acumulado!
                 </p>
-                <ul class="task-list" id="store-list-container">
-                    <!-- Itens da loja injetados via JS -->
-                </ul>
+                <ul class="task-list" id="store-list-container"></ul>
             </div>
         </div>
 
-        <!-- ABA PENALIDADES -->
+        <!-- PENALIDADES -->
         <div id="tab-penalties" class="tab-content hidden">
             <div class="card">
                 <h2>⚠️ Registro de Penalidades</h2>
-                <ul class="penalty-list" id="penalty-list-container">
-                    <!-- Penalidades injetadas via JS -->
-                </ul>
+                <ul class="penalty-list" id="penalty-list-container"></ul>
             </div>
         </div>
 
-        <!-- PAINEL EXCLUSIVO DOS PAIS -->
+        <!-- PAINEL DOS PAIS -->
         <div id="parent-panel" class="hidden">
             <div class="tabs">
                 <div class="tab active" onclick="switchParentTab('approvals')">✅ Aprovações</div>
@@ -361,15 +361,11 @@
             </div>
 
             <div id="ptab-approvals" class="parent-tab-content card">
-                <h2>✅ Tarefas Pendentes de Validação</h2>
-                <ul class="task-list" id="pending-tasks-container">
-                    <!-- Pendentes aqui -->
-                </ul>
+                <h2>✅ Tarefas Pendentes</h2>
+                <ul class="task-list" id="pending-tasks-container"></ul>
 
                 <h2 style="margin-top: 1.5rem;">🎁 Pedidos de Resgate (Lojinha)</h2>
-                <ul class="task-list" id="pending-store-container">
-                    <!-- Pedidos da loja aqui -->
-                </ul>
+                <ul class="task-list" id="pending-store-container"></ul>
             </div>
 
             <div id="ptab-manage" class="parent-tab-content card hidden">
@@ -394,17 +390,14 @@
             </div>
 
             <div id="ptab-suggestions" class="parent-tab-content card hidden">
-                <h2>💡 Sugestões Enviadas pelas Crianças</h2>
-                <ul class="task-list" id="suggestions-list-container">
-                    <!-- Sugestões aqui -->
-                </ul>
+                <h2>💡 Sugestões Enviadas</h2>
+                <ul class="task-list" id="suggestions-list-container"></ul>
             </div>
         </div>
 
         <button class="btn btn-outline" onclick="logout()">Sair da Conta</button>
     </div>
 
-    <!-- RODAPÉ COM SUGESTÃO DISCRETA -->
     <footer>
         <button class="btn-suggestion" onclick="openSuggestionModal()">💡 Mandar uma Sugestão</button>
     </footer>
@@ -415,7 +408,7 @@
     <div class="modal-content">
         <h3 style="margin-bottom: 0.5rem;">💡 Mandar Sugestão</h3>
         <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1rem;">
-            Tem alguma ideia para melhorar o app ou um pedido de tarefa/recompensa? Escreva abaixo!
+            Escreva sua ideia para melhorar o app ou um pedido especial!
         </p>
         <div class="form-group">
             <textarea id="suggestion-text" rows="4" placeholder="Escreva sua ideia aqui..."></textarea>
@@ -426,13 +419,13 @@
 </div>
 
 <script>
-    // ESTADO DA APLICAÇÃO (LOCALSTORAGE)
+    // Se quiser reiniciar o banco limpo no navegador, limpe o localStorage
     const defaultData = {
         users: {
-            "Thiego": { name: "Thiego", pass: "1234", xp: 0, role: "Filho" },
-            "Manuela": { name: "Manuela", pass: "1234", xp: 0, role: "Filha" },
-            "Tayrone": { name: "Tayrone", pass: "1234", xp: 0, role: "Filho" },
-            "Pais": { name: "Os Pais", pass: "admin", role: "Supervisor" }
+            "Thiego": { name: "Thiego", pass: null, xp: 0, role: "Filho" },
+            "Manuela": { name: "Manuela", pass: null, xp: 0, role: "Filha" },
+            "Tayrone": { name: "Tayrone", pass: null, xp: 0, role: "Filho" },
+            "Pais": { name: "Os Pais", pass: "1234", role: "Supervisor" }
         },
         tasks: [
             { id: 1, title: "Lavar a Louça", xp: 20, assignedTo: "Thiego", status: "pending_completion" },
@@ -450,14 +443,33 @@
         suggestions: []
     };
 
-    let appData = JSON.parse(localStorage.getItem('luta_diaria_db')) || defaultData;
+    // Para evitar conflito com dados antigos salvos no navegador, renovamos a chave do banco
+    let appData = JSON.parse(localStorage.getItem('luta_diaria_v2')) || defaultData;
     let currentUser = null;
 
     function saveData() {
-        localStorage.setItem('luta_diaria_db', JSON.stringify(appData));
+        localStorage.setItem('luta_diaria_v2', JSON.stringify(appData));
     }
 
-    // NÍVEIS INFINITOS E ENGRAÇADOS
+    function checkUserFirstAccess() {
+        const selectedName = document.getElementById('user-select').value;
+        const user = appData.users[selectedName];
+        const msgBox = document.getElementById('first-access-msg');
+        const passLabel = document.getElementById('pass-label');
+        const btn = document.getElementById('login-btn');
+
+        if (user && user.pass === null) {
+            msgBox.classList.remove('hidden');
+            passLabel.innerText = "Crie sua Senha:";
+            btn.innerText = "Cadastrar Senha e Entrar";
+        } else {
+            msgBox.classList.add('hidden');
+            passLabel.innerText = "Senha:";
+            btn.innerText = "Entrar";
+        }
+        document.getElementById('user-password').value = '';
+    }
+
     function getLevelInfo(xp) {
         if (xp < 30) return "Nível 1: Iniciante Preguiçoso";
         if (xp < 70) return "Nível 2: Caçador de Meia Perdida";
@@ -465,7 +477,6 @@
         if (xp < 200) return "Nível 4: Mestre do Escorredor";
         if (xp < 350) return "Nível 5: General da Vassoura";
         
-        // Progressão exponencial a partir do nível 5
         let lvl = 5;
         let requiredXp = 350;
         let increment = 200;
@@ -487,24 +498,44 @@
 
     function login() {
         const userSelect = document.getElementById('user-select').value;
-        const passInput = document.getElementById('user-password').value;
-
+        const passInput = document.getElementById('user-password').value.trim();
         const user = appData.users[userSelect];
-        if (user && user.pass === passInput) {
+
+        if (!passInput) {
+            alert('Por favor, digite uma senha!');
+            return;
+        }
+
+        // Se for o primeiro acesso da criança, salva a senha informada
+        if (user.pass === null) {
+            user.pass = passInput;
+            saveData();
+            alert(`Senha cadastrada com sucesso para ${user.name}! Não se esqueça dela.`);
             currentUser = user;
-            document.getElementById('login-screen').classList.add('hidden');
-            document.getElementById('app-screen').classList.remove('hidden');
-            initDashboard();
+            openDashboard();
+            return;
+        }
+
+        // Validação normal
+        if (user.pass === passInput) {
+            currentUser = user;
+            openDashboard();
         } else {
             alert('Senha incorreta! Tente novamente.');
         }
+    }
+
+    function openDashboard() {
+        document.getElementById('login-screen').classList.add('hidden');
+        document.getElementById('app-screen').classList.remove('hidden');
+        initDashboard();
     }
 
     function logout() {
         currentUser = null;
         document.getElementById('app-screen').classList.add('hidden');
         document.getElementById('login-screen').classList.remove('hidden');
-        document.getElementById('user-password').value = '';
+        checkUserFirstAccess();
     }
 
     function initDashboard() {
@@ -531,7 +562,7 @@
     }
 
     function switchTab(tabName) {
-        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+        document.querySelectorAll('#user-tabs .tab').forEach(t => t.classList.remove('active'));
         document.querySelectorAll('.tab-content').forEach(c => c.classList.add('hidden'));
 
         event.target.classList.add('active');
@@ -655,7 +686,6 @@
     }
 
     function renderParentPanel() {
-        // Renderizar aprovações de tarefas
         const pendingContainer = document.getElementById('pending-tasks-container');
         pendingContainer.innerHTML = '';
 
@@ -680,7 +710,6 @@
             });
         }
 
-        // Renderizar aprovações da loja
         const storeContainer = document.getElementById('pending-store-container');
         storeContainer.innerHTML = '';
 
@@ -703,7 +732,6 @@
             });
         }
 
-        // Renderizar sugestões
         const suggContainer = document.getElementById('suggestions-list-container');
         suggContainer.innerHTML = '';
 
@@ -790,6 +818,9 @@
         closeSuggestionModal();
         alert('Sugestão enviada com sucesso! Os pais vão dar uma olhada.');
     }
+
+    // Checar o primeiro acesso ao carregar a página
+    checkUserFirstAccess();
 </script>
 </body>
 </html>
