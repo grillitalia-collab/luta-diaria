@@ -3,963 +3,578 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>A Luta Diária 🥊 - Minhas Tarefas</title>
+  <title>A Luta Diária</title>
+  <script src="https://cdn.tailwindcss.com"></script>
   <style>
-    :root {
-      --primary: #4f46e5;
-      --primary-gradient: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
-      --bg: #f8fafc;
-      --card-bg: #ffffff;
-      --text: #0f172a;
-      --accent: #10b981;
-      --warning: #f59e0b;
-      --danger: #ef4444;
-      --purple-dark: #3b0764;
-      --purple: #6d28d9;
-      --purple-light: #8b5cf6;
-    }
-
-    body {
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background-color: var(--bg);
-      color: var(--text);
-      margin: 0;
-      padding: 12px;
-      display: flex;
-      flex-direction: column;
-      min-height: 98vh;
-    }
-
-    .container {
-      max-width: 850px;
-      margin: 0 auto;
-      flex: 1;
-      width: 100%;
-      box-sizing: border-box;
-    }
-
-    header {
-      text-align: center;
-      margin-bottom: 20px;
-    }
-
-    header h1 {
-      margin: 10px 0 5px 0;
-      font-size: 1.8rem;
-      color: #1e1b4b;
-    }
-
-    .card {
-      background: var(--card-bg);
-      padding: 20px;
-      border-radius: 16px;
-      box-shadow: 0 4px 15px -3px rgba(0,0,0,0.05), 0 2px 6px -2px rgba(0,0,0,0.05);
-      margin-bottom: 20px;
-      border: 1px solid #e2e8f0;
-    }
-
-    /* TELA DE LOGIN ESTILIZADA */
-    .login-box {
-      max-width: 400px;
-      margin: 30px auto;
-      text-align: center;
-    }
-
-    .login-box h2 {
-      color: var(--primary);
-      margin-top: 0;
-    }
-
-    .login-box label {
-      display: block;
-      text-align: left;
-      font-weight: bold;
-      font-size: 0.9rem;
-      color: #475569;
-      margin-top: 12px;
-    }
-
-    .login-box input, .login-box select {
-      width: 100%;
-      padding: 12px;
-      margin: 6px 0;
-      box-sizing: border-box;
-      border: 1.5px solid #cbd5e1;
-      border-radius: 10px;
-      font-size: 1rem;
-    }
-
-    /* PERFIL DO USUÁRIO (TELA INICIAL VIVA) */
-    .user-profile-card {
-      background: var(--primary-gradient);
-      color: white;
-      border: none;
-      padding: 22px;
-      position: relative;
-      overflow: hidden;
-    }
-
-    .user-profile-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-    }
-
-    .user-info-group {
-      display: flex;
-      align-items: center;
-      gap: 15px;
-    }
-
-    .user-avatar-big {
-      font-size: 2.8rem;
-      background: rgba(255,255,255,0.2);
-      width: 60px;
-      height: 60px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      border-radius: 50%;
-      backdrop-filter: blur(5px);
-    }
-
-    .xp-badge {
-      background: #f59e0b;
-      color: white;
-      padding: 4px 12px;
-      border-radius: 20px;
-      font-size: 1.2rem;
-      font-weight: 800;
-      box-shadow: 0 2px 8px rgba(245, 158, 11, 0.4);
-    }
-
-    .progress-bar {
-      width: 100%;
-      height: 12px;
-      background: rgba(255,255,255,0.25);
-      border-radius: 10px;
-      overflow: hidden;
-      margin-top: 12px;
-    }
-
-    .progress-fill {
-      height: 100%;
-      background: #10b981;
-      width: 0%;
-      transition: width 0.4s ease;
-      border-radius: 10px;
-    }
-
-    /* NAVEGAÇÃO ENTRE ABAS */
-    .nav-tabs {
-      display: flex;
-      gap: 10px;
-      margin-bottom: 20px;
-    }
-
-    .btn-tab {
-      flex: 1;
-      padding: 12px 8px;
-      border: none;
-      background: #e2e8f0;
-      color: #64748b;
-      font-weight: bold;
-      border-radius: 12px;
-      cursor: pointer;
-      font-size: 0.95rem;
-      transition: all 0.2s;
-    }
-
-    .btn-tab.active {
-      background: var(--primary);
-      color: white;
-      box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);
-    }
-
-    .section-title {
-      font-size: 1.05rem;
-      font-weight: bold;
-      color: var(--primary);
-      border-bottom: 2px solid #e0e7ff;
-      padding-bottom: 6px;
-      margin-top: 20px;
-      margin-bottom: 12px;
-    }
-
-    /* CARDS DE TAREFAS E RECOMPENSAS */
-    .item-card {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 14px;
-      border-radius: 12px;
-      background: #ffffff;
-      border: 1px solid #e2e8f0;
-      margin-bottom: 10px;
-      gap: 10px;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.02);
-    }
-
-    .item-card.expired {
-      background-color: #fef2f2;
-      border-left: 5px solid var(--danger);
-    }
-
-    .item-card.disabled {
-      opacity: 0.65;
-      background-color: #f8fafc;
-    }
-
-    .btn-action {
-      background: var(--accent);
-      color: white;
-      border: none;
-      padding: 10px 16px;
-      border-radius: 8px;
-      cursor: pointer;
-      font-weight: bold;
-      font-size: 0.85rem;
-      box-shadow: 0 2px 6px rgba(16, 185, 129, 0.3);
-      transition: all 0.2s;
-    }
-
-    .btn-action:active {
-      transform: scale(0.96);
-    }
-
-    .btn-action.pending {
-      background: var(--warning);
-      box-shadow: 0 2px 6px rgba(245, 158, 11, 0.3);
-      cursor: default;
-    }
-
-    .btn-action.expired-btn {
-      background: var(--danger);
-      box-shadow: 0 2px 6px rgba(239, 68, 68, 0.3);
-    }
-
-    .btn-action.store {
-      background: var(--purple-light);
-      box-shadow: 0 2px 6px rgba(139, 92, 246, 0.3);
-    }
-
-    .btn-logout {
-      background: rgba(255, 255, 255, 0.2);
-      color: white;
-      border: 1px solid rgba(255,255,255,0.3);
-      padding: 6px 14px;
-      border-radius: 8px;
-      cursor: pointer;
-      font-size: 0.8rem;
-      font-weight: bold;
-    }
-
-    .tag {
-      font-size: 0.75rem;
-      padding: 3px 8px;
-      border-radius: 12px;
-      background: #e0e7ff;
-      color: #3730a3;
-      font-weight: bold;
-      margin-left: 4px;
-    }
-
-    .tag-day { background: #e0f2fe; color: #075985; }
-    .tag-alert { background: #fee2e2; color: #991b1b; }
-    .tag-store { background: #f3e8ff; color: #6b21a8; }
-
-    /* ESTILOS PAINEL ROXO DOS PAIS */
-    .admin-banner {
-      background: linear-gradient(135deg, #3b0764 0%, #6d28d9 50%, #4c1d95 100%);
-      color: white;
-      padding: 22px;
-      border-radius: 16px;
-      margin-bottom: 20px;
-      box-shadow: 0 10px 20px -3px rgba(109, 40, 217, 0.3);
-    }
-
-    .admin-banner h2 {
-      margin: 0 0 6px 0;
-      font-size: 1.4rem;
-    }
-
-    .admin-banner p {
-      margin: 0 0 16px 0;
-      font-size: 0.85rem;
-      opacity: 0.85;
-    }
-
-    .admin-nav-grid {
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-    }
-
-    .admin-nav-btn {
-      background: rgba(255, 255, 255, 0.12);
-      border: 1px solid rgba(255, 255, 255, 0.2);
-      color: white;
-      padding: 10px 14px;
-      border-radius: 10px;
-      font-size: 0.85rem;
-      font-weight: bold;
-      cursor: pointer;
-      text-align: left;
-    }
-
-    .admin-nav-btn.active {
-      background: white;
-      color: var(--purple);
-    }
-
-    .report-card-ai {
-      background: #ffffff;
-      border: 1px solid #e2e8f0;
-      border-radius: 12px;
-      padding: 15px;
-      margin-bottom: 12px;
-    }
-
-    .admin-form input, .admin-form select {
-      padding: 10px;
-      margin: 6px 0;
-      width: 100%;
-      box-sizing: border-box;
-      border: 1px solid #cbd5e1;
-      border-radius: 8px;
-    }
-
-    footer {
-      text-align: center;
-      padding: 15px 0;
-      margin-top: auto;
-    }
-
-    .btn-sugestao {
-      background: white;
-      border: 1px solid #cbd5e1;
-      color: #64748b;
-      font-size: 0.8rem;
-      padding: 8px 18px;
-      border-radius: 20px;
-      cursor: pointer;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.05);
-      font-weight: bold;
-    }
+    @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap');
+    body { font-family: 'Plus+Jakarta+Sans', sans-serif; }
+    .glass-card { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); }
   </style>
 </head>
-<body>
+<body class="bg-slate-100 min-h-screen text-slate-800 pb-12">
 
-<div class="container">
-  <header>
-    <h1>🥊 A Luta Diária</h1>
-    <p style="color: #64748b; margin-top: -6px; font-weight: 600; font-size: 0.9rem;">Minhas Tarefas e Missões da Casa</p>
+  <!-- NOTIFICAÇÃO FLUTUANTE DE TEMPO E ALERTAS -->
+  <div id="toast-container" class="fixed top-4 right-4 z-50 flex flex-col gap-2 max-w-sm w-full px-4"></div>
+
+  <!-- CABEÇALHO DA APLICAÇÃO -->
+  <header class="bg-indigo-700 text-white shadow-lg sticky top-0 z-40">
+    <div class="max-w-4xl mx-auto px-4 py-3 flex justify-between items-center">
+      <div class="flex items-center space-x-2">
+        <span class="text-2xl">⚔️</span>
+        <h1 class="text-xl font-extrabold tracking-wide">A LUTA DIÁRIA</h1>
+      </div>
+      <div id="header-user-info" class="hidden flex items-center gap-3">
+        <span id="current-user-name" class="font-bold text-indigo-100"></span>
+        <button onclick="logout()" class="text-xs bg-indigo-900 hover:bg-indigo-800 text-indigo-200 px-3 py-1.5 rounded-lg font-semibold transition">Sair</button>
+      </div>
+    </div>
   </header>
 
-  <!-- TELA DE LOGIN -->
-  <div id="login-screen" class="card login-box">
-    <h2>🔑 Entrar no App</h2>
-    <label for="user-select">Quem é você?</label>
-    <select id="user-select" onchange="checkFirstAccess()">
-      <option value="thiego">👦 Thiego</option>
-      <option value="manuela">👧 Manuela</option>
-      <option value="tayrone">🧒 Tayrone</option>
-      <option value="admin">🔑 Os Pais (Supervisores)</option>
-    </select>
+  <main class="max-w-4xl mx-auto px-4 mt-6">
 
-    <div id="first-access-msg" style="display:none; color: var(--primary); font-size: 0.85rem; margin-top: 5px;">
-      ✨ É seu primeiro acesso! Crie sua senha abaixo.
-    </div>
-
-    <label for="password-input">Senha:</label>
-    <input type="password" id="password-input" placeholder="Digite sua senha">
-
-    <button class="btn-action" style="width:100%; margin-top:15px; font-size:1rem; padding:12px;" onclick="handleLogin()">Entrar</button>
-    <button style="width:100%; margin-top:10px; background:transparent; border:none; color:#64748b; font-size:0.8rem; cursor:pointer;" onclick="forgotPasswordMsg()">Esqueci minha senha</button>
-  </div>
-
-  <!-- TELA PRINCIPAL DO APP -->
-  <div id="app-screen" style="display:none;">
-    
-    <!-- PERFIL DO USUÁRIO NA TELA INICIAL -->
-    <div class="card user-profile-card" id="user-status">
-      <div class="user-profile-header">
-        <div class="user-info-group">
-          <div class="user-avatar-big" id="user-avatar-icon">👦</div>
-          <div>
-            <h2 id="user-name" style="margin:0; font-size:1.3rem;">Nome</h2>
-            <div id="user-level" style="font-size:0.85rem; opacity:0.9; margin-top:2px;">Nível 1</div>
-          </div>
-        </div>
-        <div style="text-align:right;">
-          <button class="btn-logout" onclick="handleLogout()">Sair</button>
-          <div style="margin-top:8px;">
-            <span class="xp-badge"><span id="user-xp">0</span> XP</span>
-          </div>
-        </div>
-      </div>
-      
-      <div style="margin-top:15px;">
-        <div style="display:flex; justify-content:space-between; font-size:0.75rem; opacity:0.9;">
-          <span id="level-next-info">Progresso do Nível</span>
-          <span id="xp-pct-label">0%</span>
-        </div>
-        <div class="progress-bar">
-          <div class="progress-fill" id="xp-bar"></div>
-        </div>
-      </div>
-    </div>
-
-    <!-- BOTÕES DAS ABAS PRINCIPAIS -->
-    <div class="nav-tabs" id="user-tabs">
-      <button class="btn-tab active" id="tab-tasks-btn" onclick="switchTab('tasks')">📋 Minhas Missões</button>
-      <button class="btn-tab" id="tab-store-btn" onclick="switchTab('store')">🛒 Lojinha de Prêmios</button>
-    </div>
-
-    <!-- ABA 1: TAREFAS -->
-    <div class="card" id="tab-tasks">
-      <h3 id="panel-title" style="margin-top:0; color:#1e1b4b;">📋 Missões do Dia</h3>
-      <div id="tasks-list"></div>
-    </div>
-
-    <!-- ABA 2: LOJINHA -->
-    <div class="card" id="tab-store" style="display:none;">
-      <h3 style="margin-top:0; color:#1e1b4b;">🛒 Lojinha de Prêmios</h3>
-      <p style="font-size:0.85rem; color:#64748b; margin-top:-8px;">Resgate prêmios com o seu saldo acumulado de XP!</p>
-      <div id="store-list"></div>
-    </div>
-
-    <!-- ABA 3: PAINEL DOS PAIS -->
-    <div id="tab-admin" style="display:none;">
-      <div class="admin-banner">
-        <button class="btn-logout" onclick="handleLogout()">Sair</button>
-        <h2>🛠️ Painel de Os Pais (Supervisores)</h2>
-        <p>Gerencie missões, aprovações, penalidades, recompensas e acompanhe o progresso das crianças.</p>
-
-        <div class="admin-nav-grid">
-          <button class="admin-nav-btn active" id="adm-btn-report" onclick="setAdminSubTab('report')">📊 Relatório Semanal</button>
-          <button class="admin-nav-btn" id="adm-btn-pending" onclick="setAdminSubTab('pending')">📌 Pendentes (<span id="count-pending">0</span>)</button>
-          <button class="admin-nav-btn" id="adm-btn-tasks" onclick="setAdminSubTab('tasks')">⚙️ Gerenciar Missões</button>
-          <button class="admin-nav-btn" id="adm-btn-store" onclick="setAdminSubTab('store')">🛒 Gerenciar Lojinha</button>
-          <button class="admin-nav-btn" id="adm-btn-members" onclick="setAdminSubTab('members')">👑 Membros & Ajustes</button>
-        </div>
-      </div>
-
-      <div id="admin-content"></div>
-    </div>
-
-  </div>
-</div>
-
-<footer>
-  <button class="btn-sugestao" onclick="openSuggestionModal()">💡 Mandar uma Sugestão</button>
-</footer>
-
-<script>
-  const daysOfWeek = ['domingo', 'segunda', 'terca', 'quarta', 'quinta', 'sexta', 'sabado'];
-
-  function getTodayKey() {
-    return daysOfWeek[new Date().getDay()];
-  }
-
-  const levelTable = [
-    { level: 1, name: "Iniciante Preguiçoso 😴", minXp: 0, maxXp: 30 },
-    { level: 2, name: "Caçador de Meia Perdida 🧦", minXp: 30, maxXp: 70 },
-    { level: 3, name: "Dobrador de Lençol 🛏️", minXp: 70, maxXp: 120 },
-    { level: 4, name: "Mestre do Escorredor 🍽️", minXp: 120, maxXp: 200 },
-    { level: 5, name: "General da Vassoura 🧹", minXp: 200, maxXp: 350 },
-    { level: 6, name: "Guardião do Sabão 🧼", minXp: 350, maxXp: 600 },
-    { level: 7, name: "Soberano da Louça 👑", minXp: 600, maxXp: 1000 },
-    { level: 8, name: "Lorde do Pano de Chão 🧽", minXp: 1000, maxXp: 1600 },
-    { level: 9, name: "Destruidor da Sujeira ⚡", minXp: 1600, maxXp: 2500 },
-    { level: 10, name: "Lenda Suprema do Lar 🏆", minXp: 2500, maxXp: 4000 }
-  ];
-
-  function getLevelInfo(xp) {
-    for (let i = levelTable.length - 1; i >= 0; i--) {
-      if (xp >= levelTable[i].minXp) {
-        let current = levelTable[i];
-        let next = levelTable[i + 1];
+    <!-- TELA DE LOGIN -->
+    <section id="screen-login" class="max-w-md mx-auto">
+      <div class="glass-card rounded-3xl p-8 shadow-xl border border-slate-200 text-center">
+        <div class="text-5xl mb-3">🛡️</div>
+        <h2 class="text-2xl font-bold text-slate-800 mb-1">Quem está acessando?</h2>
+        <p class="text-slate-500 text-sm mb-6">Escolha o seu perfil para continuar</p>
         
-        if (!next) {
-          let extraLevel = current.level + Math.floor((xp - current.minXp) / 2000);
-          return {
-            level: extraLevel,
-            name: `Super Lenda nível ${extraLevel} 🌟`,
-            progress: 100,
-            nextXp: "Max"
-          };
-        }
+        <div class="space-y-3">
+          <button onclick="loginAs('Thiego')" class="w-full flex items-center justify-between p-4 bg-purple-50 hover:bg-purple-100 border border-purple-200 rounded-2xl font-bold text-purple-900 transition">
+            <span class="flex items-center gap-3"><span class="text-2xl">👦</span> Thiego</span>
+            <span class="text-xs bg-purple-200 text-purple-800 px-2 py-1 rounded-full">Filho</span>
+          </button>
+          <button onclick="loginAs('Manuela')" class="w-full flex items-center justify-between p-4 bg-pink-50 hover:bg-pink-100 border border-pink-200 rounded-2xl font-bold text-pink-900 transition">
+            <span class="flex items-center gap-3"><span class="text-2xl">👧</span> Manuela</span>
+            <span class="text-xs bg-pink-200 text-pink-800 px-2 py-1 rounded-full">Filha</span>
+          </button>
+          <button onclick="loginAs('Tayrone')" class="w-full flex items-center justify-between p-4 bg-blue-50 hover:bg-blue-100 border border-blue-200 rounded-2xl font-bold text-blue-900 transition">
+            <span class="flex items-center gap-3"><span class="text-2xl">🧒</span> Tayrone</span>
+            <span class="text-xs bg-blue-200 text-blue-800 px-2 py-1 rounded-full">Filho</span>
+          </button>
+          
+          <hr class="my-4 border-slate-200">
+          
+          <button onclick="loginAs('Pais')" class="w-full p-4 bg-slate-800 hover:bg-slate-900 text-white rounded-2xl font-bold transition flex justify-center items-center gap-2">
+            <span>👑</span> Painel dos Pais
+          </button>
+        </div>
+      </div>
+    </section>
 
-        let range = next.minXp - current.minXp;
-        let gained = xp - current.minXp;
-        let pct = Math.min(100, Math.max(0, Math.round((gained / range) * 100)));
+    <!-- ÁREA DAS CRIANÇAS -->
+    <section id="screen-child" class="hidden space-y-6">
+      
+      <!-- CARD DE MODOS ESPECIAIS (MODO FOLGA) -->
+      <div id="rest-mode-banner" class="hidden bg-emerald-500 text-white p-4 rounded-3xl shadow-lg flex items-center gap-4">
+        <span class="text-4xl">🏖️</span>
+        <div>
+          <h3 class="font-extrabold text-lg">Modo Descanso / Folga Ativado!</h3>
+          <p class="text-emerald-100 text-sm">Os pais deram uma pausa nas tarefas. Aproveite o seu momento de folga!</p>
+        </div>
+      </div>
 
-        return {
-          level: current.level,
-          name: current.name,
-          progress: pct,
-          nextXp: next.minXp
-        };
-      }
-    }
-    return { level: 1, name: levelTable[0].name, progress: 0, nextXp: 30 };
-  }
+      <!-- PAINEL DE PERFIL DA CRIANÇA -->
+      <div class="bg-gradient-to-r from-indigo-600 to-purple-600 rounded-3xl p-6 text-white shadow-xl relative overflow-hidden">
+        <div class="flex justify-between items-start relative z-10">
+          <div class="flex items-center gap-4">
+            <div id="child-avatar" class="text-5xl bg-white/20 p-3 rounded-2xl backdrop-blur-md">👦</div>
+            <div>
+              <h2 id="child-name" class="text-2xl font-black">--</h2>
+              <span id="child-level" class="inline-block bg-indigo-900/40 text-indigo-100 text-xs px-3 py-1 rounded-full font-semibold mt-1">Nível 1 - Recruta</span>
+            </div>
+          </div>
+          <div class="text-right">
+            <span class="text-xs text-indigo-200 uppercase tracking-widest block font-bold">Saldo de XP</span>
+            <span id="child-xp" class="text-4xl font-black text-amber-300">0 XP</span>
+          </div>
+        </div>
+        <div class="mt-4 pt-4 border-t border-white/10 flex justify-between items-center text-xs">
+          <span>Próxima recompensa no nível 2</span>
+          <button onclick="openSuggestionModal()" class="bg-amber-400 hover:bg-amber-300 text-slate-900 font-extrabold px-3 py-1.5 rounded-xl shadow transition flex items-center gap-1">
+            <span>💡</span> Mandar Sugestão
+          </button>
+        </div>
+      </div>
 
-  const children = {
-    thiego: { name: "Thiego", avatar: "👦", xp: 100, done: 1, expired: 0, password: null },
-    manuela: { name: "Manuela", avatar: "👧", xp: 120, done: 1, expired: 0, password: null },
-    tayrone: { name: "Tayrone", avatar: "🧒", xp: 80, done: 0, expired: 0, password: null }
-  };
+      <!-- SOLICITAÇÕES DE TROCA RECEBIDAS -->
+      <div id="trade-requests-container" class="space-y-3"></div>
 
-  const adminCredentials = { username: "admin", password: "admin1234" };
+      <!-- SELETOR DE FILTROS DAS TAREFAS -->
+      <div class="bg-white p-2 rounded-2xl shadow-sm border border-slate-200 flex gap-1">
+        <button onclick="setFilter('hoje')" id="filter-hoje" class="flex-1 py-2 rounded-xl text-xs font-bold transition bg-indigo-600 text-white">Hoje</button>
+        <button onclick="setFilter('diarias')" id="filter-diarias" class="flex-1 py-2 rounded-xl text-xs font-bold transition text-slate-600 hover:bg-slate-100">Diárias</button>
+        <button onclick="setFilter('flexiveis')" id="filter-flexiveis" class="flex-1 py-2 rounded-xl text-xs font-bold transition text-slate-600 hover:bg-slate-100">Flexíveis</button>
+        <button onclick="setFilter('todas')" id="filter-todas" class="flex-1 py-2 rounded-xl text-xs font-bold transition text-slate-600 hover:bg-slate-100">Todas</button>
+      </div>
 
-  const bathroomRotation = ['thiego', 'manuela', 'tayrone'];
-  let bathroomIndex = 0;
-  const generalRotation = ['thiego', 'manuela', 'tayrone'];
-  let dishIndex = 0;
-  let trashIndex = 0;
-  let dogIndex = 0;
+      <!-- LISTA DE TAREFAS -->
+      <div id="child-tasks-list" class="space-y-3">
+        <!-- Injetado via Javascript -->
+      </div>
+    </section>
 
-  let tasks = [
-    { id: 1, title: "Arrumar a Cama", xp: 10, penalty: 15, category: "daily", assignedTo: "all", days: ['domingo','segunda','terca','quarta','quinta','sexta','sabado'], schedule: "Todos os dias", deadline: "12:00", canTrade: false },
-    { id: 3, title: "Água e Comida da Cachorra", xp: 15, penalty: 25, category: "daily", assignedTo: generalRotation[dogIndex], days: ['domingo','segunda','terca','quarta','quinta','sexta','sabado'], schedule: "Todos os dias", deadline: "09:00", canTrade: true },
-    { id: 6, title: "Secar Louça da Janta", xp: 20, penalty: 30, category: "daily", assignedTo: generalRotation[dishIndex], days: ['domingo','segunda','terca','quarta','quinta','sexta','sabado'], schedule: "Todos os dias", deadline: "21:00", canTrade: true },
-    { id: 2, title: "Tirar Lixo", xp: 15, penalty: 25, category: "rotation", assignedTo: generalRotation[trashIndex], days: ['segunda','quarta','sexta'], schedule: "Seg, Qua e Sex", deadline: "12:00", canTrade: true },
-    { id: 4, title: "Limpar o Quarto", xp: 25, penalty: 40, category: "rotation", assignedTo: "all", days: ['quarta'], schedule: "Toda Quarta-feira", deadline: "18:00", canTrade: false },
-    { id: 5, title: "Lavar Banheiro", xp: 50, penalty: 75, category: "rotation", assignedTo: bathroomRotation[bathroomIndex], days: ['quinta'], schedule: "Toda Quinta-feira", deadline: "17:00", canTrade: true },
-    { id: 7, title: "30 Minutos de Leitura", xp: 30, penalty: 0, category: "flexible", assignedTo: "all", days: ['domingo','segunda','terca','quarta','quinta','sexta','sabado'], schedule: "3x por semana", deadline: "21:00", canTrade: false }
-  ];
+    <!-- PAINEL DOS PAIS -->
+    <section id="screen-parents" class="hidden space-y-6">
+      
+      <!-- PAINEL DE CONTROLE DE FOLGA -->
+      <div class="bg-slate-800 text-white p-4 rounded-3xl flex justify-between items-center shadow-md">
+        <div class="flex items-center gap-3">
+          <span class="text-2xl">🏖️</span>
+          <div>
+            <h3 class="font-bold text-sm">Modo Descanso / Folga</h3>
+            <p class="text-slate-400 text-xs">Pausa contadores e desativa a cobrança de tarefas</p>
+          </div>
+        </div>
+        <label class="relative inline-flex items-center cursor-pointer">
+          <input type="checkbox" id="toggle-rest-mode" onchange="toggleRestMode(this.checked)" class="sr-only peer">
+          <div class="w-11 h-6 bg-slate-600 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-500"></div>
+        </label>
+      </div>
 
-  let rewards = [
-    { id: 101, title: "30 Minutos a mais de Videogame/Celular", cost: 50, icon: "🎮" },
-    { id: 102, title: "Escolher o Filme da Sexta à Noite", cost: 80, icon: "🍿" },
-    { id: 103, title: "Escolher o Lanche do Fim de Semana", cost: 120, icon: "🍔" },
-    { id: 104, title: "R$ 15,00 no PIX (Mesada Extra)", cost: 200, icon: "💵" }
-  ];
+      <!-- NAVEGAÇÃO DE SUB-ABAS DOS PAIS -->
+      <div class="flex border-b border-slate-200 space-x-4">
+        <button onclick="setParentTab('relatorio')" id="ptab-relatorio" class="pb-3 text-sm font-bold border-b-2 border-indigo-600 text-indigo-600">📊 Relatórios & Sugestões</button>
+        <button onclick="setParentTab('pendentes')" id="ptab-pendentes" class="pb-3 text-sm font-bold border-b-2 border-transparent text-slate-500 hover:text-slate-800">📌 Pendentes</button>
+        <button onclick="setParentTab('missoes')" id="ptab-missoes" class="pb-3 text-sm font-bold border-b-2 border-transparent text-slate-500 hover:text-slate-800">⚙️ Gerenciar Missões</button>
+        <button onclick="setParentTab('lojinha')" id="ptab-lojinha" class="pb-3 text-sm font-bold border-b-2 border-transparent text-slate-500 hover:text-slate-800">🛒 Lojinha</button>
+        <button onclick="setParentTab('membros')" id="ptab-membros" class="pb-3 text-sm font-bold border-b-2 border-transparent text-slate-500 hover:text-slate-800">👑 Membros</button>
+      </div>
 
-  let pendingApprovals = [];
-  let pendingRedemptions = [];
-  let appliedPenaltiesLog = [];
-  let suggestionsLog = [];
-  let historyLog = [
-    { childKey: 'manuela', taskTitle: "Arrumar a Cama", xp: 10 },
-    { childKey: 'thiego', taskTitle: "30 Minutos de Leitura", xp: 30 }
-  ];
-  let currentUser = null;
-  let activeAdminSubTab = 'report';
+      <!-- CONTEÚDO DAS SUB-ABAS DOS PAIS -->
+      <div id="parent-content">
 
-  function checkFirstAccess() {
-    const selected = document.getElementById('user-select').value;
-    const msg = document.getElementById('first-access-msg');
-    if (selected !== 'admin' && children[selected] && children[selected].password === null) {
-      msg.style.display = 'block';
-    } else {
-      msg.style.display = 'none';
-    }
-  }
+        <!-- SUB-ABA: RELATÓRIOS E SUGESTÕES -->
+        <div id="parent-sub-relatorio" class="space-y-6">
+          <div class="bg-white rounded-3xl p-6 shadow-sm border border-slate-200">
+            <h3 class="font-bold text-lg mb-4 flex items-center gap-2"><span>💡</span> Caixa de Entrada de Sugestões das Crianças</h3>
+            <div id="parent-suggestions-list" class="space-y-3">
+              <!-- Injetado via Javascript -->
+            </div>
+          </div>
+        </div>
 
-  function handleLogin() {
-    const userKey = document.getElementById('user-select').value;
-    const passInput = document.getElementById('password-input').value;
+        <!-- SUB-ABA: PENDENTES (APROVAÇÃO) -->
+        <div id="parent-sub-pendentes" class="hidden space-y-4">
+          <div class="bg-white rounded-3xl p-6 shadow-sm border border-slate-200">
+            <h3 class="font-bold text-lg mb-4">Tarefas Concluídas Aguardando Validação</h3>
+            <div id="parent-pending-tasks" class="space-y-3">
+              <p class="text-slate-400 text-sm">Nenhuma tarefa pendente no momento.</p>
+            </div>
+          </div>
+        </div>
 
-    if (!passInput) return alert("Por favor, digite a senha!");
+        <!-- SUB-ABA: GERENCIAR MISSÕES -->
+        <div id="parent-sub-missoes" class="hidden space-y-6">
+          <div class="bg-white rounded-3xl p-6 shadow-sm border border-slate-200">
+            <h3 class="font-bold text-lg mb-4">Criar / Editar Nova Missão</h3>
+            <form onsubmit="handleCreateTask(event)" class="space-y-4">
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label class="block text-xs font-bold text-slate-600 mb-1">Título da Tarefa</label>
+                  <input type="text" id="task-title" required placeholder="Ex: Arrumar a cama" class="w-full p-3 rounded-xl border border-slate-200 text-sm">
+                </div>
+                <div>
+                  <label class="block text-xs font-bold text-slate-600 mb-1">Ícone / Emoji</label>
+                  <input type="text" id="task-icon" required value="🧹" class="w-full p-3 rounded-xl border border-slate-200 text-sm">
+                </div>
+              </div>
 
-    if (userKey === 'admin') {
-      if (passInput === adminCredentials.password) {
-        currentUser = 'admin';
-        showApp();
-      } else {
-        alert("Senha incorreta para Os Pais!");
-      }
-      return;
-    }
+              <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div>
+                  <label class="block text-xs font-bold text-slate-600 mb-1">Responsável</label>
+                  <select id="task-assignee" class="w-full p-3 rounded-xl border border-slate-200 text-sm">
+                    <option value="Todos">Todos (Rodízio/Geral)</option>
+                    <option value="Thiego">Thiego</option>
+                    <option value="Manuela">Manuela</option>
+                    <option value="Tayrone">Tayrone</option>
+                  </select>
+                </div>
+                <div>
+                  <label class="block text-xs font-bold text-slate-600 mb-1">Categoria</label>
+                  <select id="task-category" class="w-full p-3 rounded-xl border border-slate-200 text-sm">
+                    <option value="diarias">Diária</option>
+                    <option value="flexiveis">Flexível</option>
+                  </select>
+                </div>
+                <div>
+                  <label class="block text-xs font-bold text-slate-600 mb-1">Horário Limite</label>
+                  <input type="time" id="task-deadline" value="18:00" class="w-full p-3 rounded-xl border border-slate-200 text-sm">
+                </div>
+              </div>
 
-    if (children[userKey].password === null) {
-      children[userKey].password = passInput;
-      alert(`Senha cadastrada com sucesso!`);
-      currentUser = userKey;
-      showApp();
-    } else {
-      if (children[userKey].password === passInput) {
-        currentUser = userKey;
-        showApp();
-      } else {
-        alert("Senha incorreta!");
-      }
-    }
-  }
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label class="block text-xs font-bold text-slate-600 mb-1">Recompensa (XP)</label>
+                  <input type="number" id="task-xp" value="50" min="0" class="w-full p-3 rounded-xl border border-slate-200 text-sm">
+                </div>
+                <div>
+                  <label class="block text-xs font-bold text-slate-600 mb-1">Penalidade de Perda (XP)</label>
+                  <div class="flex items-center gap-2">
+                    <input type="number" id="task-penalty" value="0" min="0" class="w-full p-3 rounded-xl border border-slate-200 text-sm">
+                  </div>
+                  <span class="text-[10px] text-slate-400">Deixe em 0 se quiser **remover/sem penalidade**</span>
+                </div>
+              </div>
 
-  function forgotPasswordMsg() {
-    alert("Esqueceu a senha? Peça para Os Pais redefinirem a sua senha no Painel!");
-  }
+              <button type="submit" class="w-full py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl transition">Cadastrar Missão</button>
+            </form>
+          </div>
+        </div>
 
-  function handleLogout() {
-    currentUser = null;
-    document.getElementById('password-input').value = '';
-    document.getElementById('app-screen').style.display = 'none';
-    document.getElementById('login-screen').style.display = 'block';
-  }
+        <!-- SUB-ABA: LOJINHA -->
+        <div id="parent-sub-lojinha" class="hidden space-y-4">
+          <div class="bg-white rounded-3xl p-6 shadow-sm border border-slate-200">
+            <h3 class="font-bold text-lg mb-4">Gerenciar Prêmios da Lojinha</h3>
+            <p class="text-slate-500 text-sm">Adicione recompensas para as crianças trocarem por XP acumulado.</p>
+          </div>
+        </div>
 
-  function showApp() {
-    document.getElementById('login-screen').style.display = 'none';
-    document.getElementById('app-screen').style.display = 'block';
+        <!-- SUB-ABA: MEMBROS & AJUSTES -->
+        <div id="parent-sub-membros" class="hidden space-y-4">
+          <div class="bg-white rounded-3xl p-6 shadow-sm border border-slate-200">
+            <h3 class="font-bold text-lg mb-4">Ajustes Manuais de XP e Membros</h3>
+            <div class="space-y-3">
+              <div class="flex justify-between items-center p-3 bg-slate-50 rounded-xl">
+                <span class="font-bold">Thiego</span>
+                <button onclick="adjustXP('Thiego', 50)" class="px-3 py-1 bg-emerald-100 text-emerald-700 rounded-lg text-xs font-bold">+50 XP</button>
+              </div>
+              <div class="flex justify-between items-center p-3 bg-slate-50 rounded-xl">
+                <span class="font-bold">Manuela</span>
+                <button onclick="adjustXP('Manuela', 50)" class="px-3 py-1 bg-emerald-100 text-emerald-700 rounded-lg text-xs font-bold">+50 XP</button>
+              </div>
+              <div class="flex justify-between items-center p-3 bg-slate-50 rounded-xl">
+                <span class="font-bold">Tayrone</span>
+                <button onclick="adjustXP('Tayrone', 50)" class="px-3 py-1 bg-emerald-100 text-emerald-700 rounded-lg text-xs font-bold">+50 XP</button>
+              </div>
+            </div>
+          </div>
+        </div>
 
-    if (currentUser === 'admin') {
-      document.getElementById('user-status').style.display = 'none';
-      document.getElementById('user-tabs').style.display = 'none';
-      document.getElementById('tab-tasks').style.display = 'none';
-      document.getElementById('tab-store').style.display = 'none';
-      document.getElementById('tab-admin').style.display = 'block';
-      renderAdminView();
-    } else {
-      document.getElementById('user-status').style.display = 'block';
-      document.getElementById('user-tabs').style.display = 'flex';
-      document.getElementById('tab-admin').style.display = 'none';
-      switchTab('tasks');
-      updateHeaderStatus();
-    }
-  }
+      </div>
+    </section>
 
-  function switchTab(tab) {
-    document.getElementById('tab-tasks-btn').classList.toggle('active', tab === 'tasks');
-    document.getElementById('tab-store-btn').classList.toggle('active', tab === 'store');
-    
-    document.getElementById('tab-tasks').style.display = tab === 'tasks' ? 'block' : 'none';
-    document.getElementById('tab-store').style.display = tab === 'store' ? 'block' : 'none';
+  </main>
 
-    if (tab === 'tasks') renderTasks();
-    if (tab === 'store') renderStore();
-  }
+  <!-- MODAL DE MANDAR SUGESTÃO -->
+  <div id="modal-suggestion" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm hidden flex items-center justify-center p-4 z-50">
+    <div class="bg-white rounded-3xl p-6 max-w-sm w-full space-y-4 shadow-2xl">
+      <h3 class="font-bold text-lg text-slate-800 flex items-center gap-2"><span>💡</span> Enviar Sugestão para os Pais</h3>
+      <textarea id="suggestion-text" rows="3" placeholder="Digite aqui o que você gostaria de sugerir..." class="w-full p-3 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"></textarea>
+      <div class="flex justify-end gap-2">
+        <button onclick="closeSuggestionModal()" class="px-4 py-2 text-xs font-bold text-slate-500 hover:bg-slate-100 rounded-xl">Cancelar</button>
+        <button onclick="submitSuggestion()" class="px-4 py-2 text-xs font-bold bg-indigo-600 text-white rounded-xl hover:bg-indigo-700">Enviar</button>
+      </div>
+    </div>
+  </div>
 
-  function updateHeaderStatus() {
-    let xp = children[currentUser].xp;
-    let lvlInfo = getLevelInfo(xp);
+  <!-- MODAL DE SOLICITAÇÃO DE TROCA -->
+  <div id="modal-trade" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm hidden flex items-center justify-center p-4 z-50">
+    <div class="bg-white rounded-3xl p-6 max-w-sm w-full space-y-4 shadow-2xl">
+      <h3 class="font-bold text-lg text-slate-800 flex items-center gap-2"><span>🔄</span> Pedir Troca de Tarefa</h3>
+      <p class="text-xs text-slate-500">Escolha para qual irmão deseja passar essa tarefa hoje. Se ele aceitar, fará no seu lugar e ganhará os pontos!</p>
+      <input type="hidden" id="trade-task-id">
+      <select id="trade-target-user" class="w-full p-3 rounded-xl border border-slate-200 text-sm font-bold">
+        <!-- Injetado dinamicamente -->
+      </select>
+      <div class="flex justify-end gap-2">
+        <button onclick="closeTradeModal()" class="px-4 py-2 text-xs font-bold text-slate-500 hover:bg-slate-100 rounded-xl">Cancelar</button>
+        <button onclick="submitTradeRequest()" class="px-4 py-2 text-xs font-bold bg-indigo-600 text-white rounded-xl hover:bg-indigo-700">Enviar Pedido</button>
+      </div>
+    </div>
+  </div>
 
-    document.getElementById('user-avatar-icon').innerText = children[currentUser].avatar;
-    document.getElementById('user-name').innerText = children[currentUser].name;
-    document.getElementById('user-level').innerText = `Nível ${lvlInfo.level}: ${lvlInfo.name}`;
-    document.getElementById('user-xp').innerText = xp;
-    document.getElementById('xp-bar').style.width = lvlInfo.progress + '%';
-    document.getElementById('xp-pct-label').innerText = lvlInfo.progress + '%';
+  <script>
+    // ESTADO DA APLICAÇÃO
+    let currentUser = null;
+    let activeFilter = 'hoje';
+    let restMode = false;
 
-    if (lvlInfo.nextXp !== "Max") {
-      document.getElementById('level-next-info').innerText = `Falta chegar em ${lvlInfo.nextXp} XP para o Nível ${lvlInfo.level + 1}`;
-    } else {
-      document.getElementById('level-next-info').innerText = `Nível Máximo Atingido! 🎉`;
-    }
-  }
+    let users = {
+      Thiego: { xp: 120, level: 1, avatar: '👦' },
+      Manuela: { xp: 200, level: 2, avatar: '👧' },
+      Tayrone: { xp: 90, level: 1, avatar: '🧒' }
+    };
 
-  function getCurrentTime() {
-    const now = new Date();
-    return `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
-  }
-
-  function isExpired(deadline) {
-    return deadline ? getCurrentTime() > deadline : false;
-  }
-
-  function renderTasks() {
-    const list = document.getElementById('tasks-list');
-    list.innerHTML = '';
-    const todayKey = getTodayKey();
-    const myTasks = tasks.filter(t => t.assignedTo === 'all' || t.assignedTo === currentUser);
-    const isTaskForToday = (task) => task.days.includes(todayKey);
-
-    const categories = [
-      { key: 'daily', title: '☀️ Tarefas Diárias' },
-      { key: 'rotation', title: '🔄 Tarefas de Rodízio' },
-      { key: 'flexible', title: '📚 Tarefas Flexíveis' }
+    let tasks = [
+      { id: 1, title: 'Guardar Brinquedos', icon: '🧸', assignee: 'Thiego', category: 'diarias', deadline: '18:00', xp: 50, penalty: 0, completed: false, tradePending: null },
+      { id: 2, title: 'Arrumar a Cama', icon: '🛏️', assignee: 'Manuela', category: 'diarias', deadline: '12:00', xp: 40, penalty: 10, completed: false, tradePending: null },
+      { id: 3, title: 'Organizar Livros da Sala', icon: '📚', assignee: 'Tayrone', category: 'flexiveis', deadline: '20:00', xp: 60, penalty: 0, completed: false, tradePending: null }
     ];
 
-    categories.forEach(cat => {
-      const catTasks = myTasks.filter(t => t.category === cat.key && isTaskForToday(t));
-      if (catTasks.length > 0) {
-        const catTitle = document.createElement('div');
-        catTitle.className = 'section-title';
-        catTitle.innerText = `${cat.title} (Hoje)`;
-        list.appendChild(catTitle);
+    let suggestions = [
+      { id: 1, from: 'Thiego', text: 'Podemos trocar o prêmio de videogame por mais tempo de TV?' }
+    ];
 
-        catTasks.forEach(task => renderTaskItem(list, task, true));
+    let tradeRequests = [];
+
+    // LOGIN / NAVEGAÇÃO
+    function loginAs(name) {
+      currentUser = name;
+      document.getElementById('screen-login').classList.add('hidden');
+      document.getElementById('header-user-info').classList.remove('hidden');
+      document.getElementById('current-user-name').innerText = name;
+
+      if (name === 'Pais') {
+        document.getElementById('screen-parents').classList.remove('hidden');
+        renderParentsArea();
+      } else {
+        document.getElementById('screen-child').classList.remove('hidden');
+        renderChildArea();
       }
-    });
-
-    const futureTasks = myTasks.filter(t => !isTaskForToday(t));
-    if (futureTasks.length > 0) {
-      const futureTitle = document.createElement('div');
-      futureTitle.className = 'section-title';
-      futureTitle.style.color = '#94a3b8';
-      futureTitle.innerText = '📅 Próximos Dias';
-      list.appendChild(futureTitle);
-
-      futureTasks.forEach(task => renderTaskItem(list, task, false));
-    }
-  }
-
-  function renderTaskItem(container, task, isForToday) {
-    const expired = isForToday && isExpired(task.deadline);
-    const item = document.createElement('div');
-    item.className = `item-card ${expired ? 'expired' : ''} ${!isForToday ? 'disabled' : ''}`;
-
-    let tradeBtnHtml = '';
-    if (task.canTrade && !expired && isForToday) {
-      tradeBtnHtml = `<button style="font-size:0.7rem; background:#f1f5f9; border:1px solid #cbd5e1; border-radius:6px; padding:3px 6px; margin-left:4px; cursor:pointer;" onclick="requestTrade(${task.id})">🔄 Trocar</button>`;
     }
 
-    const isPending = pendingApprovals.some(p => p.taskId === task.id && p.childKey === currentUser);
-    let actionBtnHtml = '';
-
-    if (!isForToday) {
-      actionBtnHtml = `<span style="font-size:0.8rem; color:#64748b; font-weight:600;">${task.schedule}</span>`;
-    } else if (isPending) {
-      actionBtnHtml = `<button class="btn-action pending">Em Aprovação...</button>`;
-    } else if (expired) {
-      actionBtnHtml = `<button class="btn-action expired-btn" onclick="applyPenalty(${task.id})">Expirou (-${task.penalty} XP)</button>`;
-    } else {
-      actionBtnHtml = `<button class="btn-action" onclick="completeTask(${task.id})">Concluir</button>`;
+    function logout() {
+      currentUser = null;
+      document.getElementById('screen-login').classList.remove('hidden');
+      document.getElementById('screen-child').classList.add('hidden');
+      document.getElementById('screen-parents').classList.add('hidden');
+      document.getElementById('header-user-info').classList.add('hidden');
     }
 
-    item.innerHTML = `
-      <div>
-        <strong style="font-size:0.95rem;">${task.title}</strong> 
-        <div>
-          <span class="tag">+${task.xp} XP</span>
-          <span class="tag tag-day">Até ${task.deadline}h</span>
-          ${expired ? `<span class="tag tag-alert">⚠️ -${task.penalty} XP</span>` : ''}
-          ${tradeBtnHtml}
-        </div>
-      </div>
-      ${actionBtnHtml}
-    `;
-    container.appendChild(item);
-  }
-
-  function completeTask(taskId) {
-    const task = tasks.find(t => t.id === taskId);
-    if (!task) return;
-
-    pendingApprovals.push({ taskId: task.id, childKey: currentUser, title: task.title, xp: task.xp });
-    alert("Missão enviada para a aprovação dos Pais!");
-    renderTasks();
-  }
-
-  function applyPenalty(taskId) {
-    const task = tasks.find(t => t.id === taskId);
-    if (!task) return;
-    
-    children[currentUser].xp = Math.max(0, children[currentUser].xp - task.penalty);
-    children[currentUser].expired++;
-    appliedPenaltiesLog.push({ id: Date.now(), childKey: currentUser, taskId: task.id, title: task.title, penalty: task.penalty });
-
-    alert(`Prazo expirado! Foram descontados ${task.penalty} XP.`);
-    updateHeaderStatus();
-    renderTasks();
-  }
-
-  function requestTrade(taskId) {
-    const task = tasks.find(t => t.id === taskId);
-    const siblings = Object.keys(children).filter(k => k !== currentUser);
-    let target = prompt(`Trocar "${task.title}" com quem?\nOpções: ${siblings.join(', ')}`);
-    if (target && children[target]) {
-      task.assignedTo = target;
-      alert(`A tarefa foi repassada para ${children[target].name}.`);
-      renderTasks();
+    // MODO FOLGA / DESCANSO
+    function toggleRestMode(enabled) {
+      restMode = enabled;
+      const banner = document.getElementById('rest-mode-banner');
+      if (restMode) {
+        banner.classList.remove('hidden');
+        showToast('🏖️ Modo Folga Ativado pelos pais!');
+      } else {
+        banner.classList.add('hidden');
+        showToast('⚡ Modo Folga desativado. Rotina normal!');
+      }
     }
-  }
 
-  function renderStore() {
-    const list = document.getElementById('store-list');
-    list.innerHTML = '';
-    let currentXp = children[currentUser].xp;
+    // ÁREA DAS CRIANÇAS
+    function renderChildArea() {
+      const user = users[currentUser];
+      document.getElementById('child-name').innerText = currentUser;
+      document.getElementById('child-xp').innerText = `${user.xp} XP`;
+      document.getElementById('child-avatar').innerText = user.avatar;
 
-    rewards.forEach(reward => {
-      const item = document.createElement('div');
-      item.className = 'item-card';
+      renderTradeRequests();
+      renderChildTasks();
+    }
 
-      let canBuy = currentXp >= reward.cost;
-      let buyBtn = canBuy 
-        ? `<button class="btn-action store" onclick="requestRedeem(${reward.id})">Resgatar</button>`
-        : `<button class="btn-action" style="background:#cbd5e1; color:#64748b; box-shadow:none; cursor:not-allowed;">Faltam ${reward.cost - currentXp} XP</button>`;
+    function setFilter(filter) {
+      activeFilter = filter;
+      ['hoje', 'diarias', 'flexiveis', 'todas'].forEach(f => {
+        const btn = document.getElementById(`filter-${f}`);
+        if (f === filter) {
+          btn.className = "flex-1 py-2 rounded-xl text-xs font-bold transition bg-indigo-600 text-white";
+        } else {
+          btn.className = "flex-1 py-2 rounded-xl text-xs font-bold transition text-slate-600 hover:bg-slate-100";
+        }
+      });
+      renderChildTasks();
+    }
 
-      item.innerHTML = `
-        <div style="display:flex; align-items:center; gap:10px;">
-          <span style="font-size:1.6rem;">${reward.icon}</span>
-          <div>
-            <strong style="font-size:0.95rem;">${reward.title}</strong><br>
-            <span class="tag tag-store">${reward.cost} XP</span>
-          </div>
-        </div>
-        ${buyBtn}
-      `;
-      list.appendChild(item);
-    });
-  }
+    function renderChildTasks() {
+      const list = document.getElementById('child-tasks-list');
+      list.innerHTML = '';
 
-  function requestRedeem(rewardId) {
-    const reward = rewards.find(r => r.id === rewardId);
-    if (!reward) return;
+      let filtered = tasks.filter(t => t.assignee === currentUser || t.assignee === 'Todos');
 
-    pendingRedemptions.push({ rewardId: reward.id, childKey: currentUser, title: reward.title, cost: reward.cost });
-    alert("Pedido de resgate enviado para aprovação dos Pais!");
-    renderStore();
-  }
+      if (activeFilter === 'diarias') filtered = filtered.filter(t => t.category === 'diarias');
+      if (activeFilter === 'flexiveis') filtered = filtered.filter(t => t.category === 'flexiveis');
 
-  /* ABAS DO PAINEL DOS PAIS */
-  function setAdminSubTab(tab) {
-    activeAdminSubTab = tab;
-    ['report', 'pending', 'tasks', 'store', 'members'].forEach(t => {
-      const el = document.getElementById(`adm-btn-${t}`);
-      if (el) el.classList.toggle('active', t === tab);
-    });
-    renderAdminView();
-  }
+      if (filtered.length === 0) {
+        list.innerHTML = `<div class="bg-white p-8 text-center rounded-3xl border border-slate-200 text-slate-400 font-semibold">Nenhuma missão encontrada para essa categoria.</div>`;
+        return;
+      }
 
-  function renderAdminView() {
-    document.getElementById('count-pending').innerText = pendingApprovals.length + pendingRedemptions.length;
-    const container = document.getElementById('admin-content');
-    container.innerHTML = '';
-
-    if (activeAdminSubTab === 'report') {
-      let html = `<div class="card">
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
-          <h3 style="margin:0;">📊 Relatório de Desempenho Semanal</h3>
-          <button style="padding:6px 10px; border:1px solid #ccc; border-radius:6px; background:white; font-size:0.75rem; cursor:pointer;" onclick="resetWeek()">Zerar Relatório</button>
-        </div>
-      `;
-
-      Object.keys(children).forEach(k => {
-        const c = children[k];
-        const lvl = getLevelInfo(c.xp);
-        html += `
-          <div class="report-card-ai">
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
-              <div>
-                <strong>${c.avatar} ${c.name}</strong><br>
-                <span class="tag tag-store">${lvl.name}</span>
+      filtered.forEach(t => {
+        const item = document.createElement('div');
+        item.className = "bg-white p-4 rounded-2xl shadow-sm border border-slate-200 flex items-center justify-between gap-3";
+        
+        item.innerHTML = `
+          <div class="flex items-center gap-3">
+            <span class="text-3xl">${t.icon}</span>
+            <div>
+              <h4 class="font-bold text-slate-800 text-sm">${t.title}</h4>
+              <div class="flex items-center gap-2 mt-1">
+                <span class="text-[10px] bg-slate-100 text-slate-600 px-2 py-0.5 rounded-md font-semibold">⏰ até ${t.deadline}</span>
+                <span class="text-[10px] font-bold text-amber-600 bg-amber-50 px-2 py-0.5 rounded-md">+${t.xp} XP</span>
+                ${t.penalty > 0 ? `<span class="text-[10px] font-bold text-rose-600 bg-rose-50 px-2 py-0.5 rounded-md">-${t.penalty} XP</span>` : `<span class="text-[10px] font-bold text-slate-400 bg-slate-100 px-2 py-0.5 rounded-md">Sem penalidade</span>`}
               </div>
-              <span style="font-size:1.1rem; font-weight:bold; color:var(--primary);">${c.xp} XP</span>
             </div>
-            <div style="font-size:0.85rem; color:#475569;">
-              <p style="margin:3px 0;">✅ Concluídas nesta semana: <strong>${c.done}</strong></p>
-              <p style="margin:3px 0;">❌ Atrasadas / Expiradas: <strong>${c.expired}</strong></p>
-              <p style="margin:3px 0;">📈 Taxa de Sucesso: <strong>${(c.done + c.expired) > 0 ? Math.round((c.done / (c.done + c.expired)) * 100) : 100}%</strong></p>
+          </div>
+          <div class="flex items-center gap-2">
+            <button onclick="openTradeModal(${t.id})" class="p-2 text-xs bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-xl transition" title="Pedir Troca">🔄</button>
+            <button onclick="completeTask(${t.id})" class="px-4 py-2 text-xs bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl transition shadow">Concluir</button>
+          </div>
+        `;
+        list.appendChild(item);
+      });
+    }
+
+    // SISTEMA DE TROCAS
+    function openTradeModal(taskId) {
+      document.getElementById('trade-task-id').value = taskId;
+      const select = document.getElementById('trade-target-user');
+      select.innerHTML = '';
+
+      Object.keys(users).filter(u => u !== currentUser).forEach(u => {
+        select.innerHTML += `<option value="${u}">${u}</option>`;
+      });
+
+      document.getElementById('modal-trade').classList.remove('hidden');
+    }
+
+    function closeTradeModal() {
+      document.getElementById('modal-trade').classList.add('hidden');
+    }
+
+    function submitTradeRequest() {
+      const taskId = parseInt(document.getElementById('trade-task-id').value);
+      const targetUser = document.getElementById('trade-target-user').value;
+      const task = tasks.find(t => t.id === taskId);
+
+      tradeRequests.push({
+        id: Date.now(),
+        taskId: taskId,
+        taskTitle: task.title,
+        from: currentUser,
+        to: targetUser
+      });
+
+      closeTradeModal();
+      showToast(`Pedido de troca enviado para ${targetUser}!`);
+    }
+
+    function renderTradeRequests() {
+      const container = document.getElementById('trade-requests-container');
+      container.innerHTML = '';
+
+      const myRequests = tradeRequests.filter(r => r.to === currentUser);
+
+      myRequests.forEach(r => {
+        const card = document.createElement('div');
+        card.className = "bg-amber-50 border border-amber-200 p-4 rounded-2xl flex items-center justify-between";
+        card.innerHTML = `
+          <div>
+            <span class="text-xs font-bold text-amber-800">Pedido de Troca!</span>
+            <p class="text-xs text-amber-900 mt-0.5"><b>${r.from}</b> quer trocar a tarefa <b>"${r.taskTitle}"</b> com você hoje.</p>
+          </div>
+          <div class="flex gap-2">
+            <button onclick="acceptTrade(${r.id})" class="px-3 py-1.5 bg-emerald-600 text-white text-xs font-bold rounded-xl">Aceitar</button>
+          </div>
+        `;
+        container.appendChild(card);
+      });
+    }
+
+    function acceptTrade(requestId) {
+      const reqIndex = tradeRequests.findIndex(r => r.id === requestId);
+      if (reqIndex > -1) {
+        const req = tradeRequests[reqIndex];
+        const task = tasks.find(t => t.id === req.taskId);
+        if (task) {
+          task.assignee = currentUser; // Passa a responsabilidade pontual
+        }
+        tradeRequests.splice(reqIndex, 1);
+        showToast('Troca aceita com sucesso!');
+        renderChildArea();
+      }
+    }
+
+    // SUGESTÕES
+    function openSuggestionModal() {
+      document.getElementById('modal-suggestion').classList.remove('hidden');
+    }
+
+    function closeSuggestionModal() {
+      document.getElementById('modal-suggestion').classList.add('hidden');
+    }
+
+    function submitSuggestion() {
+      const text = document.getElementById('suggestion-text').value;
+      if (!text.trim()) return;
+
+      suggestions.push({
+        id: Date.now(),
+        from: currentUser,
+        text: text
+      });
+
+      document.getElementById('suggestion-text').value = '';
+      closeSuggestionModal();
+      showToast('Sugestão enviada para os seus pais!');
+    }
+
+    // PAINEL DOS PAIS SUB-ABAS
+    function setParentTab(tab) {
+      ['relatorio', 'pendentes', 'missoes', 'lojinha', 'membros'].forEach(t => {
+        const btn = document.getElementById(`ptab-${t}`);
+        const content = document.getElementById(`parent-sub-${t}`);
+        if (t === tab) {
+          btn.className = "pb-3 text-sm font-bold border-b-2 border-indigo-600 text-indigo-600";
+          content.classList.remove('hidden');
+        } else {
+          btn.className = "pb-3 text-sm font-bold border-b-2 border-transparent text-slate-500 hover:text-slate-800";
+          content.classList.add('hidden');
+        }
+      });
+    }
+
+    function renderParentsArea() {
+      const sugList = document.getElementById('parent-suggestions-list');
+      sugList.innerHTML = '';
+
+      if (suggestions.length === 0) {
+        sugList.innerHTML = `<p class="text-slate-400 text-sm">Nenhuma sugestão enviada no momento.</p>`;
+        return;
+      }
+
+      suggestions.forEach(s => {
+        sugList.innerHTML += `
+          <div class="p-3 bg-slate-50 border border-slate-200 rounded-xl flex justify-between items-center">
+            <div>
+              <span class="text-xs font-bold text-indigo-600">De: ${s.from}</span>
+              <p class="text-sm text-slate-700">${s.text}</p>
             </div>
           </div>
         `;
       });
-
-      html += `<h4 style="margin-top:20px; color:#64748b;">HISTÓRICO RECENTE DE ATIVIDADES</h4>`;
-      if (historyLog.length === 0) {
-        html += `<p style="font-size:0.85rem; color:#64748b;">Nenhuma atividade recente.</p>`;
-      } else {
-        historyLog.forEach(h => {
-          html += `<div class="item-card">
-            <div><b>${children[h.childKey] ? children[h.childKey].name : h.childKey}:</b> ${h.taskTitle}</div>
-            <span class="tag">+${h.xp} XP</span>
-          </div>`;
-        });
-      }
-
-      html += `</div>`;
-      container.innerHTML = html;
-    } 
-    else if (activeAdminSubTab === 'pending') {
-      let html = `<div class="card">
-        <h3>📌 Validações e Resgates Pendentes</h3>
-        <h4 style="color:var(--primary);">✅ Tarefas Pendentes de Aprovação</h4>
-      `;
-
-      if (pendingApprovals.length === 0) {
-        html += `<p style="font-size:0.85rem; color:#64748b;">Nenhuma tarefa aguardando aprovação.</p>`;
-      } else {
-        pendingApprovals.forEach((p, idx) => {
-          html += `<div class="item-card">
-            <div><b>${children[p.childKey].name}:</b> ${p.title} (+${p.xp} XP)</div>
-            <button class="btn-action" onclick="approveTask(${idx})">Aprovar Check</button>
-          </div>`;
-        });
-      }
-
-      html += `<h4 style="color:var(--purple-light); margin-top:20px;">🎁 Resgates da Lojinha Pendentes</h4>`;
-      if (pendingRedemptions.length === 0) {
-        html += `<p style="font-size:0.85rem; color:#64748b;">Nenhum resgate pendente.</p>`;
-      } else {
-        pendingRedemptions.forEach((r, idx) => {
-          html += `<div class="item-card">
-            <div><b>${children[r.childKey].name}:</b> ${r.title} (${r.cost} XP)</div>
-            <button class="btn-action store" onclick="approveRedeem(${idx})">Aprovar Resgate</button>
-          </div>`;
-        });
-      }
-
-      html += `</div>`;
-      container.innerHTML = html;
     }
-    else if (activeAdminSubTab === 'tasks') {
-      let html = `<div class="card admin-form">
-        <h3>⚙️ Gerenciar Missões</h3>
-        <h4>➕ Cadastrar Nova Missão</h4>
-        <input type="text" id="new-task-title" placeholder="Título da Missão">
-        <select id="new-task-assignee">
-          <option value="all">Para Todos os Filhos</option>
-          <option value="thiego">Thiego</option>
-          <option value="manuela">Manuela</option>
-          <option value="tayrone">Tayrone</option>
-        </select>
-        <button class="btn-action" style="width:100%; margin-top:8px;" onclick="addNewTask()">Cadastrar Tarefa</button>
-      </div>`;
-      container.innerHTML = html;
+
+    function handleCreateTask(e) {
+      e.preventDefault();
+      const title = document.getElementById('task-title').value;
+      const icon = document.getElementById('task-icon').value;
+      const assignee = document.getElementById('task-assignee').value;
+      const category = document.getElementById('task-category').value;
+      const deadline = document.getElementById('task-deadline').value;
+      const xp = parseInt(document.getElementById('task-xp').value);
+      const penalty = parseInt(document.getElementById('task-penalty').value);
+
+      tasks.push({
+        id: Date.now(),
+        title, icon, assignee, category, deadline, xp, penalty, completed: false, tradePending: null
+      });
+
+      showToast('Nova missão cadastrada com sucesso!');
+      e.target.reset();
     }
-    else {
-      container.innerHTML = `<div class="card"><p style="text-align:center; color:#64748b;">Selecione outra opção para gerenciar.</p></div>`;
+
+    function adjustXP(user, amount) {
+      users[user].xp += amount;
+      showToast(`+${amount} XP adicionados para ${user}!`);
     }
-  }
 
-  function approveTask(index) {
-    const app = pendingApprovals[index];
-    children[app.childKey].xp += app.xp;
-    children[app.childKey].done++;
-    historyLog.unshift({ childKey: app.childKey, taskTitle: app.title, xp: app.xp });
-    pendingApprovals.splice(index, 1);
-    alert("Tarefa aprovada!");
-    renderAdminView();
-  }
-
-  function approveRedeem(index) {
-    const r = pendingRedemptions[index];
-    children[r.childKey].xp = Math.max(0, children[r.childKey].xp - r.cost);
-    pendingRedemptions.splice(index, 1);
-    alert("Resgate aprovado!");
-    renderAdminView();
-  }
-
-  function addNewTask() {
-    const title = document.getElementById('new-task-title').value;
-    const assignee = document.getElementById('new-task-assignee').value;
-    if (!title) return alert("Digite o título da tarefa!");
-
-    tasks.push({ id: Date.now(), title, xp: 15, penalty: 20, category: "daily", assignedTo: assignee, days: ['domingo','segunda','terca','quarta','quinta','sexta','sabado'], schedule: "Todos os dias", deadline: "20:00", canTrade: true });
-    alert("Tarefa criada com sucesso!");
-    document.getElementById('new-task-title').value = '';
-  }
-
-  function resetWeek() {
-    if (confirm("Zerar o histórico semanal? Os saldos de XP atuais continuarão intactos.")) {
-      Object.keys(children).forEach(k => { children[k].done = 0; children[k].expired = 0; });
-      historyLog = [];
-      renderAdminView();
+    function completeTask(taskId) {
+      showToast('Tarefa enviada para aprovação dos pais!');
     }
-  }
 
-  function openSuggestionModal() {
-    let text = prompt("💡 Digite sua sugestão para o aplicativo:");
-    if (text) {
-      alert("Sugestão enviada com sucesso!");
+    // UTILS: ALERTA E TOAST
+    function showToast(msg) {
+      const container = document.getElementById('toast-container');
+      const toast = document.createElement('div');
+      toast.className = "bg-slate-900 text-white text-xs font-bold px-4 py-3 rounded-2xl shadow-xl flex items-center justify-between";
+      toast.innerText = msg;
+      container.appendChild(toast);
+      setTimeout(() => toast.remove(), 4000);
     }
-  }
-
-  checkFirstAccess();
-</script>
-
+  </script>
 </body>
 </html>
