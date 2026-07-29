@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>A Luta Diária</title>
+    <title>A Luta Diária 🥊</title>
     <style>
         :root {
             --primary: #10b981;
@@ -14,6 +14,7 @@
             --text-muted: #6b7280;
             --danger: #ef4444;
             --warning: #f59e0b;
+            --info: #3b82f6;
         }
 
         * {
@@ -34,7 +35,7 @@
 
         .container {
             width: 100%;
-            max-width: 480px;
+            max-width: 500px;
             display: flex;
             flex-direction: column;
             gap: 1rem;
@@ -42,11 +43,11 @@
 
         header {
             text-align: center;
-            padding: 1rem 0;
+            padding: 0.5rem 0;
         }
 
         header h1 {
-            font-size: 1.75rem;
+            font-size: 1.8rem;
             color: #111827;
             display: flex;
             align-items: center;
@@ -57,22 +58,23 @@
         header p {
             color: var(--text-muted);
             font-size: 0.9rem;
-            margin-top: 0.25rem;
         }
 
         .card {
             background: var(--card-bg);
             border-radius: 12px;
             padding: 1.25rem;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            margin-bottom: 1rem;
         }
 
         .card h2 {
-            font-size: 1.2rem;
+            font-size: 1.15rem;
             margin-bottom: 1rem;
             display: flex;
             align-items: center;
             gap: 0.5rem;
+            color: #111827;
         }
 
         .form-group {
@@ -82,7 +84,7 @@
         label {
             display: block;
             font-size: 0.875rem;
-            font-weight: 500;
+            font-weight: 600;
             margin-bottom: 0.35rem;
         }
 
@@ -114,24 +116,13 @@
             transition: background 0.2s;
         }
 
-        .btn:hover {
-            background-color: var(--primary-dark);
-        }
+        .btn:hover { background-color: var(--primary-dark); }
+        .btn-outline { background: transparent; border: 1px solid #d1d5db; color: var(--text-muted); margin-top: 0.5rem; }
+        .btn-danger { background-color: var(--danger); }
+        .btn-warning { background-color: var(--warning); }
+        .btn-info { background-color: var(--info); }
 
-        .btn-outline {
-            background: transparent;
-            border: 1px solid #d1d5db;
-            color: var(--text-muted);
-            margin-top: 0.5rem;
-        }
-
-        .btn-danger {
-            background-color: var(--danger);
-        }
-
-        .hidden {
-            display: none !important;
-        }
+        .hidden { display: none !important; }
 
         .user-header {
             display: flex;
@@ -140,29 +131,21 @@
             background: #fff;
             padding: 1rem;
             border-radius: 12px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
         }
 
-        .user-info h3 {
-            font-size: 1.1rem;
-        }
+        .user-info h3 { font-size: 1.1rem; }
+        .user-info p { font-size: 0.85rem; color: var(--text-muted); }
 
-        .user-info p {
-            font-size: 0.85rem;
-            color: var(--text-muted);
-        }
-
-        .stats-badge {
-            text-align: right;
-        }
-
+        .stats-badge { text-align: right; }
         .xp-tag {
             background: #ecfdf5;
             color: var(--primary-dark);
             font-weight: bold;
-            padding: 0.25rem 0.5rem;
+            padding: 0.3rem 0.6rem;
             border-radius: 6px;
-            font-size: 0.9rem;
+            font-size: 0.95rem;
+            border: 1px solid #a7f3d0;
         }
 
         .task-list, .penalty-list {
@@ -182,22 +165,16 @@
             align-items: center;
         }
 
-        .task-details h4 {
-            font-size: 0.95rem;
-        }
-
-        .task-details p {
-            font-size: 0.8rem;
-            color: var(--text-muted);
-        }
+        .task-details h4 { font-size: 0.95rem; margin-bottom: 0.2rem; }
+        .task-details p { font-size: 0.8rem; color: var(--text-muted); }
 
         .task-actions {
             display: flex;
-            gap: 0.5rem;
+            gap: 0.4rem;
         }
 
         .task-actions button {
-            padding: 0.4rem 0.75rem;
+            padding: 0.45rem 0.75rem;
             border-radius: 6px;
             border: none;
             font-size: 0.8rem;
@@ -206,22 +183,26 @@
         }
 
         .btn-sm-success { background: var(--primary); color: white; }
+        .btn-sm-danger { background: var(--danger); color: white; }
+        .btn-sm-warning { background: var(--warning); color: white; }
 
         .tabs {
             display: flex;
-            gap: 0.5rem;
+            gap: 0.4rem;
             margin-bottom: 1rem;
+            overflow-x: auto;
         }
 
         .tab {
             flex: 1;
-            padding: 0.5rem;
+            padding: 0.6rem 0.4rem;
             text-align: center;
             background: #e5e7eb;
-            border-radius: 6px;
+            border-radius: 8px;
             font-size: 0.85rem;
             font-weight: 600;
             cursor: pointer;
+            white-space: nowrap;
         }
 
         .tab.active {
@@ -239,7 +220,7 @@
             background: none;
             border: none;
             color: var(--text-muted);
-            font-size: 0.8rem;
+            font-size: 0.85rem;
             cursor: pointer;
             text-decoration: underline;
         }
@@ -260,17 +241,26 @@
             border-radius: 12px;
             padding: 1.5rem;
             width: 100%;
-            max-width: 400px;
+            max-width: 420px;
         }
 
         .info-first-access {
             background-color: #eff6ff;
             border: 1px solid #bfdbfe;
             color: #1e40af;
-            padding: 0.6rem;
-            border-radius: 6px;
-            font-size: 0.8rem;
+            padding: 0.65rem;
+            border-radius: 8px;
+            font-size: 0.825rem;
             margin-bottom: 1rem;
+        }
+
+        .category-header {
+            font-size: 0.85rem;
+            font-weight: bold;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin: 1rem 0 0.5rem 0;
         }
     </style>
 </head>
@@ -304,8 +294,9 @@
         <button class="btn" id="login-btn" onclick="login()">Entrar</button>
     </div>
 
-    <!-- TELA PRINCIPAL -->
+    <!-- TELA PRINCIPAL (LOGADO) -->
     <div id="app-screen" class="hidden">
+        <!-- HEADER USUÁRIO -->
         <div class="user-header">
             <div class="user-info">
                 <h3 id="display-name">Carregando...</h3>
@@ -313,62 +304,74 @@
             </div>
             <div class="stats-badge">
                 <div class="xp-tag" id="display-xp">0 XP</div>
-                <small id="display-level" style="font-size: 0.75rem; color: var(--text-muted); display:block; margin-top:0.2rem;">Nível 1</small>
+                <small id="display-level" style="font-size: 0.75rem; color: var(--text-muted); display:block; margin-top:0.25rem;">Nível 1</small>
             </div>
         </div>
 
         <br>
 
+        <!-- NAVEGAÇÃO FILHOS -->
         <div class="tabs" id="user-tabs">
             <div class="tab active" onclick="switchTab('tasks')">📋 Tarefas</div>
             <div class="tab" onclick="switchTab('store')">🎁 Lojinha</div>
             <div class="tab" onclick="switchTab('penalties')">⚠️ Penalidades</div>
         </div>
 
-        <!-- TAREFAS -->
+        <!-- ABA TAREFAS DAS CRIANÇAS -->
         <div id="tab-tasks" class="tab-content">
             <div class="card">
                 <h2>📋 Minhas Missões Hoje</h2>
-                <ul class="task-list" id="task-list-container"></ul>
+                
+                <div class="category-header">☀️ Tarefas Diárias</div>
+                <ul class="task-list" id="list-daily"></ul>
+
+                <div class="category-header">🔄 Rodízio</div>
+                <ul class="task-list" id="list-rotation"></ul>
+
+                <div class="category-header">⚡ Flexíveis / Extras</div>
+                <ul class="task-list" id="list-flexible"></ul>
             </div>
         </div>
 
-        <!-- LOJINHA -->
+        <!-- ABA LOJINHA -->
         <div id="tab-store" class="tab-content hidden">
             <div class="card">
                 <h2>🎁 Resgatar Recompensas</h2>
                 <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1rem;">
-                    Resgate seus prêmios com o XP acumulado!
+                    Troque seus pontos por prêmios! O valor do item será descontado do seu saldo.
                 </p>
                 <ul class="task-list" id="store-list-container"></ul>
             </div>
         </div>
 
-        <!-- PENALIDADES -->
+        <!-- ABA PENALIDADES -->
         <div id="tab-penalties" class="tab-content hidden">
             <div class="card">
-                <h2>⚠️ Registro de Penalidades</h2>
+                <h2>⚠️ Histórico de Penalidades</h2>
                 <ul class="penalty-list" id="penalty-list-container"></ul>
             </div>
         </div>
 
-        <!-- PAINEL DOS PAIS -->
+        <!-- PAINEL COMPLETO DOS PAIS -->
         <div id="parent-panel" class="hidden">
             <div class="tabs">
                 <div class="tab active" onclick="switchParentTab('approvals')">✅ Aprovações</div>
-                <div class="tab" onclick="switchParentTab('manage')">⚙️ Gerenciar</div>
+                <div class="tab" onclick="switchParentTab('penalties')">⚠️ Penalidades</div>
+                <div class="tab" onclick="switchParentTab('passwords')">🔑 Senhas</div>
                 <div class="tab" onclick="switchParentTab('suggestions')">💡 Sugestões</div>
             </div>
 
+            <!-- APROVAÇÕES DE TAREFAS E LOJA -->
             <div id="ptab-approvals" class="parent-tab-content card">
-                <h2>✅ Tarefas Pendentes</h2>
+                <h2>✅ Tarefas Aguardando Aprovação</h2>
                 <ul class="task-list" id="pending-tasks-container"></ul>
 
-                <h2 style="margin-top: 1.5rem;">🎁 Pedidos de Resgate (Lojinha)</h2>
+                <h2 style="margin-top: 1.5rem;">🎁 Resgates da Lojinha</h2>
                 <ul class="task-list" id="pending-store-container"></ul>
             </div>
 
-            <div id="ptab-manage" class="parent-tab-content card hidden">
+            <!-- GERENCIAR PENALIDADES (APLICAR E REMOVER) -->
+            <div id="ptab-penalties" class="parent-tab-content card hidden">
                 <h2>⚠️ Aplicar Penalidade</h2>
                 <div class="form-group">
                     <label>Para quem?</label>
@@ -380,17 +383,45 @@
                 </div>
                 <div class="form-group">
                     <label>Motivo:</label>
-                    <input type="text" id="penalize-reason" placeholder="Ex: Não guardou o sapato">
+                    <input type="text" id="penalize-reason" placeholder="Ex: Não guardou os brinquedos">
                 </div>
                 <div class="form-group">
                     <label>Perda de XP:</label>
                     <input type="number" id="penalize-xp" placeholder="Ex: 20">
                 </div>
                 <button class="btn btn-danger" onclick="applyPenalty()">Aplicar Penalidade</button>
+
+                <h2 style="margin-top: 1.5rem;">↩️ Reverter Penalidades</h2>
+                <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 0.75rem;">
+                    Aplicações por engano podem ser removidas aqui para devolver os pontos.
+                </p>
+                <ul class="penalty-list" id="parent-penalty-list"></ul>
             </div>
 
+            <!-- GERENCIAR E RESETAR SENHAS -->
+            <div id="ptab-passwords" class="parent-tab-content card hidden">
+                <h2>🔑 Resetar Senha dos Filhos</h2>
+                <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 1rem;">
+                    Se alguma criança esquecer a senha, você pode redefinir aqui para o próximo acesso.
+                </p>
+                <div class="form-group">
+                    <label>Selecione a Criança:</label>
+                    <select id="reset-user-select">
+                        <option value="Thiego">Thiego</option>
+                        <option value="Manuela">Manuela</option>
+                        <option value="Tayrone">Tayrone</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Nova Senha (ou deixe em branco para pedir no próximo acesso):</label>
+                    <input type="text" id="reset-new-pass" placeholder="Ex: 1234 (opcional)">
+                </div>
+                <button class="btn btn-warning" onclick="resetUserPassword()">Redefinir Senha</button>
+            </div>
+
+            <!-- SUGESTÕES RECEBIDAS -->
             <div id="ptab-suggestions" class="parent-tab-content card hidden">
-                <h2>💡 Sugestões Enviadas</h2>
+                <h2>💡 Sugestões das Crianças</h2>
                 <ul class="task-list" id="suggestions-list-container"></ul>
             </div>
         </div>
@@ -398,6 +429,7 @@
         <button class="btn btn-outline" onclick="logout()">Sair da Conta</button>
     </div>
 
+    <!-- RODAPÉ -->
     <footer>
         <button class="btn-suggestion" onclick="openSuggestionModal()">💡 Mandar uma Sugestão</button>
     </footer>
@@ -408,7 +440,7 @@
     <div class="modal-content">
         <h3 style="margin-bottom: 0.5rem;">💡 Mandar Sugestão</h3>
         <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1rem;">
-            Escreva sua ideia para melhorar o app ou um pedido especial!
+            Tem alguma ideia para melhorar o app ou um pedido de recompensa? Escreva abaixo!
         </p>
         <div class="form-group">
             <textarea id="suggestion-text" rows="4" placeholder="Escreva sua ideia aqui..."></textarea>
@@ -419,7 +451,6 @@
 </div>
 
 <script>
-    // Se quiser reiniciar o banco limpo no navegador, limpe o localStorage
     const defaultData = {
         users: {
             "Thiego": { name: "Thiego", pass: null, xp: 0, role: "Filho" },
@@ -428,27 +459,32 @@
             "Pais": { name: "Os Pais", pass: "1234", role: "Supervisor" }
         },
         tasks: [
-            { id: 1, title: "Lavar a Louça", xp: 20, assignedTo: "Thiego", status: "pending_completion" },
-            { id: 2, title: "Arrumar o Quarto", xp: 15, assignedTo: "Manuela", status: "pending_completion" },
-            { id: 3, title: "Juntar os Brinquedos", xp: 10, assignedTo: "Tayrone", status: "pending_completion" }
+            { id: 1, title: "Arrumar a Cama", type: "daily", xp: 10, assignedTo: "Thiego", status: "pending_completion" },
+            { id: 2, title: "Escovar os Dentes após refeições", type: "daily", xp: 10, assignedTo: "Thiego", status: "pending_completion" },
+            { id: 3, title: "Lavar a Louça do Almoço", type: "rotation", xp: 25, assignedTo: "Thiego", status: "pending_completion" },
+            { id: 4, title: "Organizar Sapatos na Entrada", type: "flexible", xp: 15, assignedTo: "Thiego", status: "pending_completion" },
+
+            { id: 5, title: "Arrumar o Quarto", type: "daily", xp: 10, assignedTo: "Manuela", status: "pending_completion" },
+            { id: 6, title: "Dobrar e Guardar as Roupas", type: "rotation", xp: 20, assignedTo: "Manuela", status: "pending_completion" },
+
+            { id: 7, title: "Juntar os Brinquedos", type: "daily", xp: 10, assignedTo: "Tayrone", status: "pending_completion" },
+            { id: 8, title: "Ajudar a Colocar a Mesa", type: "rotation", xp: 15, assignedTo: "Tayrone", status: "pending_completion" }
         ],
         storeItems: [
-            { id: 1, title: "30 min de Celular / Videogame Extra", cost: 50 },
-            { id: 2, title: "Escolher o Filme no Fim de Semana", cost: 80 },
-            { id: 3, title: "Passeio ou Sobremesa Especial", cost: 150 }
+            { id: 1, title: "🎮 30 min de Videogame / Celular Extra", cost: 50 },
+            { id: 2, title: "🎬 Escolher o Filme do Fim de Semana", cost: 80 },
+            { id: 3, title: "🍦 Passeio ou Sobremesa Especial", cost: 150 }
         ],
-        pendingApprovals: [],
         pendingStore: [],
         penalties: [],
         suggestions: []
     };
 
-    // Para evitar conflito com dados antigos salvos no navegador, renovamos a chave do banco
-    let appData = JSON.parse(localStorage.getItem('luta_diaria_v2')) || defaultData;
+    let appData = JSON.parse(localStorage.getItem('luta_diaria_v3')) || defaultData;
     let currentUser = null;
 
     function saveData() {
-        localStorage.setItem('luta_diaria_v2', JSON.stringify(appData));
+        localStorage.setItem('luta_diaria_v3', JSON.stringify(appData));
     }
 
     function checkUserFirstAccess() {
@@ -471,11 +507,11 @@
     }
 
     function getLevelInfo(xp) {
-        if (xp < 30) return "Nível 1: Iniciante Preguiçoso";
-        if (xp < 70) return "Nível 2: Caçador de Meia Perdida";
-        if (xp < 120) return "Nível 3: Dobrador de Lençol";
-        if (xp < 200) return "Nível 4: Mestre do Escorredor";
-        if (xp < 350) return "Nível 5: General da Vassoura";
+        if (xp < 30) return "Nível 1: Iniciante Preguiçoso 😴";
+        if (xp < 70) return "Nível 2: Caçador de Meia Perdida 🧦";
+        if (xp < 120) return "Nível 3: Dobrador de Lençol 🛏️";
+        if (xp < 200) return "Nível 4: Mestre do Escorredor 🍽️";
+        if (xp < 350) return "Nível 5: General da Vassoura 🧹";
         
         let lvl = 5;
         let requiredXp = 350;
@@ -488,8 +524,8 @@
         }
 
         const titles = [
-            "Guardião do Sabão", "Soberano da Louça", "Lorde do Pano de Chão", 
-            "Lenda Suprema do Lar", "Exterminador de Poeira", "Deus da Organização"
+            "Guardião do Sabão 🧼", "Soberano da Louça 👑", "Lorde do Pano de Chão 🧽", 
+            "Lenda Suprema do Lar 🏆", "Exterminador de Poeira ✨", "Deus da Organização ⚡"
         ];
         
         let titleIndex = (lvl - 6) % titles.length;
@@ -506,17 +542,15 @@
             return;
         }
 
-        // Se for o primeiro acesso da criança, salva a senha informada
         if (user.pass === null) {
             user.pass = passInput;
             saveData();
-            alert(`Senha cadastrada com sucesso para ${user.name}! Não se esqueça dela.`);
+            alert(`Senha cadastrada com sucesso para ${user.name}!`);
             currentUser = user;
             openDashboard();
             return;
         }
 
-        // Validação normal
         if (user.pass === passInput) {
             currentUser = user;
             openDashboard();
@@ -578,36 +612,45 @@
     }
 
     function renderUserTasks() {
-        const container = document.getElementById('task-list-container');
-        container.innerHTML = '';
+        const listDaily = document.getElementById('list-daily');
+        const listRotation = document.getElementById('list-rotation');
+        const listFlexible = document.getElementById('list-flexible');
+
+        listDaily.innerHTML = '';
+        listRotation.innerHTML = '';
+        listFlexible.innerHTML = '';
 
         const userTasks = appData.tasks.filter(t => t.assignedTo === currentUser.name);
-
-        if (userTasks.length === 0) {
-            container.innerHTML = '<p style="font-size:0.85rem; color: var(--text-muted);">Nenhuma tarefa para você hoje!</p>';
-            return;
-        }
 
         userTasks.forEach(task => {
             const li = document.createElement('li');
             li.className = 'task-item';
-            
+
             let actionBtn = '';
             if (task.status === 'pending_completion') {
                 actionBtn = `<button class="btn-sm-success" onclick="completeTask(${task.id})">Concluir</button>`;
             } else if (task.status === 'waiting_approval') {
-                actionBtn = `<span style="font-size:0.8rem; color: var(--warning); font-weight:bold;">Aguardando Pais</span>`;
+                actionBtn = `<span style="font-size:0.75rem; color: var(--warning); font-weight:bold;">⏳ Aguardando Pais</span>`;
+            } else if (task.status === 'completed') {
+                actionBtn = `<span style="font-size:0.75rem; color: var(--primary); font-weight:bold;">✅ Feito</span>`;
             }
 
             li.innerHTML = `
                 <div class="task-details">
                     <h4>${task.title}</h4>
-                    <p>Recompensa: +${task.xp} XP</p>
+                    <p>+${task.xp} XP</p>
                 </div>
                 <div class="task-actions">${actionBtn}</div>
             `;
-            container.appendChild(li);
+
+            if (task.type === 'daily') listDaily.appendChild(li);
+            else if (task.type === 'rotation') listRotation.appendChild(li);
+            else listFlexible.appendChild(li);
         });
+
+        if (!listDaily.children.length) listDaily.innerHTML = '<p style="font-size:0.8rem; color: var(--text-muted);">Nenhuma tarefa diária.</p>';
+        if (!listRotation.children.length) listRotation.innerHTML = '<p style="font-size:0.8rem; color: var(--text-muted);">Nenhuma tarefa de rodízio.</p>';
+        if (!listFlexible.children.length) listFlexible.innerHTML = '<p style="font-size:0.8rem; color: var(--text-muted);">Nenhuma tarefa flexível.</p>';
     }
 
     function completeTask(taskId) {
@@ -657,7 +700,7 @@
                 cost: item.cost
             });
             saveData();
-            alert('Pedido de resgate enviado para os pais!');
+            alert('Pedido de resgate enviado para aprovação dos pais!');
         }
     }
 
@@ -668,7 +711,7 @@
         const userPenalties = appData.penalties.filter(p => p.user === currentUser.name);
 
         if (userPenalties.length === 0) {
-            container.innerHTML = '<p style="font-size:0.85rem; color: var(--text-muted);">Nenhuma penalidade registrada! Parabéns!</p>';
+            container.innerHTML = '<p style="font-size:0.85rem; color: var(--text-muted);">Nenhuma penalidade registrada! Parabéns! 🎉</p>';
             return;
         }
 
@@ -678,7 +721,7 @@
             li.innerHTML = `
                 <div class="task-details">
                     <h4>${p.reason}</h4>
-                    <p>Perda: -${p.xp} XP</p>
+                    <p style="color: var(--danger); font-weight:bold;">-${p.xp} XP</p>
                 </div>
             `;
             container.appendChild(li);
@@ -686,13 +729,13 @@
     }
 
     function renderParentPanel() {
+        // 1. Tarefas Pendentes
         const pendingContainer = document.getElementById('pending-tasks-container');
         pendingContainer.innerHTML = '';
-
         const pendingTasks = appData.tasks.filter(t => t.status === 'waiting_approval');
 
         if (pendingTasks.length === 0) {
-            pendingContainer.innerHTML = '<p style="font-size:0.85rem; color: var(--text-muted);">Nenhuma tarefa pendente.</p>';
+            pendingContainer.innerHTML = '<p style="font-size:0.85rem; color: var(--text-muted);">Nenhuma tarefa aguardando aprovação.</p>';
         } else {
             pendingTasks.forEach(task => {
                 const li = document.createElement('li');
@@ -700,7 +743,7 @@
                 li.innerHTML = `
                     <div class="task-details">
                         <h4>${task.title} (${task.assignedTo})</h4>
-                        <p>XP: +${task.xp}</p>
+                        <p>+${task.xp} XP</p>
                     </div>
                     <div class="task-actions">
                         <button class="btn-sm-success" onclick="approveTask(${task.id})">Aprovar</button>
@@ -710,11 +753,12 @@
             });
         }
 
+        // 2. Pedidos da Lojinha Pendentes
         const storeContainer = document.getElementById('pending-store-container');
         storeContainer.innerHTML = '';
 
         if (appData.pendingStore.length === 0) {
-            storeContainer.innerHTML = '<p style="font-size:0.85rem; color: var(--text-muted);">Nenhum pedido de resgate.</p>';
+            storeContainer.innerHTML = '<p style="font-size:0.85rem; color: var(--text-muted);">Nenhum pedido de resgate pendente.</p>';
         } else {
             appData.pendingStore.forEach(req => {
                 const li = document.createElement('li');
@@ -725,13 +769,37 @@
                         <p>Custo: ${req.cost} XP</p>
                     </div>
                     <div class="task-actions">
-                        <button class="btn-sm-success" onclick="approveStoreRequest(${req.id})">Aprovar</button>
+                        <button class="btn-sm-success" onclick="approveStoreRequest(${req.id})">Aprovar Resgate</button>
                     </div>
                 `;
                 storeContainer.appendChild(li);
             });
         }
 
+        // 3. Lista de Penalidades para Reversão
+        const penaltyList = document.getElementById('parent-penalty-list');
+        penaltyList.innerHTML = '';
+
+        if (appData.penalties.length === 0) {
+            penaltyList.innerHTML = '<p style="font-size:0.85rem; color: var(--text-muted);">Nenhuma penalidade aplicada até o momento.</p>';
+        } else {
+            appData.penalties.forEach(p => {
+                const li = document.createElement('li');
+                li.className = 'task-item';
+                li.innerHTML = `
+                    <div class="task-details">
+                        <h4>${p.user}: ${p.reason}</h4>
+                        <p style="color: var(--danger);">-${p.xp} XP</p>
+                    </div>
+                    <div class="task-actions">
+                        <button class="btn-sm-warning" onclick="revertPenalty(${p.id})">↩️ Reverter</button>
+                    </div>
+                `;
+                penaltyList.appendChild(li);
+            });
+        }
+
+        // 4. Sugestões
         const suggContainer = document.getElementById('suggestions-list-container');
         suggContainer.innerHTML = '';
 
@@ -744,7 +812,7 @@
                 li.innerHTML = `
                     <div class="task-details">
                         <h4>"${s.text}"</h4>
-                        <p>Enviado por: ${s.user}</p>
+                        <p>Enviado por: <b>${s.user}</b></p>
                     </div>
                 `;
                 suggContainer.appendChild(li);
@@ -759,7 +827,7 @@
             appData.users[task.assignedTo].xp += task.xp;
             saveData();
             renderParentPanel();
-            alert(`Tarefa aprovada! +${task.xp} XP para ${task.assignedTo}`);
+            alert(`Tarefa aprovada! +${task.xp} XP concedidos a ${task.assignedTo}`);
         }
     }
 
@@ -772,14 +840,14 @@
                 appData.pendingStore.splice(index, 1);
                 saveData();
                 renderParentPanel();
-                alert(`Resgate aprovado! Descontado ${req.cost} XP de ${req.user}`);
+                alert(`Resgate aprovado! ${req.cost} XP descontados de ${req.user}`);
             }
         }
     }
 
     function applyPenalty() {
         const user = document.getElementById('penalize-user').value;
-        const reason = document.getElementById('penalize-reason').value;
+        const reason = document.getElementById('penalize-reason').value.trim();
         const xp = parseInt(document.getElementById('penalize-xp').value) || 0;
 
         if (!reason || xp <= 0) {
@@ -793,7 +861,36 @@
 
         document.getElementById('penalize-reason').value = '';
         document.getElementById('penalize-xp').value = '';
-        alert(`Penalidade aplicada a ${user}.`);
+        renderParentPanel();
+        alert(`Penalidade de -${xp} XP aplicada a ${user}.`);
+    }
+
+    function revertPenalty(penaltyId) {
+        const index = appData.penalties.findIndex(p => p.id === penaltyId);
+        if (index !== -1) {
+            const p = appData.penalties[index];
+            appData.users[p.user].xp += p.xp; // Devolve o XP
+            appData.penalties.splice(index, 1);
+            saveData();
+            renderParentPanel();
+            alert(`Penalidade revertida! Devolvidos +${p.xp} XP para ${p.user}.`);
+        }
+    }
+
+    function resetUserPassword() {
+        const targetUser = document.getElementById('reset-user-select').value;
+        const newPass = document.getElementById('reset-new-pass').value.trim();
+
+        if (newPass === '') {
+            appData.users[targetUser].pass = null;
+            alert(`A senha de ${targetUser} foi resetada! Ela/Ele poderá criar uma nova senha no próximo login.`);
+        } else {
+            appData.users[targetUser].pass = newPass;
+            alert(`A senha de ${targetUser} foi alterada para: ${newPass}`);
+        }
+
+        document.getElementById('reset-new-pass').value = '';
+        saveData();
     }
 
     function openSuggestionModal() {
@@ -806,9 +903,9 @@
     }
 
     function submitSuggestion() {
-        const text = document.getElementById('suggestion-text').value;
+        const text = document.getElementById('suggestion-text').value.trim();
         if (!text) {
-            alert('Escreva algo na sugestão!');
+            alert('Escreva algo na sua sugestão!');
             return;
         }
 
@@ -819,7 +916,7 @@
         alert('Sugestão enviada com sucesso! Os pais vão dar uma olhada.');
     }
 
-    // Checar o primeiro acesso ao carregar a página
+    // Inicialização ao carregar
     checkUserFirstAccess();
 </script>
 </body>
