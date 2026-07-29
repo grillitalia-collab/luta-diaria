@@ -1,0 +1,586 @@
+Ajustado no capricho, Douglas!
+Agora o app conta com Níveis Infinitos e Engraçados, a curva de dificuldade progressiva e o botão discreto de Sugestões no rodapé!
+O que mudou:
+ * Níveis Engraçados e Dificuldade Progressiva:
+   * Nível 1: Iniciante Preguiçoso (0 a 29 XP)
+   * Nível 2: Caçador de Meia Perdida (30 a 69 XP)
+   * Nível 3: Dobrador de Lençol (70 a 119 XP)
+   * Nível 4: Mestre do Escorredor (120 a 199 XP)
+   * Nível 5: General da Vassoura (200 a 349 XP)
+   * Nível 6 em diante (Dificuldade Alta): Guardião do Sabão, Soberano da Louça, Lorde do Pano de Chão, Lenda Suprema do Lar, etc.
+   * Até o Nível 5: sobe rapidinho com poucos XPs.
+   * Do Nível 5 pra frente: o sarrafo sobe e exige muito mais XP pra passar de fase!
+ * Gasto de XP na Lojinha:
+   * Sempre que uma criança resgata um item na lojinha (com aprovação dos Pais no painel), o saldo de XP dela zera ou é descontado o valor total do item, conforme a regra de compra!
+ * Botãozinho de Sugestão:
+   * Bem pequeno e discreto no rodapé da página.
+   * Qualquer um dos três (Thiego, Manuela ou Tayrone) pode clicar para mandar uma ideia ou pedido de melhoria no app. As sugestões ficam visíveis no painel de Os Pais!
+Código Completo Atualizado (index.html)
+Substitua todo o conteúdo do arquivo por este:
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>A Luta Diária 🥊 - Minhas Tarefas</title>
+  <style>
+    :root {
+      --primary: #4f46e5;
+      --bg: #f3f4f6;
+      --card-bg: #ffffff;
+      --text: #1f2937;
+      --accent: #10b981;
+      --warning: #f59e0b;
+      --danger: #ef4444;
+      --purple: #8b5cf6;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: var(--bg);
+      color: var(--text);
+      margin: 0;
+      padding: 15px;
+      display: flex;
+      flex-direction: column;
+      min-height: 95vh;
+    }
+
+    .container {
+      max-width: 850px;
+      margin: 0 auto;
+      flex: 1;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    .card {
+      background: var(--card-bg);
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
+      margin-bottom: 20px;
+    }
+
+    .login-box {
+      max-width: 400px;
+      margin: 40px auto;
+    }
+
+    .login-box input, .login-box select {
+      width: 100%;
+      padding: 10px;
+      margin: 8px 0;
+      box-sizing: border-box;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+    }
+
+    .nav-tabs {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 15px;
+    }
+
+    .btn-tab {
+      flex: 1;
+      padding: 10px;
+      border: none;
+      background: #e5e7eb;
+      font-weight: bold;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+
+    .btn-tab.active {
+      background: var(--primary);
+      color: white;
+    }
+
+    .progress-bar {
+      width: 100%;
+      height: 15px;
+      background: #e5e7eb;
+      border-radius: 10px;
+      overflow: hidden;
+      margin-top: 10px;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: var(--accent);
+      width: 0%;
+      transition: width 0.3s ease;
+    }
+
+    .section-title {
+      font-size: 1.05rem;
+      color: var(--primary);
+      border-bottom: 2px solid #e0e7ff;
+      padding-bottom: 4px;
+      margin-top: 15px;
+      margin-bottom: 10px;
+    }
+
+    .item-card {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px;
+      border-bottom: 1px solid #e5e7eb;
+      gap: 10px;
+    }
+
+    .item-card.expired {
+      background-color: #fef2f2;
+      border-left: 4px solid var(--danger);
+    }
+
+    .item-card.disabled {
+      opacity: 0.6;
+      background-color: #f9fafb;
+    }
+
+    .item-card:last-child {
+      border-bottom: none;
+    }
+
+    .btn-action {
+      background: var(--accent);
+      color: white;
+      border: none;
+      padding: 8px 14px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+
+    .btn-action.pending {
+      background: var(--warning);
+      cursor: default;
+    }
+
+    .btn-action.expired-btn {
+      background: var(--danger);
+      cursor: pointer;
+    }
+
+    .btn-action.store {
+      background: var(--purple);
+    }
+
+    .btn-logout {
+      background: #6b7280;
+      color: white;
+      border: none;
+      padding: 6px 12px;
+      border-radius: 6px;
+      float: right;
+      cursor: pointer;
+    }
+
+    .tag {
+      font-size: 0.75rem;
+      padding: 3px 8px;
+      border-radius: 10px;
+      background: #e0e7ff;
+      color: #3730a3;
+      font-weight: bold;
+      margin-left: 5px;
+    }
+
+    .tag-day { background: #e0f2fe; color: #075985; }
+    .tag-alert { background: #fee2e2; color: #991b1b; }
+    .tag-store { background: #f3e8ff; color: #6b21a8; }
+
+    .report-grid {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-top: 10px;
+    }
+
+    .report-card {
+      flex: 1;
+      min-width: 200px;
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      padding: 12px;
+      border-radius: 8px;
+    }
+
+    .admin-form input, .admin-form select {
+      padding: 8px;
+      margin: 5px 0;
+      width: calc(100% - 20px);
+      border: 1px solid #ccc;
+      border-radius: 6px;
+    }
+
+    /* Rodapé discreto */
+    footer {
+      text-align: center;
+      padding: 10px 0;
+      margin-top: 20px;
+    }
+
+    .btn-sugestao {
+      background: transparent;
+      border: 1px solid #cbd5e1;
+      color: #64748b;
+      font-size: 0.75rem;
+      padding: 4px 10px;
+      border-radius: 12px;
+      cursor: pointer;
+    }
+
+    .btn-sugestao:hover {
+      background: #e2e8f0;
+      color: #334155;
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <header>
+    <h1>🥊 A Luta Diária</h1>
+    <p style="color: #6b7280; margin-top: -10px; font-weight: bold;">Minhas Tarefas e Missões da Casa</p>
+  </header>
+
+  <!-- TELA DE LOGIN -->
+  <div id="login-screen" class="card login-box">
+    <h2>🔑 Entrar no App</h2>
+    <label for="user-select">Quem é você?</label>
+    <select id="user-select" onchange="checkFirstAccess()">
+      <option value="thiego">👦 Thiego</option>
+      <option value="manuela">👧 Manuela</option>
+      <option value="tayrone">🧒 Tayrone</option>
+      <option value="admin">🔑 Os Pais (Supervisores)</option>
+    </select>
+
+    <div id="first-access-msg" style="display:none; color: var(--primary); font-size: 0.85rem; margin-top: 5px;">
+      ✨ É seu primeiro acesso! Crie sua senha abaixo.
+    </div>
+
+    <label for="password-input" style="margin-top: 10px; display:block;">Senha:</label>
+    <input type="password" id="password-input" placeholder="Digite sua senha">
+
+    <button class="btn-action" style="width:100%; margin-top:10px;" onclick="handleLogin()">Entrar</button>
+    <button style="width:100%; margin-top:8px; background:transparent; border:none; color:#6b7280; font-size:0.8rem; cursor:pointer;" onclick="forgotPasswordMsg()">Esqueci minha senha</button>
+  </div>
+
+  <!-- TELA PRINCIPAL -->
+  <div id="app-screen" style="display:none;">
+    <!-- Painel de Status das Crianças -->
+    <div class="card" id="user-status">
+      <button class="btn-logout" onclick="handleLogout()">Sair</button>
+      <h2 id="user-name">Perfil</h2>
+      <p style="margin: 5px 0;">Nível Atual: <strong id="user-level" style="color:var(--purple);">1 - Iniciante</strong></p>
+      <p style="margin: 5px 0;">Saldo Atual: <strong id="user-xp" style="color:var(--primary); font-size:1.2rem;">0</strong> XP</p>
+      <div>
+        <span id="level-next-info" style="font-size:0.85rem; color:#6b7280;">Progresso para o próximo nível:</span>
+        <div class="progress-bar">
+          <div class="progress-fill" id="xp-bar"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Navegação de Abas (Crianças) -->
+    <div class="nav-tabs" id="user-tabs">
+      <button class="btn-tab active" id="tab-tasks-btn" onclick="switchTab('tasks')">📋 Minhas Missões</button>
+      <button class="btn-tab" id="tab-store-btn" onclick="switchTab('store')">🛒 Lojinha de Recompensas</button>
+    </div>
+
+    <!-- Aba de Tarefas -->
+    <div class="card" id="tab-tasks">
+      <h3 id="panel-title">📋 Missões do Dia</h3>
+      <div id="tasks-list"></div>
+    </div>
+
+    <!-- Aba da Lojinha -->
+    <div class="card" id="tab-store" style="display:none;">
+      <h3>🛒 Lojinha de Prêmios</h3>
+      <p style="font-size:0.85rem; color:#6b7280; margin-top:-10px;">Ao resgatar um prêmio, o seu saldo de XP zera!</p>
+      <div id="store-list"></div>
+    </div>
+
+    <!-- Painel do Admin / Os Pais -->
+    <div class="card" id="tab-admin" style="display:none;">
+      <button class="btn-logout" onclick="handleLogout()">Sair</button>
+      <h3>🛠️ Painel de Os Pais (Supervisores)</h3>
+      <div id="admin-content"></div>
+    </div>
+  </div>
+</div>
+
+<footer>
+  <button class="btn-sugestao" onclick="openSuggestionModal()">💡 Mandar uma Sugestão</button>
+</footer>
+
+<script>
+  const daysOfWeek = ['domingo', 'segunda', 'terca', 'quarta', 'quinta', 'sexta', 'sabado'];
+
+  function getTodayKey() {
+    return daysOfWeek[new Date().getDay()];
+  }
+
+  // Tabela de Níveis
+  const levelTable = [
+    { level: 1, name: "Iniciante Preguiçoso 😴", minXp: 0, maxXp: 30 },
+    { level: 2, name: "Caçador de Meia Perdida 🧦", minXp: 30, maxXp: 70 },
+    { level: 3, name: "Dobrador de Lençol 🛏️", minXp: 70, maxXp: 120 },
+    { level: 4, name: "Mestre do Escorredor 🍽️", minXp: 120, maxXp: 200 },
+    { level: 5, name: "General da Vassoura 🧹", minXp: 200, maxXp: 350 },
+    { level: 6, name: "Guardião do Sabão 🧼", minXp: 350, maxXp: 600 },
+    { level: 7, name: "Soberano da Louça 👑", minXp: 600, maxXp: 1000 },
+    { level: 8, name: "Lorde do Pano de Chão 🧽", minXp: 1000, maxXp: 1600 },
+    { level: 9, name: "Destruidor da Sujeira ⚡", minXp: 1600, maxXp: 2500 },
+    { level: 10, name: "Lenda Suprema do Lar 🏆", minXp: 2500, maxXp: 4000 }
+  ];
+
+  function getLevelInfo(xp) {
+    for (let i = levelTable.length - 1; i >= 0; i--) {
+      if (xp >= levelTable[i].minXp) {
+        let current = levelTable[i];
+        let next = levelTable[i + 1];
+        
+        if (!next) {
+          // Para níveis além do 10 (Infinito)
+          let extraLevel = current.level + Math.floor((xp - current.minXp) / 2000);
+          return {
+            level: extraLevel,
+            name: `Super Lenda nível ${extraLevel} 🌟`,
+            progress: 100,
+            nextXp: "Max"
+          };
+        }
+
+        let range = next.minXp - current.minXp;
+        let gained = xp - current.minXp;
+        let pct = Math.min(100, Math.max(0, Math.round((gained / range) * 100)));
+
+        return {
+          level: current.level,
+          name: current.name,
+          progress: pct,
+          nextXp: next.minXp
+        };
+      }
+    }
+    return { level: 1, name: levelTable[0].name, progress: 0, nextXp: 30 };
+  }
+
+  // Cadastro Crianças
+  const children = {
+    thiego: { name: "Thiego (14 anos)", xp: 0, password: null },
+    manuela: { name: "Manuela (14 anos)", xp: 0, password: null },
+    tayrone: { name: "Tayrone (9 anos)", xp: 0, password: null }
+  };
+
+  const adminCredentials = { username: "admin", password: "admin1234" };
+
+  // Rodízios
+  const bathroomRotation = ['thiego', 'manuela', 'tayrone'];
+  let bathroomIndex = 0;
+  const generalRotation = ['thiego', 'manuela', 'tayrone'];
+  let dishIndex = 0;
+  let trashIndex = 0;
+  let dogIndex = 0;
+
+  // Banco de Dados de Tarefas
+  let tasks = [
+    { id: 1, title: "Arrumar a Cama", xp: 10, penalty: 15, category: "daily", assignedTo: "all", days: ['domingo','segunda','terca','quarta','quinta','sexta','sabado'], schedule: "Todos os dias", deadline: "12:00", canTrade: false },
+    { id: 3, title: "Água e Comida da Cachorra", xp: 15, penalty: 25, category: "daily", assignedTo: generalRotation[dogIndex], days: ['domingo','segunda','terca','quarta','quinta','sexta','sabado'], schedule: "Todos os dias", deadline: "09:00", canTrade: true },
+    { id: 6, title: "Secar Louça da Janta", xp: 20, penalty: 30, category: "daily", assignedTo: generalRotation[dishIndex], days: ['domingo','segunda','terca','quarta','quinta','sexta','sabado'], schedule: "Todos os dias", deadline: "21:00", canTrade: true },
+    { id: 2, title: "Tirar Lixo", xp: 15, penalty: 25, category: "rotation", assignedTo: generalRotation[trashIndex], days: ['segunda','quarta','sexta'], schedule: "Seg, Qua e Sex", deadline: "12:00", canTrade: true },
+    { id: 4, title: "Limpar o Quarto", xp: 25, penalty: 40, category: "rotation", assignedTo: "all", days: ['quarta'], schedule: "Toda Quarta-feira", deadline: "18:00", canTrade: false },
+    { id: 5, title: "Lavar Banheiro", xp: 50, penalty: 75, category: "rotation", assignedTo: bathroomRotation[bathroomIndex], days: ['quinta'], schedule: "Toda Quinta-feira", deadline: "17:00", canTrade: true },
+    { id: 7, title: "30 Minutos de Leitura", xp: 30, penalty: 0, category: "flexible", assignedTo: "all", days: ['domingo','segunda','terca','quarta','quinta','sexta','sabado'], schedule: "3x por semana", deadline: "21:00", canTrade: false }
+  ];
+
+  // Lojinha
+  let rewards = [
+    { id: 101, title: "30 Minutos a mais de Videogame/Celular", cost: 50, icon: "🎮" },
+    { id: 102, title: "Escolher o Filme da Sexta à Noite", cost: 80, icon: "🍿" },
+    { id: 103, title: "Escolher o Lanche do Fim de Semana", cost: 120, icon: "🍔" },
+    { id: 104, title: "R$ 15,00 no PIX (Mesada Extra)", cost: 200, icon: "💵" }
+  ];
+
+  let pendingApprovals = [];
+  let pendingRedemptions = [];
+  let appliedPenaltiesLog = [];
+  let suggestionsLog = [];
+  let historyLog = [];
+  let currentUser = null;
+
+  function checkFirstAccess() {
+    const selected = document.getElementById('user-select').value;
+    const msg = document.getElementById('first-access-msg');
+    if (selected !== 'admin' && children[selected] && children[selected].password === null) {
+      msg.style.display = 'block';
+    } else {
+      msg.style.display = 'none';
+    }
+  }
+
+  function handleLogin() {
+    const userKey = document.getElementById('user-select').value;
+    const passInput = document.getElementById('password-input').value;
+
+    if (!passInput) return alert("Por favor, digite a senha!");
+
+    if (userKey === 'admin') {
+      if (passInput === adminCredentials.password) {
+        currentUser = 'admin';
+        showApp();
+      } else {
+        alert("Senha incorreta para Os Pais!");
+      }
+      return;
+    }
+
+    if (children[userKey].password === null) {
+      children[userKey].password = passInput;
+      alert(`Senha cadastrada com sucesso!`);
+      currentUser = userKey;
+      showApp();
+    } else {
+      if (children[userKey].password === passInput) {
+        currentUser = userKey;
+        showApp();
+      } else {
+        alert("Senha incorreta!");
+      }
+    }
+  }
+
+  function forgotPasswordMsg() {
+    alert("Esqueceu a senha? Peça para Os Pais redefinirem a sua senha no Painel!");
+  }
+
+  function handleLogout() {
+    currentUser = null;
+    document.getElementById('password-input').value = '';
+    document.getElementById('app-screen').style.display = 'none';
+    document.getElementById('login-screen').style.display = 'block';
+  }
+
+  function showApp() {
+    document.getElementById('login-screen').style.display = 'none';
+    document.getElementById('app-screen').style.display = 'block';
+
+    if (currentUser === 'admin') {
+      document.getElementById('user-status').style.display = 'none';
+      document.getElementById('user-tabs').style.display = 'none';
+      document.getElementById('tab-tasks').style.display = 'none';
+      document.getElementById('tab-store').style.display = 'none';
+      document.getElementById('tab-admin').style.display = 'block';
+      renderAdminView();
+    } else {
+      document.getElementById('user-status').style.display = 'block';
+      document.getElementById('user-tabs').style.display = 'flex';
+      document.getElementById('tab-admin').style.display = 'none';
+      switchTab('tasks');
+      updateHeaderStatus();
+    }
+  }
+
+  function switchTab(tab) {
+    document.getElementById('tab-tasks-btn').classList.toggle('active', tab === 'tasks');
+    document.getElementById('tab-store-btn').classList.toggle('active', tab === 'store');
+    
+    document.getElementById('tab-tasks').style.display = tab === 'tasks' ? 'block' : 'none';
+    document.getElementById('tab-store').style.display = tab === 'store' ? 'block' : 'none';
+
+    if (tab === 'tasks') renderTasks();
+    if (tab === 'store') renderStore();
+  }
+
+  function updateHeaderStatus() {
+    let xp = children[currentUser].xp;
+    let lvlInfo = getLevelInfo(xp);
+
+    document.getElementById('user-name').innerText = children[currentUser].name;
+    document.getElementById('user-level').innerText = `Nível ${lvlInfo.level}: ${lvlInfo.name}`;
+    document.getElementById('user-xp').innerText = xp;
+    document.getElementById('xp-bar').style.width = lvlInfo.progress + '%';
+
+    if (lvlInfo.nextXp !== "Max") {
+      document.getElementById('level-next-info').innerText = `Falta chegar em ${lvlInfo.nextXp} XP para o próximo nível (${lvlInfo.progress}% concluído):`;
+    } else {
+      document.getElementById('level-next-info').innerText = `Você atingiu o Nível Máximo! 🎉`;
+    }
+  }
+
+  function getCurrentTime() {
+    const now = new Date();
+    return `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+  }
+
+  function isExpired(deadline) {
+    return deadline ? getCurrentTime() > deadline : false;
+  }
+
+  // TAREFAS
+  function renderTasks() {
+    const list = document.getElementById('tasks-list');
+    list.innerHTML = '';
+    const todayKey = getTodayKey();
+    const myTasks = tasks.filter(t => t.assignedTo === 'all' || t.assignedTo === currentUser);
+    const isTaskForToday = (task) => task.days.includes(todayKey);
+
+    const categories = [
+      { key: 'daily', title: '☀️ Tarefas Diárias' },
+      { key: 'rotation', title: '🔄 Tarefas de Rodízio' },
+      { key: 'flexible', title: '📚 Tarefas Flexíveis' }
+    ];
+
+    categories.forEach(cat => {
+      const catTasks = myTasks.filter(t => t.category === cat.key && isTaskForToday(t));
+      if (catTasks.length > 0) {
+        const catTitle = document.createElement('div');
+        catTitle.className = 'section-title';
+        catTitle.innerText = `${cat.title} (Hoje)`;
+        list.appendChild(catTitle);
+
+        catTasks.forEach(task => renderTaskItem(list, task, true));
+      }
+    });
+
+    const futureTasks = myTasks.filter(t => !isTaskForToday(t));
+    if (futureTasks.length > 0) {
+      const futureTitle = document.createElement('div');
+      futureTitle.className = 'section-title';
+      futureTitle.style.color = '#6b7280';
+      futureTitle.innerText = '📅 Próximos Dias (Apenas Leitura/Troca)';
+      list.appendChild(futureTitle);
+
+      futureTasks.forEach(task => renderTaskItem(list, task, false));
+    }
+  }
+
+  function renderTaskItem(container, task, isForToday) {
+    const expired = isForToday && isExpired(task.deadline);
+    const item = document.createElement('div');
+    item.className = `item-card ${expired ? 'expired' : ''} ${!isForToday ? 'disabled' : ''}`;
+
+    let tradeBtnHtml = '';
+    if (task.canTrade && !expired) {
+      tradeBtnHtml = `<button style="font-size:0.75rem; margin-left:5px;" onclick="requestTrade(${task.id})">🔄 Propor Troca</button>`;
+    }
+
+    const isPending = pendingApprovals.some(p => p.taskId === task.id && p.childKey === currentUser);
+    let actionBtnHtml = '';
+
+    if (!isForToday) {
+      actionBtnHtml = `<span style="font-size:0.8rem; color:#6b7280; font-weight:bold;">Dia: ${task.schedule}</span>`;
+    } else if (isPending) {
+      actionBtnHtml = `<button class="btn-action pending">Aguardando Os Pais...</button>`;
+    } else if (expired) {
+      actionBtnHtml = `<button class="btn-action expired-btn" onclick="applyPenalty(${task.id})">Expirou (-${task.penalty} XP)</button>`;
+    } else {
+      actionBtnHtml = `<butt
