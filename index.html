@@ -13,7 +13,8 @@
       --accent: #10b981;
       --warning: #f59e0b;
       --danger: #ef4444;
-      --purple: #8b5cf6;
+      --purple: #6d28d9;
+      --purple-light: #8b5cf6;
     }
 
     body {
@@ -31,6 +32,7 @@
       max-width: 850px;
       margin: 0 auto;
       flex: 1;
+      width: 100%;
     }
 
     header {
@@ -150,13 +152,13 @@
     }
 
     .btn-action.store {
-      background: var(--purple);
+      background: var(--purple-light);
     }
 
     .btn-logout {
-      background: #6b7280;
+      background: rgba(255, 255, 255, 0.2);
       color: white;
-      border: none;
+      border: 1px solid rgba(255,255,255,0.4);
       padding: 6px 12px;
       border-radius: 6px;
       float: right;
@@ -177,28 +179,66 @@
     .tag-alert { background: #fee2e2; color: #991b1b; }
     .tag-store { background: #f3e8ff; color: #6b21a8; }
 
-    .report-grid {
+    /* ESTILOS DO PAINEL ROXO (IGUAL AI STUDIO) */
+    .admin-banner {
+      background: linear-gradient(135deg, #3b0764 0%, #6d28d9 50%, #4c1d95 100%);
+      color: white;
+      padding: 20px;
+      border-radius: 16px;
+      margin-bottom: 20px;
+      box-shadow: 0 10px 15px -3px rgba(109, 40, 217, 0.3);
+    }
+
+    .admin-banner h2 {
+      margin: 0 0 5px 0;
+      font-size: 1.3rem;
+    }
+
+    .admin-banner p {
+      margin: 0 0 15px 0;
+      font-size: 0.8rem;
+      opacity: 0.85;
+    }
+
+    .admin-nav-grid {
       display: flex;
-      gap: 10px;
-      flex-wrap: wrap;
-      margin-top: 10px;
+      flex-direction: column;
+      gap: 8px;
     }
 
-    .report-card {
-      flex: 1;
-      min-width: 200px;
-      background: #f8fafc;
+    .admin-nav-btn {
+      background: rgba(255, 255, 255, 0.15);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      color: white;
+      padding: 10px 14px;
+      border-radius: 10px;
+      font-size: 0.85rem;
+      font-weight: bold;
+      cursor: pointer;
+      text-align: left;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .admin-nav-btn.active {
+      background: white;
+      color: var(--purple);
+    }
+
+    .report-card-ai {
+      background: #ffffff;
       border: 1px solid #e2e8f0;
-      padding: 12px;
-      border-radius: 8px;
+      border-radius: 12px;
+      padding: 15px;
+      margin-bottom: 12px;
     }
 
-    .admin-form input, .admin-form select {
-      padding: 8px;
-      margin: 5px 0;
-      width: calc(100% - 20px);
-      border: 1px solid #ccc;
-      border-radius: 6px;
+    .report-header-ai {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
     }
 
     footer {
@@ -208,18 +248,14 @@
     }
 
     .btn-sugestao {
-      background: transparent;
+      background: white;
       border: 1px solid #cbd5e1;
       color: #64748b;
-      font-size: 0.75rem;
-      padding: 4px 10px;
-      border-radius: 12px;
+      font-size: 0.8rem;
+      padding: 8px 16px;
+      border-radius: 20px;
       cursor: pointer;
-    }
-
-    .btn-sugestao:hover {
-      background: #e2e8f0;
-      color: #334155;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.05);
     }
   </style>
 </head>
@@ -256,9 +292,9 @@
   <!-- TELA PRINCIPAL -->
   <div id="app-screen" style="display:none;">
     <div class="card" id="user-status">
-      <button class="btn-logout" onclick="handleLogout()">Sair</button>
+      <button class="btn-logout" style="background:#6b7280;" onclick="handleLogout()">Sair</button>
       <h2 id="user-name">Perfil</h2>
-      <p style="margin: 5px 0;">Nível Atual: <strong id="user-level" style="color:var(--purple);">1 - Iniciante</strong></p>
+      <p style="margin: 5px 0;">Nível Atual: <strong id="user-level" style="color:var(--purple-light);">1 - Iniciante</strong></p>
       <p style="margin: 5px 0;">Saldo Atual: <strong id="user-xp" style="color:var(--primary); font-size:1.2rem;">0</strong> XP</p>
       <div>
         <span id="level-next-info" style="font-size:0.85rem; color:#6b7280;">Progresso para o próximo nível:</span>
@@ -284,9 +320,22 @@
       <div id="store-list"></div>
     </div>
 
-    <div class="card" id="tab-admin" style="display:none;">
-      <button class="btn-logout" onclick="handleLogout()">Sair</button>
-      <h3>🛠️ Painel de Os Pais (Supervisores)</h3>
+    <!-- PAINEL ROXO DOS PAIS -->
+    <div id="tab-admin" style="display:none;">
+      <div class="admin-banner">
+        <button class="btn-logout" onclick="handleLogout()">Sair</button>
+        <h2>🛠️ Painel de Os Pais (Supervisores)</h2>
+        <p>Gerencie missões, aprove validações, reverta penalidades, configure recompensas e acompanhe o desempenho.</p>
+
+        <div class="admin-nav-grid">
+          <button class="admin-nav-btn active" id="adm-btn-report" onclick="setAdminSubTab('report')">📊 Relatório Semanal</button>
+          <button class="admin-nav-btn" id="adm-btn-pending" onclick="setAdminSubTab('pending')">📌 Pendentes (<span id="count-pending">0</span>)</button>
+          <button class="admin-nav-btn" id="adm-btn-tasks" onclick="setAdminSubTab('tasks')">⚙️ Gerenciar Missões</button>
+          <button class="admin-nav-btn" id="adm-btn-store" onclick="setAdminSubTab('store')">🛒 Gerenciar Lojinha</button>
+          <button class="admin-nav-btn" id="adm-btn-members" onclick="setAdminSubTab('members')">👑 Membros & Ajustes</button>
+        </div>
+      </div>
+
       <div id="admin-content"></div>
     </div>
   </div>
@@ -348,9 +397,9 @@
   }
 
   const children = {
-    thiego: { name: "Thiego (14 anos)", xp: 0, password: null },
-    manuela: { name: "Manuela (14 anos)", xp: 0, password: null },
-    tayrone: { name: "Tayrone (9 anos)", xp: 0, password: null }
+    thiego: { name: "Thiego", xp: 100, done: 1, expired: 0, password: null },
+    manuela: { name: "Manuela", xp: 120, done: 1, expired: 0, password: null },
+    tayrone: { name: "Tayrone", xp: 80, done: 0, expired: 0, password: null }
   };
 
   const adminCredentials = { username: "admin", password: "admin1234" };
@@ -383,8 +432,12 @@
   let pendingRedemptions = [];
   let appliedPenaltiesLog = [];
   let suggestionsLog = [];
-  let historyLog = [];
+  let historyLog = [
+    { childKey: 'manuela', taskTitle: "Arrumar a Cama", xp: 10 },
+    { childKey: 'thiego', taskTitle: "30 Minutos de Leitura", xp: 30 }
+  ];
   let currentUser = null;
+  let activeAdminSubTab = 'report';
 
   function checkFirstAccess() {
     const selected = document.getElementById('user-select').value;
@@ -581,8 +634,8 @@
     if (!task) return;
     
     children[currentUser].xp = Math.max(0, children[currentUser].xp - task.penalty);
+    children[currentUser].expired++;
     appliedPenaltiesLog.push({ id: Date.now(), childKey: currentUser, taskId: task.id, title: task.title, penalty: task.penalty });
-    historyLog.unshift({ childKey: currentUser, taskTitle: task.title, status: 'expired', xp: -task.penalty });
 
     alert(`Prazo expirado! Descontados ${task.penalty} XP.`);
     updateHeaderStatus();
@@ -595,7 +648,7 @@
     let target = prompt(`Trocar "${task.title}" com quem?\nOpções: ${siblings.join(', ')}`);
     if (target && children[target]) {
       task.assignedTo = target;
-      alert(`A tarefa foi repassada para ${children[target].name.split(' ')[0]}.`);
+      alert(`A tarefa foi repassada para ${children[target].name}.`);
       renderTasks();
     }
   }
@@ -611,7 +664,7 @@
 
       let canBuy = currentXp >= reward.cost;
       let buyBtn = canBuy 
-        ? `<button class="btn-action store" onclick="requestRedeem(${reward.id})">Resgatar (Zerar XP)</button>`
+        ? `<button class="btn-action store" onclick="requestRedeem(${reward.id})">Resgatar</button>`
         : `<button class="btn-action" style="background:#cbd5e1; cursor:not-allowed;">Faltam ${reward.cost - currentXp} XP</button>`;
 
       item.innerHTML = `
@@ -630,164 +683,137 @@
     const reward = rewards.find(r => r.id === rewardId);
     if (!reward) return;
 
-    if (confirm(`Deseja resgatar "${reward.title}"? Ao ser aprovado pelos seus Pais, seu saldo de XP será ZERADO!`)) {
-      pendingRedemptions.push({ rewardId: reward.id, childKey: currentUser, title: reward.title });
-      alert("Pedido de resgate enviado para Os Pais!");
-      renderStore();
-    }
+    pendingRedemptions.push({ rewardId: reward.id, childKey: currentUser, title: reward.title, cost: reward.cost });
+    alert("Pedido de resgate enviado para Os Pais!");
+    renderStore();
   }
 
-  function openSuggestionModal() {
-    let text = prompt("💡 Digite sua sugestão ou ideia para o aplicativo:");
-    if (text) {
-      let author = currentUser ? (currentUser === 'admin' ? 'Os Pais' : children[currentUser].name) : 'Anônimo';
-      suggestionsLog.push({ author: author, text: text, date: new Date().toLocaleTimeString() });
-      alert("Sugestão enviada com sucesso! Os Pais verão no painel.");
-    }
+  /* ABAS DO PAINEL DOS PAIS (AI STUDIO) */
+  function setAdminSubTab(tab) {
+    activeAdminSubTab = tab;
+    ['report', 'pending', 'tasks', 'store', 'members'].forEach(t => {
+      const el = document.getElementById(`adm-btn-${t}`);
+      if (el) el.classList.toggle('active', t === tab);
+    });
+    renderAdminView();
   }
 
   function renderAdminView() {
+    document.getElementById('count-pending').innerText = pendingApprovals.length + pendingRedemptions.length;
     const container = document.getElementById('admin-content');
-    
-    let storeHtml = `<h4>🛒 Pedidos de Resgate da Lojinha (Zera XP)</h4>`;
-    if (pendingRedemptions.length === 0) {
-      storeHtml += `<p style="font-size:0.85rem; color:#6b7280;">Nenhum pedido de resgate pendente.</p>`;
-    } else {
-      pendingRedemptions.forEach((item, index) => {
-        storeHtml += `
-          <div class="item-card" style="background:#f3e8ff;">
-            <div><strong>${children[item.childKey].name}</strong> quer resgatar: <u>${item.title}</u></div>
-            <button class="btn-action store" onclick="approveRedeem(${index})">Aprovar e ZERAR XP</button>
-          </div>
-        `;
-      });
-    }
+    container.innerHTML = '';
 
-    let approvalsHtml = `<hr><h4>📌 Tarefas Concluídas (Aguardando Check)</h4>`;
-    if (pendingApprovals.length === 0) {
-      approvalsHtml += `<p style="font-size:0.85rem; color:#6b7280;">Nenhuma tarefa aguardando aprovação.</p>`;
-    } else {
-      pendingApprovals.forEach((item, index) => {
-        approvalsHtml += `
-          <div class="item-card">
-            <div><strong>${children[item.childKey].name}</strong> concluiu: <u>${item.title}</u></div>
-            <button class="btn-action" onclick="approveTask(${index})">Aprovar Check (+${item.xp} XP)</button>
-          </div>
-        `;
-      });
-    }
-
-    let reverseHtml = `<hr><h4>🔄 Reverter Penalidade (Devolver XP)</h4>`;
-    if (appliedPenaltiesLog.length === 0) {
-      reverseHtml += `<p style="font-size:0.85rem; color:#6b7280;">Nenhuma penalidade para reverter.</p>`;
-    } else {
-      appliedPenaltiesLog.forEach((item, index) => {
-        reverseHtml += `
-          <div class="item-card" style="background:#fff7ed;">
-            <div><strong>${children[item.childKey].name}</strong> perdeu -${item.penalty} XP em <u>${item.title}</u></div>
-            <button class="btn-action" style="background:var(--warning);" onclick="reversePenalty(${index})">Devolver XP</button>
-          </div>
-        `;
-      });
-    }
-
-    let suggestionsHtml = `<hr><h4>💡 Sugestões Enviadas pelas Crianças</h4>`;
-    if (suggestionsLog.length === 0) {
-      suggestionsHtml += `<p style="font-size:0.85rem; color:#6b7280;">Nenhuma sugestão enviada ainda.</p>`;
-    } else {
-      suggestionsLog.forEach(s => {
-        suggestionsHtml += `
-          <div class="item-card" style="background:#f0fdf4;">
-            <div><strong>${s.author}:</strong> "${s.text}"</div>
-            <span style="font-size:0.75rem; color:#6b7280;">${s.date}</span>
-          </div>
-        `;
-      });
-    }
-
-    let reportHtml = `<hr><h4>📊 Relatório de Desempenho Semanal</h4><div class="report-grid">`;
-    Object.keys(children).forEach(key => {
-      const child = children[key];
-      const completed = historyLog.filter(h => h.childKey === key && h.status === 'completed').length;
-      const expired = historyLog.filter(h => h.childKey === key && h.status === 'expired').length;
-      const lvl = getLevelInfo(child.xp);
-
-      reportHtml += `
-        <div class="report-card">
-          <strong style="font-size:1.1rem; color:var(--primary);">${child.name.split(' ')[0]}</strong>
-          <p style="margin:3px 0; font-size:0.85rem; color:var(--purple);">Nível ${lvl.level}: ${lvl.name}</p>
-          <p style="margin:3px 0; font-size:0.9rem;">✅ Feitas: <strong>${completed}</strong></p>
-          <p style="margin:3px 0; font-size:0.9rem; color:var(--danger);">❌ Expiradas: <strong>${expired}</strong></p>
-          <p style="margin:3px 0; font-size:0.85rem; color:#6b7280;">Saldo XP: <strong>${child.xp}</strong></p>
+    if (activeAdminSubTab === 'report') {
+      let html = `<div class="card">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+          <h3 style="margin:0;">📊 Relatório de Desempenho Semanal</h3>
+          <button style="padding:6px 10px; border:1px solid #ccc; border-radius:6px; background:white; font-size:0.75rem; cursor:pointer;" onclick="resetWeek()">Zerar Relatório</button>
         </div>
       `;
-    });
-    reportHtml += `</div><button style="margin-top:10px; font-size:0.8rem;" onclick="resetWeek()">Zerar Relatório Semanal</button>`;
 
-    let resetPassHtml = `
-      <hr>
-      <h4>🔑 Redefinir Senha das Crianças</h4>
-      <div class="admin-form">
-        <select id="reset-user-select">
-          <option value="thiego">👦 Thiego</option>
-          <option value="manuela">👧 Manuela</option>
-          <option value="tayrone">🧒 Tayrone</option>
-        </select>
-        <input type="password" id="reset-new-pass" placeholder="Digite a nova senha">
-        <button class="btn-action" style="margin-top:5px;" onclick="resetChildPassword()">Resetar Senha</button>
-      </div>
-    `;
+      Object.keys(children).forEach(k => {
+        const c = children[k];
+        const lvl = getLevelInfo(c.xp);
+        html += `
+          <div class="report-card-ai">
+            <div class="report-header-ai">
+              <div>
+                <strong>${c.name}</strong><br>
+                <span class="tag tag-store">${lvl.name}</span>
+              </div>
+              <span style="font-size:1.1rem; font-weight:bold; color:var(--primary);">${c.xp} XP</span>
+            </div>
+            <div style="font-size:0.85rem; color:#4b5563;">
+              <p style="margin:3px 0;">✅ Feitas nesta semana: <strong>${c.done}</strong></p>
+              <p style="margin:3px 0;">❌ Expiradas / Atrasadas: <strong>${c.expired}</strong></p>
+              <p style="margin:3px 0;">📈 Taxa de Sucesso: <strong>${(c.done + c.expired) > 0 ? Math.round((c.done / (c.done + c.expired)) * 100) : 100}%</strong></p>
+            </div>
+          </div>
+        `;
+      });
 
-    container.innerHTML = storeHtml + approvalsHtml + reverseHtml + suggestionsHtml + reportHtml + resetPassHtml;
-  }
+      html += `<h4 style="margin-top:20px; color:#6b7280;">HISTÓRICO RECENTE DE ATIVIDADES</h4>`;
+      if (historyLog.length === 0) {
+        html += `<p style="font-size:0.85rem; color:#6b7280;">Nenhuma atividade recente.</p>`;
+      } else {
+        historyLog.forEach(h => {
+          html += `<div class="item-card">
+            <div><b>${children[h.childKey] ? children[h.childKey].name : h.childKey}:</b> ${h.taskTitle}</div>
+            <span class="tag">+${h.xp} XP</span>
+          </div>`;
+        });
+      }
 
-  function approveRedeem(index) {
-    const item = pendingRedemptions[index];
-    children[item.childKey].xp = 0;
-    alert(`Resgate aprovado! O saldo de XP de ${children[item.childKey].name} foi ZERADO!`);
-    pendingRedemptions.splice(index, 1);
-    renderAdminView();
+      html += `</div>`;
+      container.innerHTML = html;
+    } 
+    else if (activeAdminSubTab === 'pending') {
+      let html = `<div class="card">
+        <h3>📌 Validações e Resgates Pendentes</h3>
+        <h4 style="color:var(--primary);">✅ Tarefas Pendentes de Aprovação</h4>
+      `;
+
+      if (pendingApprovals.length === 0) {
+        html += `<p style="font-size:0.85rem; color:#6b7280;">Nenhuma tarefa aguardando aprovação.</p>`;
+      } else {
+        pendingApprovals.forEach((p, idx) => {
+          html += `<div class="item-card">
+            <div><b>${children[p.childKey].name}:</b> ${p.title} (+${p.xp} XP)</div>
+            <button class="btn-action" onclick="approveTask(${idx})">Aprovar Check</button>
+          </div>`;
+        });
+      }
+
+      html += `<h4 style="color:var(--purple-light); margin-top:20px;">🎁 Resgates da Lojinha Pendentes</h4>`;
+      if (pendingRedemptions.length === 0) {
+        html += `<p style="font-size:0.85rem; color:#6b7280;">Nenhum resgate pendente.</p>`;
+      } else {
+        pendingRedemptions.forEach((r, idx) => {
+          html += `<div class="item-card">
+            <div><b>${children[r.childKey].name}:</b> ${r.title} (${r.cost} XP)</div>
+            <button class="btn-action store" onclick="approveRedeem(${idx})">Aprovar e ZERAR XP</button>
+          </div>`;
+        });
+      }
+
+      html += `</div>`;
+      container.innerHTML = html;
+    }
+    else {
+      container.innerHTML = `<div class="card"><p style="text-align:center; color:#6b7280;">Selecione outra aba para gerenciar.</p></div>`;
+    }
   }
 
   function approveTask(index) {
     const app = pendingApprovals[index];
     children[app.childKey].xp += app.xp;
-    
-    const task = tasks.find(t => t.id === app.taskId);
-    if (task) {
-      if (task.id === 5) bathroomIndex = (bathroomIndex + 1) % bathroomRotation.length, task.assignedTo = bathroomRotation[bathroomIndex];
-      else if (task.id === 6) dishIndex = (dishIndex + 1) % generalRotation.length, task.assignedTo = generalRotation[dishIndex];
-      else if (task.id === 2) trashIndex = (trashIndex + 1) % generalRotation.length, task.assignedTo = generalRotation[trashIndex];
-      else if (task.id === 3) dogIndex = (dogIndex + 1) % generalRotation.length, task.assignedTo = generalRotation[dogIndex];
-    }
-
-    historyLog.unshift({ childKey: app.childKey, taskTitle: app.title, status: 'completed', xp: app.xp });
-    alert(`Aprovado! +${app.xp} XP dados para ${children[app.childKey].name}.`);
+    children[app.childKey].done++;
+    historyLog.unshift({ childKey: app.childKey, taskTitle: app.title, xp: app.xp });
     pendingApprovals.splice(index, 1);
+    alert("Tarefa aprovada!");
     renderAdminView();
   }
 
-  function reversePenalty(index) {
-    const logItem = appliedPenaltiesLog[index];
-    children[logItem.childKey].xp += logItem.penalty;
-    alert(`Penalidade revertida! ${logItem.penalty} XP foram devolvidos.`);
-    appliedPenaltiesLog.splice(index, 1);
+  function approveRedeem(index) {
+    const r = pendingRedemptions[index];
+    children[r.childKey].xp = 0;
+    pendingRedemptions.splice(index, 1);
+    alert("Resgate aprovado! Saldo de XP zerado.");
     renderAdminView();
-  }
-
-  function resetChildPassword() {
-    const selected = document.getElementById('reset-user-select').value;
-    const newPass = document.getElementById('reset-new-pass').value;
-    if (!newPass) return alert("Digite a nova senha!");
-    children[selected].password = newPass;
-    alert(`Senha de ${children[selected].name.split(' ')[0]} redefinida!`);
-    document.getElementById('reset-new-pass').value = '';
   }
 
   function resetWeek() {
-    if (confirm("Zerar o relatório semanal? Os saldos de XP continuarão intactos.")) {
+    if (confirm("Zerar o histórico semanal? Os saldos de XP atuais serão mantidos.")) {
+      Object.keys(children).forEach(k => { children[k].done = 0; children[k].expired = 0; });
       historyLog = [];
       renderAdminView();
+    }
+  }
+
+  function openSuggestionModal() {
+    let text = prompt("💡 Digite sua sugestão:");
+    if (text) {
+      alert("Sugestão enviada com sucesso!");
     }
   }
 
