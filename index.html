@@ -17,7 +17,7 @@
   <div id="toast-container" class="fixed top-4 right-4 z-50 flex flex-col gap-2 max-w-sm w-full px-4"></div>
 
   <!-- CABEÇALHO DA APLICAÇÃO -->
-  <header class="bg-indigo-700 text-white shadow-lg sticky top-0 z-40">
+  <header class="bg-indigo-900 text-white shadow-lg sticky top-0 z-40">
     <div class="max-w-4xl mx-auto px-4 py-3 flex justify-between items-center">
       <div class="flex items-center space-x-2">
         <span class="text-2xl">⚔️</span>
@@ -25,72 +25,88 @@
       </div>
       <div id="header-user-info" class="hidden flex items-center gap-3">
         <span id="current-user-name" class="font-bold text-indigo-100"></span>
-        <button onclick="logout()" class="text-xs bg-indigo-900 hover:bg-indigo-800 text-indigo-200 px-3 py-1.5 rounded-lg font-semibold transition">Sair</button>
+        <button onclick="logout()" class="text-xs bg-indigo-800 hover:bg-indigo-700 text-indigo-200 px-3 py-1.5 rounded-lg font-semibold transition">Sair</button>
       </div>
     </div>
   </header>
 
   <main class="max-w-4xl mx-auto px-4 mt-6">
 
-    <!-- TELA DE LOGIN -->
-    <section id="screen-login" class="max-w-md mx-auto">
+    <!-- TELA DE LOGIN / SELEÇÃO DE PERFIL -->
+    <section id="screen-login" class="max-w-md mx-auto space-y-4">
       <div class="glass-card rounded-3xl p-8 shadow-xl border border-slate-200 text-center">
         <div class="text-5xl mb-3">🛡️</div>
-        <h2 class="text-2xl font-bold text-slate-800 mb-1">Quem está acessando?</h2>
-        <p class="text-slate-500 text-sm mb-6">Escolha o seu perfil para continuar</p>
+        <h2 class="text-2xl font-bold text-slate-800 mb-1">A Luta Diária</h2>
+        <p class="text-slate-500 text-sm mb-6">Escolha seu perfil para acessar</p>
         
         <div class="space-y-3">
-          <button onclick="loginAs('Thiego')" class="w-full flex items-center justify-between p-4 bg-purple-50 hover:bg-purple-100 border border-purple-200 rounded-2xl font-bold text-purple-900 transition">
+          <button onclick="selectProfile('Thiego')" class="w-full flex items-center justify-between p-4 bg-purple-50 hover:bg-purple-100 border border-purple-200 rounded-2xl font-bold text-purple-900 transition">
             <span class="flex items-center gap-3"><span class="text-2xl">👦</span> Thiego</span>
             <span class="text-xs bg-purple-200 text-purple-800 px-2 py-1 rounded-full">Filho</span>
           </button>
-          <button onclick="loginAs('Manuela')" class="w-full flex items-center justify-between p-4 bg-pink-50 hover:bg-pink-100 border border-pink-200 rounded-2xl font-bold text-pink-900 transition">
+          <button onclick="selectProfile('Manuela')" class="w-full flex items-center justify-between p-4 bg-pink-50 hover:bg-pink-100 border border-pink-200 rounded-2xl font-bold text-pink-900 transition">
             <span class="flex items-center gap-3"><span class="text-2xl">👧</span> Manuela</span>
             <span class="text-xs bg-pink-200 text-pink-800 px-2 py-1 rounded-full">Filha</span>
           </button>
-          <button onclick="loginAs('Tayrone')" class="w-full flex items-center justify-between p-4 bg-blue-50 hover:bg-blue-100 border border-blue-200 rounded-2xl font-bold text-blue-900 transition">
+          <button onclick="selectProfile('Tayrone')" class="w-full flex items-center justify-between p-4 bg-blue-50 hover:bg-blue-100 border border-blue-200 rounded-2xl font-bold text-blue-900 transition">
             <span class="flex items-center gap-3"><span class="text-2xl">🧒</span> Tayrone</span>
             <span class="text-xs bg-blue-200 text-blue-800 px-2 py-1 rounded-full">Filho</span>
           </button>
           
           <hr class="my-4 border-slate-200">
           
-          <button onclick="loginAs('Pais')" class="w-full p-4 bg-slate-800 hover:bg-slate-900 text-white rounded-2xl font-bold transition flex justify-center items-center gap-2">
+          <button onclick="selectProfile('Pais')" class="w-full p-4 bg-slate-900 hover:bg-slate-800 text-white rounded-2xl font-bold transition flex justify-center items-center gap-2">
             <span>👑</span> Painel dos Pais
           </button>
         </div>
       </div>
     </section>
 
+    <!-- MODAL DE SENHA E PRIMEIRO ACESSO -->
+    <div id="modal-auth" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm hidden flex items-center justify-center p-4 z-50">
+      <div class="bg-white rounded-3xl p-6 max-w-sm w-full space-y-4 shadow-2xl">
+        <h3 id="auth-title" class="font-bold text-lg text-slate-800">Autenticação</h3>
+        <p id="auth-desc" class="text-xs text-slate-500">Digite sua senha para entrar.</p>
+        
+        <form onsubmit="handleAuthSubmit(event)" class="space-y-3">
+          <input type="password" id="auth-password" required placeholder="Digite a senha" class="w-full p-3 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+          <div class="flex justify-end gap-2">
+            <button type="button" onclick="closeAuthModal()" class="px-4 py-2 text-xs font-bold text-slate-500 hover:bg-slate-100 rounded-xl">Cancelar</button>
+            <button type="submit" class="px-4 py-2 text-xs font-bold bg-indigo-600 text-white rounded-xl hover:bg-indigo-700">Entrar</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
     <!-- ÁREA DAS CRIANÇAS -->
     <section id="screen-child" class="hidden space-y-6">
       
-      <!-- CARD DE MODOS ESPECIAIS (MODO FOLGA) -->
+      <!-- CARD DO MODO DESCANSO -->
       <div id="rest-mode-banner" class="hidden bg-emerald-500 text-white p-4 rounded-3xl shadow-lg flex items-center gap-4">
         <span class="text-4xl">🏖️</span>
         <div>
           <h3 class="font-extrabold text-lg">Modo Descanso / Folga Ativado!</h3>
-          <p class="text-emerald-100 text-sm">Os pais deram uma pausa nas tarefas. Aproveite o seu momento de folga!</p>
+          <p class="text-emerald-100 text-sm">Os pais pausaram a rotina de tarefas por hoje. Aproveite para descansar!</p>
         </div>
       </div>
 
-      <!-- PAINEL DE PERFIL DA CRIANÇA -->
-      <div class="bg-gradient-to-r from-indigo-600 to-purple-600 rounded-3xl p-6 text-white shadow-xl relative overflow-hidden">
+      <!-- PAINEL DE PERFIL DA CRIANÇA (VISUAL PURPLE AI STUDIO) -->
+      <div class="bg-gradient-to-r from-purple-800 via-indigo-800 to-slate-900 rounded-3xl p-6 text-white shadow-xl relative overflow-hidden">
         <div class="flex justify-between items-start relative z-10">
           <div class="flex items-center gap-4">
-            <div id="child-avatar" class="text-5xl bg-white/20 p-3 rounded-2xl backdrop-blur-md">👦</div>
+            <div id="child-avatar" class="text-5xl bg-white/10 p-3 rounded-2xl backdrop-blur-md">👦</div>
             <div>
               <h2 id="child-name" class="text-2xl font-black">--</h2>
-              <span id="child-level" class="inline-block bg-indigo-900/40 text-indigo-100 text-xs px-3 py-1 rounded-full font-semibold mt-1">Nível 1 - Recruta</span>
+              <span id="child-level" class="inline-block bg-purple-900/60 text-purple-200 text-xs px-3 py-1 rounded-full font-semibold mt-1">Nível 1 - Guerreiro(a)</span>
             </div>
           </div>
           <div class="text-right">
-            <span class="text-xs text-indigo-200 uppercase tracking-widest block font-bold">Saldo de XP</span>
+            <span class="text-xs text-purple-300 uppercase tracking-widest block font-bold">Saldo de XP</span>
             <span id="child-xp" class="text-4xl font-black text-amber-300">0 XP</span>
           </div>
         </div>
         <div class="mt-4 pt-4 border-t border-white/10 flex justify-between items-center text-xs">
-          <span>Próxima recompensa no nível 2</span>
+          <span>Complete missões para acumular XP e resgatar recompensas!</span>
           <button onclick="openSuggestionModal()" class="bg-amber-400 hover:bg-amber-300 text-slate-900 font-extrabold px-3 py-1.5 rounded-xl shadow transition flex items-center gap-1">
             <span>💡</span> Mandar Sugestão
           </button>
@@ -102,77 +118,94 @@
 
       <!-- SELETOR DE FILTROS DAS TAREFAS -->
       <div class="bg-white p-2 rounded-2xl shadow-sm border border-slate-200 flex gap-1">
-        <button onclick="setFilter('hoje')" id="filter-hoje" class="flex-1 py-2 rounded-xl text-xs font-bold transition bg-indigo-600 text-white">Hoje</button>
+        <button onclick="setFilter('hoje')" id="filter-hoje" class="flex-1 py-2 rounded-xl text-xs font-bold transition bg-purple-700 text-white">Hoje</button>
         <button onclick="setFilter('diarias')" id="filter-diarias" class="flex-1 py-2 rounded-xl text-xs font-bold transition text-slate-600 hover:bg-slate-100">Diárias</button>
         <button onclick="setFilter('flexiveis')" id="filter-flexiveis" class="flex-1 py-2 rounded-xl text-xs font-bold transition text-slate-600 hover:bg-slate-100">Flexíveis</button>
         <button onclick="setFilter('todas')" id="filter-todas" class="flex-1 py-2 rounded-xl text-xs font-bold transition text-slate-600 hover:bg-slate-100">Todas</button>
       </div>
 
       <!-- LISTA DE TAREFAS -->
-      <div id="child-tasks-list" class="space-y-3">
-        <!-- Injetado via Javascript -->
-      </div>
+      <div id="child-tasks-list" class="space-y-3"></div>
     </section>
 
-    <!-- PAINEL DOS PAIS -->
+    <!-- PAINEL DOS PAIS (VISUAL PURPLE ADMIN) -->
     <section id="screen-parents" class="hidden space-y-6">
       
-      <!-- PAINEL DE CONTROLE DE FOLGA -->
-      <div class="bg-slate-800 text-white p-4 rounded-3xl flex justify-between items-center shadow-md">
+      <!-- CONTROLE DO MODO DESCANSO -->
+      <div class="bg-purple-950 text-white p-4 rounded-3xl flex justify-between items-center shadow-md border border-purple-800">
         <div class="flex items-center gap-3">
           <span class="text-2xl">🏖️</span>
           <div>
             <h3 class="font-bold text-sm">Modo Descanso / Folga</h3>
-            <p class="text-slate-400 text-xs">Pausa contadores e desativa a cobrança de tarefas</p>
+            <p class="text-purple-300 text-xs">Pausa a cobrança e penalidades de tarefas até ser desativado</p>
           </div>
         </div>
         <label class="relative inline-flex items-center cursor-pointer">
           <input type="checkbox" id="toggle-rest-mode" onchange="toggleRestMode(this.checked)" class="sr-only peer">
-          <div class="w-11 h-6 bg-slate-600 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-500"></div>
+          <div class="w-11 h-6 bg-purple-900 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-500"></div>
         </label>
       </div>
 
-      <!-- NAVEGAÇÃO DE SUB-ABAS DOS PAIS -->
-      <div class="flex border-b border-slate-200 space-x-4">
-        <button onclick="setParentTab('relatorio')" id="ptab-relatorio" class="pb-3 text-sm font-bold border-b-2 border-indigo-600 text-indigo-600">📊 Relatórios & Sugestões</button>
-        <button onclick="setParentTab('pendentes')" id="ptab-pendentes" class="pb-3 text-sm font-bold border-b-2 border-transparent text-slate-500 hover:text-slate-800">📌 Pendentes</button>
-        <button onclick="setParentTab('missoes')" id="ptab-missoes" class="pb-3 text-sm font-bold border-b-2 border-transparent text-slate-500 hover:text-slate-800">⚙️ Gerenciar Missões</button>
-        <button onclick="setParentTab('lojinha')" id="ptab-lojinha" class="pb-3 text-sm font-bold border-b-2 border-transparent text-slate-500 hover:text-slate-800">🛒 Lojinha</button>
-        <button onclick="setParentTab('membros')" id="ptab-membros" class="pb-3 text-sm font-bold border-b-2 border-transparent text-slate-500 hover:text-slate-800">👑 Membros</button>
+      <!-- NAVEGAÇÃO DE SUB-ABAS -->
+      <div class="flex border-b border-slate-200 space-x-4 overflow-x-auto pb-1">
+        <button onclick="setParentTab('relatorio')" id="ptab-relatorio" class="pb-3 text-sm font-bold border-b-2 border-purple-700 text-purple-700 whitespace-nowrap">📊 Visão Geral & Sugestões</button>
+        <button onclick="setParentTab('pendentes')" id="ptab-pendentes" class="pb-3 text-sm font-bold border-b-2 border-transparent text-slate-500 hover:text-slate-800 whitespace-nowrap">📌 Validações Pendentes</button>
+        <button onclick="setParentTab('missoes')" id="ptab-missoes" class="pb-3 text-sm font-bold border-b-2 border-transparent text-slate-500 hover:text-slate-800 whitespace-nowrap">⚙️ Cadastrar Missões</button>
+        <button onclick="setParentTab('membros')" id="ptab-membros" class="pb-3 text-sm font-bold border-b-2 border-transparent text-slate-500 hover:text-slate-800 whitespace-nowrap">👑 Gestão de Membros & Senhas</button>
       </div>
 
       <!-- CONTEÚDO DAS SUB-ABAS DOS PAIS -->
       <div id="parent-content">
 
-        <!-- SUB-ABA: RELATÓRIOS E SUGESTÕES -->
+        <!-- SUB-ABA: VISÃO GERAL E SUGESTÕES -->
         <div id="parent-sub-relatorio" class="space-y-6">
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div class="bg-white p-5 rounded-3xl border border-slate-200 shadow-sm flex justify-between items-center">
+              <div>
+                <span class="text-xs text-slate-500 font-bold block uppercase">Thiego</span>
+                <span id="p-xp-thiego" class="text-2xl font-black text-purple-700">0 XP</span>
+              </div>
+              <span class="text-3xl">👦</span>
+            </div>
+            <div class="bg-white p-5 rounded-3xl border border-slate-200 shadow-sm flex justify-between items-center">
+              <div>
+                <span class="text-xs text-slate-500 font-bold block uppercase">Manuela</span>
+                <span id="p-xp-manuela" class="text-2xl font-black text-pink-600">0 XP</span>
+              </div>
+              <span class="text-3xl">👧</span>
+            </div>
+            <div class="bg-white p-5 rounded-3xl border border-slate-200 shadow-sm flex justify-between items-center">
+              <div>
+                <span class="text-xs text-slate-500 font-bold block uppercase">Tayrone</span>
+                <span id="p-xp-tayrone" class="text-2xl font-black text-blue-600">0 XP</span>
+              </div>
+              <span class="text-3xl">🧒</span>
+            </div>
+          </div>
+
           <div class="bg-white rounded-3xl p-6 shadow-sm border border-slate-200">
             <h3 class="font-bold text-lg mb-4 flex items-center gap-2"><span>💡</span> Caixa de Entrada de Sugestões das Crianças</h3>
-            <div id="parent-suggestions-list" class="space-y-3">
-              <!-- Injetado via Javascript -->
-            </div>
+            <div id="parent-suggestions-list" class="space-y-3"></div>
           </div>
         </div>
 
-        <!-- SUB-ABA: PENDENTES (APROVAÇÃO) -->
+        <!-- SUB-ABA: PENDENTES (VALIDAÇÃO DOS PAIS) -->
         <div id="parent-sub-pendentes" class="hidden space-y-4">
           <div class="bg-white rounded-3xl p-6 shadow-sm border border-slate-200">
-            <h3 class="font-bold text-lg mb-4">Tarefas Concluídas Aguardando Validação</h3>
-            <div id="parent-pending-tasks" class="space-y-3">
-              <p class="text-slate-400 text-sm">Nenhuma tarefa pendente no momento.</p>
-            </div>
+            <h3 class="font-bold text-lg mb-4">Tarefas Concluídas Aguardando Aprovação</h3>
+            <div id="parent-pending-tasks" class="space-y-3"></div>
           </div>
         </div>
 
         <!-- SUB-ABA: GERENCIAR MISSÕES -->
         <div id="parent-sub-missoes" class="hidden space-y-6">
           <div class="bg-white rounded-3xl p-6 shadow-sm border border-slate-200">
-            <h3 class="font-bold text-lg mb-4">Criar / Editar Nova Missão</h3>
+            <h3 class="font-bold text-lg mb-4">Cadastrar Nova Missão</h3>
             <form onsubmit="handleCreateTask(event)" class="space-y-4">
               <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label class="block text-xs font-bold text-slate-600 mb-1">Título da Tarefa</label>
-                  <input type="text" id="task-title" required placeholder="Ex: Arrumar a cama" class="w-full p-3 rounded-xl border border-slate-200 text-sm">
+                  <input type="text" id="task-title" required placeholder="Ex: Arrumar o quarto" class="w-full p-3 rounded-xl border border-slate-200 text-sm">
                 </div>
                 <div>
                   <label class="block text-xs font-bold text-slate-600 mb-1">Ícone / Emoji</label>
@@ -182,7 +215,7 @@
 
               <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
-                  <label class="block text-xs font-bold text-slate-600 mb-1">Responsável</label>
+                  <label class="block text-xs font-bold text-slate-600 mb-1">Atribuir a</label>
                   <select id="task-assignee" class="w-full p-3 rounded-xl border border-slate-200 text-sm">
                     <option value="Todos">Todos (Rodízio/Geral)</option>
                     <option value="Thiego">Thiego</option>
@@ -205,49 +238,31 @@
 
               <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label class="block text-xs font-bold text-slate-600 mb-1">Recompensa (XP)</label>
+                  <label class="block text-xs font-bold text-slate-600 mb-1">Recompensa (+XP)</label>
                   <input type="number" id="task-xp" value="50" min="0" class="w-full p-3 rounded-xl border border-slate-200 text-sm">
                 </div>
                 <div>
-                  <label class="block text-xs font-bold text-slate-600 mb-1">Penalidade de Perda (XP)</label>
-                  <div class="flex items-center gap-2">
-                    <input type="number" id="task-penalty" value="0" min="0" class="w-full p-3 rounded-xl border border-slate-200 text-sm">
-                  </div>
-                  <span class="text-[10px] text-slate-400">Deixe em 0 se quiser **remover/sem penalidade**</span>
+                  <label class="block text-xs font-bold text-slate-600 mb-1">Penalidade de Perda (-XP)</label>
+                  <input type="number" id="task-penalty" value="0" min="0" class="w-full p-3 rounded-xl border border-slate-200 text-sm">
+                  <span class="text-[10px] text-slate-400">Deixe em 0 para tarefa sem penalidade.</span>
                 </div>
               </div>
 
-              <button type="submit" class="w-full py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl transition">Cadastrar Missão</button>
+              <button type="submit" class="w-full py-3 bg-purple-700 hover:bg-purple-800 text-white font-bold rounded-xl transition">Salvar Missão</button>
             </form>
           </div>
-        </div>
 
-        <!-- SUB-ABA: LOJINHA -->
-        <div id="parent-sub-lojinha" class="hidden space-y-4">
           <div class="bg-white rounded-3xl p-6 shadow-sm border border-slate-200">
-            <h3 class="font-bold text-lg mb-4">Gerenciar Prêmios da Lojinha</h3>
-            <p class="text-slate-500 text-sm">Adicione recompensas para as crianças trocarem por XP acumulado.</p>
+            <h3 class="font-bold text-lg mb-4">Missões Cadastradas</h3>
+            <div id="parent-all-tasks" class="space-y-3"></div>
           </div>
         </div>
 
-        <!-- SUB-ABA: MEMBROS & AJUSTES -->
+        <!-- SUB-ABA: MEMBROS & SENHAS -->
         <div id="parent-sub-membros" class="hidden space-y-4">
           <div class="bg-white rounded-3xl p-6 shadow-sm border border-slate-200">
-            <h3 class="font-bold text-lg mb-4">Ajustes Manuais de XP e Membros</h3>
-            <div class="space-y-3">
-              <div class="flex justify-between items-center p-3 bg-slate-50 rounded-xl">
-                <span class="font-bold">Thiego</span>
-                <button onclick="adjustXP('Thiego', 50)" class="px-3 py-1 bg-emerald-100 text-emerald-700 rounded-lg text-xs font-bold">+50 XP</button>
-              </div>
-              <div class="flex justify-between items-center p-3 bg-slate-50 rounded-xl">
-                <span class="font-bold">Manuela</span>
-                <button onclick="adjustXP('Manuela', 50)" class="px-3 py-1 bg-emerald-100 text-emerald-700 rounded-lg text-xs font-bold">+50 XP</button>
-              </div>
-              <div class="flex justify-between items-center p-3 bg-slate-50 rounded-xl">
-                <span class="font-bold">Tayrone</span>
-                <button onclick="adjustXP('Tayrone', 50)" class="px-3 py-1 bg-emerald-100 text-emerald-700 rounded-lg text-xs font-bold">+50 XP</button>
-              </div>
-            </div>
+            <h3 class="font-bold text-lg mb-4">Gestão de Crianças e Reset de Senhas</h3>
+            <div class="space-y-3" id="parent-members-list"></div>
           </div>
         </div>
 
@@ -259,11 +274,11 @@
   <!-- MODAL DE MANDAR SUGESTÃO -->
   <div id="modal-suggestion" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm hidden flex items-center justify-center p-4 z-50">
     <div class="bg-white rounded-3xl p-6 max-w-sm w-full space-y-4 shadow-2xl">
-      <h3 class="font-bold text-lg text-slate-800 flex items-center gap-2"><span>💡</span> Enviar Sugestão para os Pais</h3>
-      <textarea id="suggestion-text" rows="3" placeholder="Digite aqui o que você gostaria de sugerir..." class="w-full p-3 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"></textarea>
+      <h3 class="font-bold text-lg text-slate-800 flex items-center gap-2"><span>💡</span> Sugestão para os Pais</h3>
+      <textarea id="suggestion-text" rows="3" placeholder="Escreva aqui o que gostaria de pedir ou sugerir..." class="w-full p-3 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-purple-500"></textarea>
       <div class="flex justify-end gap-2">
         <button onclick="closeSuggestionModal()" class="px-4 py-2 text-xs font-bold text-slate-500 hover:bg-slate-100 rounded-xl">Cancelar</button>
-        <button onclick="submitSuggestion()" class="px-4 py-2 text-xs font-bold bg-indigo-600 text-white rounded-xl hover:bg-indigo-700">Enviar</button>
+        <button onclick="submitSuggestion()" class="px-4 py-2 text-xs font-bold bg-purple-700 text-white rounded-xl hover:bg-purple-800">Enviar</button>
       </div>
     </div>
   </div>
@@ -272,309 +287,56 @@
   <div id="modal-trade" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm hidden flex items-center justify-center p-4 z-50">
     <div class="bg-white rounded-3xl p-6 max-w-sm w-full space-y-4 shadow-2xl">
       <h3 class="font-bold text-lg text-slate-800 flex items-center gap-2"><span>🔄</span> Pedir Troca de Tarefa</h3>
-      <p class="text-xs text-slate-500">Escolha para qual irmão deseja passar essa tarefa hoje. Se ele aceitar, fará no seu lugar e ganhará os pontos!</p>
+      <p class="text-xs text-slate-500">Se seu irmão aceitar, ele realiza essa tarefa no seu lugar hoje e ganha o XP. Amanhã a escala do rodízio volta ao normal!</p>
       <input type="hidden" id="trade-task-id">
-      <select id="trade-target-user" class="w-full p-3 rounded-xl border border-slate-200 text-sm font-bold">
-        <!-- Injetado dinamicamente -->
-      </select>
+      <select id="trade-target-user" class="w-full p-3 rounded-xl border border-slate-200 text-sm font-bold"></select>
       <div class="flex justify-end gap-2">
         <button onclick="closeTradeModal()" class="px-4 py-2 text-xs font-bold text-slate-500 hover:bg-slate-100 rounded-xl">Cancelar</button>
-        <button onclick="submitTradeRequest()" class="px-4 py-2 text-xs font-bold bg-indigo-600 text-white rounded-xl hover:bg-indigo-700">Enviar Pedido</button>
+        <button onclick="submitTradeRequest()" class="px-4 py-2 text-xs font-bold bg-purple-700 text-white rounded-xl hover:bg-purple-800">Enviar Pedido</button>
       </div>
     </div>
   </div>
 
   <script>
-    // ESTADO DA APLICAÇÃO
-    let currentUser = null;
-    let activeFilter = 'hoje';
-    let restMode = false;
+    // BANCO DE DADOS LOCAL PERSISTENTE (LOCALSTORAGE)
+    const STORAGE_KEY = 'alutadiaria_data_v2';
 
-    let users = {
-      Thiego: { xp: 120, level: 1, avatar: '👦' },
-      Manuela: { xp: 200, level: 2, avatar: '👧' },
-      Tayrone: { xp: 90, level: 1, avatar: '🧒' }
+    const defaultData = {
+      restMode: false,
+      users: {
+        Thiego: { xp: 120, level: 1, avatar: '👦', password: null },
+        Manuela: { xp: 200, level: 2, avatar: '👧', password: null },
+        Tayrone: { xp: 90, level: 1, avatar: '🧒', password: null }
+      },
+      tasks: [
+        { id: 101, title: 'Lavar a Louça do Almoço', icon: '🍽️', assignee: 'Thiego', category: 'diarias', deadline: '14:00', xp: 50, penalty: 10, status: 'pending_user' },
+        { id: 102, title: 'Arrumar a Cama', icon: '🛏️', assignee: 'Manuela', category: 'diarias', deadline: '10:00', xp: 30, penalty: 0, status: 'pending_user' },
+        { id: 103, title: 'Organizar os Brinquedos', icon: '🧸', assignee: 'Tayrone', category: 'flexiveis', deadline: '18:00', xp: 40, penalty: 5, status: 'pending_user' }
+      ],
+      suggestions: [],
+      tradeRequests: [],
+      notifiedTasks: [] // Controle de notificações disparadas
     };
 
-    let tasks = [
-      { id: 1, title: 'Guardar Brinquedos', icon: '🧸', assignee: 'Thiego', category: 'diarias', deadline: '18:00', xp: 50, penalty: 0, completed: false, tradePending: null },
-      { id: 2, title: 'Arrumar a Cama', icon: '🛏️', assignee: 'Manuela', category: 'diarias', deadline: '12:00', xp: 40, penalty: 10, completed: false, tradePending: null },
-      { id: 3, title: 'Organizar Livros da Sala', icon: '📚', assignee: 'Tayrone', category: 'flexiveis', deadline: '20:00', xp: 60, penalty: 0, completed: false, tradePending: null }
-    ];
+    let appData = JSON.parse(localStorage.getItem(STORAGE_KEY)) || defaultData;
 
-    let suggestions = [
-      { id: 1, from: 'Thiego', text: 'Podemos trocar o prêmio de videogame por mais tempo de TV?' }
-    ];
+    function saveData() {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(appData));
+    }
 
-    let tradeRequests = [];
+    // ESTADO DA SESSÃO ATUAL
+    let currentUser = null;
+    let selectedProfileForLogin = null;
+    let activeFilter = 'hoje';
 
-    // LOGIN / NAVEGAÇÃO
-    function loginAs(name) {
-      currentUser = name;
-      document.getElementById('screen-login').classList.add('hidden');
-      document.getElementById('header-user-info').classList.remove('hidden');
-      document.getElementById('current-user-name').innerText = name;
+    // GERENCIAMENTO DE AUTENTICAÇÃO
+    function selectProfile(name) {
+      selectedProfileForLogin = name;
+      const modal = document.getElementById('modal-auth');
+      const title = document.getElementById('auth-title');
+      const desc = document.getElementById('auth-desc');
+      const input = document.getElementById('auth-password');
+      input.value = '';
 
       if (name === 'Pais') {
-        document.getElementById('screen-parents').classList.remove('hidden');
-        renderParentsArea();
-      } else {
-        document.getElementById('screen-child').classList.remove('hidden');
-        renderChildArea();
-      }
-    }
-
-    function logout() {
-      currentUser = null;
-      document.getElementById('screen-login').classList.remove('hidden');
-      document.getElementById('screen-child').classList.add('hidden');
-      document.getElementById('screen-parents').classList.add('hidden');
-      document.getElementById('header-user-info').classList.add('hidden');
-    }
-
-    // MODO FOLGA / DESCANSO
-    function toggleRestMode(enabled) {
-      restMode = enabled;
-      const banner = document.getElementById('rest-mode-banner');
-      if (restMode) {
-        banner.classList.remove('hidden');
-        showToast('🏖️ Modo Folga Ativado pelos pais!');
-      } else {
-        banner.classList.add('hidden');
-        showToast('⚡ Modo Folga desativado. Rotina normal!');
-      }
-    }
-
-    // ÁREA DAS CRIANÇAS
-    function renderChildArea() {
-      const user = users[currentUser];
-      document.getElementById('child-name').innerText = currentUser;
-      document.getElementById('child-xp').innerText = `${user.xp} XP`;
-      document.getElementById('child-avatar').innerText = user.avatar;
-
-      renderTradeRequests();
-      renderChildTasks();
-    }
-
-    function setFilter(filter) {
-      activeFilter = filter;
-      ['hoje', 'diarias', 'flexiveis', 'todas'].forEach(f => {
-        const btn = document.getElementById(`filter-${f}`);
-        if (f === filter) {
-          btn.className = "flex-1 py-2 rounded-xl text-xs font-bold transition bg-indigo-600 text-white";
-        } else {
-          btn.className = "flex-1 py-2 rounded-xl text-xs font-bold transition text-slate-600 hover:bg-slate-100";
-        }
-      });
-      renderChildTasks();
-    }
-
-    function renderChildTasks() {
-      const list = document.getElementById('child-tasks-list');
-      list.innerHTML = '';
-
-      let filtered = tasks.filter(t => t.assignee === currentUser || t.assignee === 'Todos');
-
-      if (activeFilter === 'diarias') filtered = filtered.filter(t => t.category === 'diarias');
-      if (activeFilter === 'flexiveis') filtered = filtered.filter(t => t.category === 'flexiveis');
-
-      if (filtered.length === 0) {
-        list.innerHTML = `<div class="bg-white p-8 text-center rounded-3xl border border-slate-200 text-slate-400 font-semibold">Nenhuma missão encontrada para essa categoria.</div>`;
-        return;
-      }
-
-      filtered.forEach(t => {
-        const item = document.createElement('div');
-        item.className = "bg-white p-4 rounded-2xl shadow-sm border border-slate-200 flex items-center justify-between gap-3";
-        
-        item.innerHTML = `
-          <div class="flex items-center gap-3">
-            <span class="text-3xl">${t.icon}</span>
-            <div>
-              <h4 class="font-bold text-slate-800 text-sm">${t.title}</h4>
-              <div class="flex items-center gap-2 mt-1">
-                <span class="text-[10px] bg-slate-100 text-slate-600 px-2 py-0.5 rounded-md font-semibold">⏰ até ${t.deadline}</span>
-                <span class="text-[10px] font-bold text-amber-600 bg-amber-50 px-2 py-0.5 rounded-md">+${t.xp} XP</span>
-                ${t.penalty > 0 ? `<span class="text-[10px] font-bold text-rose-600 bg-rose-50 px-2 py-0.5 rounded-md">-${t.penalty} XP</span>` : `<span class="text-[10px] font-bold text-slate-400 bg-slate-100 px-2 py-0.5 rounded-md">Sem penalidade</span>`}
-              </div>
-            </div>
-          </div>
-          <div class="flex items-center gap-2">
-            <button onclick="openTradeModal(${t.id})" class="p-2 text-xs bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-xl transition" title="Pedir Troca">🔄</button>
-            <button onclick="completeTask(${t.id})" class="px-4 py-2 text-xs bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl transition shadow">Concluir</button>
-          </div>
-        `;
-        list.appendChild(item);
-      });
-    }
-
-    // SISTEMA DE TROCAS
-    function openTradeModal(taskId) {
-      document.getElementById('trade-task-id').value = taskId;
-      const select = document.getElementById('trade-target-user');
-      select.innerHTML = '';
-
-      Object.keys(users).filter(u => u !== currentUser).forEach(u => {
-        select.innerHTML += `<option value="${u}">${u}</option>`;
-      });
-
-      document.getElementById('modal-trade').classList.remove('hidden');
-    }
-
-    function closeTradeModal() {
-      document.getElementById('modal-trade').classList.add('hidden');
-    }
-
-    function submitTradeRequest() {
-      const taskId = parseInt(document.getElementById('trade-task-id').value);
-      const targetUser = document.getElementById('trade-target-user').value;
-      const task = tasks.find(t => t.id === taskId);
-
-      tradeRequests.push({
-        id: Date.now(),
-        taskId: taskId,
-        taskTitle: task.title,
-        from: currentUser,
-        to: targetUser
-      });
-
-      closeTradeModal();
-      showToast(`Pedido de troca enviado para ${targetUser}!`);
-    }
-
-    function renderTradeRequests() {
-      const container = document.getElementById('trade-requests-container');
-      container.innerHTML = '';
-
-      const myRequests = tradeRequests.filter(r => r.to === currentUser);
-
-      myRequests.forEach(r => {
-        const card = document.createElement('div');
-        card.className = "bg-amber-50 border border-amber-200 p-4 rounded-2xl flex items-center justify-between";
-        card.innerHTML = `
-          <div>
-            <span class="text-xs font-bold text-amber-800">Pedido de Troca!</span>
-            <p class="text-xs text-amber-900 mt-0.5"><b>${r.from}</b> quer trocar a tarefa <b>"${r.taskTitle}"</b> com você hoje.</p>
-          </div>
-          <div class="flex gap-2">
-            <button onclick="acceptTrade(${r.id})" class="px-3 py-1.5 bg-emerald-600 text-white text-xs font-bold rounded-xl">Aceitar</button>
-          </div>
-        `;
-        container.appendChild(card);
-      });
-    }
-
-    function acceptTrade(requestId) {
-      const reqIndex = tradeRequests.findIndex(r => r.id === requestId);
-      if (reqIndex > -1) {
-        const req = tradeRequests[reqIndex];
-        const task = tasks.find(t => t.id === req.taskId);
-        if (task) {
-          task.assignee = currentUser; // Passa a responsabilidade pontual
-        }
-        tradeRequests.splice(reqIndex, 1);
-        showToast('Troca aceita com sucesso!');
-        renderChildArea();
-      }
-    }
-
-    // SUGESTÕES
-    function openSuggestionModal() {
-      document.getElementById('modal-suggestion').classList.remove('hidden');
-    }
-
-    function closeSuggestionModal() {
-      document.getElementById('modal-suggestion').classList.add('hidden');
-    }
-
-    function submitSuggestion() {
-      const text = document.getElementById('suggestion-text').value;
-      if (!text.trim()) return;
-
-      suggestions.push({
-        id: Date.now(),
-        from: currentUser,
-        text: text
-      });
-
-      document.getElementById('suggestion-text').value = '';
-      closeSuggestionModal();
-      showToast('Sugestão enviada para os seus pais!');
-    }
-
-    // PAINEL DOS PAIS SUB-ABAS
-    function setParentTab(tab) {
-      ['relatorio', 'pendentes', 'missoes', 'lojinha', 'membros'].forEach(t => {
-        const btn = document.getElementById(`ptab-${t}`);
-        const content = document.getElementById(`parent-sub-${t}`);
-        if (t === tab) {
-          btn.className = "pb-3 text-sm font-bold border-b-2 border-indigo-600 text-indigo-600";
-          content.classList.remove('hidden');
-        } else {
-          btn.className = "pb-3 text-sm font-bold border-b-2 border-transparent text-slate-500 hover:text-slate-800";
-          content.classList.add('hidden');
-        }
-      });
-    }
-
-    function renderParentsArea() {
-      const sugList = document.getElementById('parent-suggestions-list');
-      sugList.innerHTML = '';
-
-      if (suggestions.length === 0) {
-        sugList.innerHTML = `<p class="text-slate-400 text-sm">Nenhuma sugestão enviada no momento.</p>`;
-        return;
-      }
-
-      suggestions.forEach(s => {
-        sugList.innerHTML += `
-          <div class="p-3 bg-slate-50 border border-slate-200 rounded-xl flex justify-between items-center">
-            <div>
-              <span class="text-xs font-bold text-indigo-600">De: ${s.from}</span>
-              <p class="text-sm text-slate-700">${s.text}</p>
-            </div>
-          </div>
-        `;
-      });
-    }
-
-    function handleCreateTask(e) {
-      e.preventDefault();
-      const title = document.getElementById('task-title').value;
-      const icon = document.getElementById('task-icon').value;
-      const assignee = document.getElementById('task-assignee').value;
-      const category = document.getElementById('task-category').value;
-      const deadline = document.getElementById('task-deadline').value;
-      const xp = parseInt(document.getElementById('task-xp').value);
-      const penalty = parseInt(document.getElementById('task-penalty').value);
-
-      tasks.push({
-        id: Date.now(),
-        title, icon, assignee, category, deadline, xp, penalty, completed: false, tradePending: null
-      });
-
-      showToast('Nova missão cadastrada com sucesso!');
-      e.target.reset();
-    }
-
-    function adjustXP(user, amount) {
-      users[user].xp += amount;
-      showToast(`+${amount} XP adicionados para ${user}!`);
-    }
-
-    function completeTask(taskId) {
-      showToast('Tarefa enviada para aprovação dos pais!');
-    }
-
-    // UTILS: ALERTA E TOAST
-    function showToast(msg) {
-      const container = document.getElementById('toast-container');
-      const toast = document.createElement('div');
-      toast.className = "bg-slate-900 text-white text-xs font-bold px-4 py-3 rounded-2xl shadow-xl flex items-center justify-between";
-      toast.innerText = msg;
-      container.appendChild(toast);
-      setTimeout(() => toast.remove(), 4000);
-    }
-  </script>
-</body>
-</html>
+        title.innerText = "Acesso dos Pais"
