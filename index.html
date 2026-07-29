@@ -9,7 +9,6 @@
     @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap');
     body { font-family: 'Plus+Jakarta+Sans', sans-serif; }
     .glass-card { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); }
-    /* Scrollbar suave para as abas no celular */
     .no-scrollbar::-webkit-scrollbar { display: none; }
     .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
   </style>
@@ -152,7 +151,7 @@
         </label>
       </div>
 
-      <!-- NAVEGAÇÃO RESPONSIVA DAS ABAS DOS PAIS (COM SCROLL HORIZONTAL NO MOBILE) -->
+      <!-- NAVEGAÇÃO RESPONSIVA DAS ABAS DOS PAIS -->
       <div class="bg-white p-2 rounded-2xl shadow-sm border border-slate-200 flex space-x-1 overflow-x-auto no-scrollbar">
         <button onclick="setParentTab('relatorio')" id="ptab-relatorio" class="px-4 py-2.5 rounded-xl text-xs font-bold whitespace-nowrap transition bg-purple-700 text-white cursor-pointer">📊 Visão Geral</button>
         <button onclick="setParentTab('pendentes')" id="ptab-pendentes" class="px-4 py-2.5 rounded-xl text-xs font-bold whitespace-nowrap transition text-slate-600 hover:bg-slate-100 cursor-pointer">📌 Validações</button>
@@ -196,11 +195,18 @@
           </div>
         </div>
 
-        <!-- SUB-ABA: VALIDAÇÕES PENDENTES -->
+        <!-- SUB-ABA: VALIDAÇÕES PENDENTES E PENALIDADES -->
         <div id="parent-sub-pendentes" class="hidden space-y-6">
           <div class="bg-white rounded-3xl p-6 shadow-sm border border-slate-200">
             <h3 class="font-bold text-lg mb-4">Tarefas Concluídas Aguardando Validação</h3>
             <div id="parent-pending-tasks" class="space-y-3"></div>
+          </div>
+
+          <!-- HISTÓRICO DE PENALIDADES COM OPÇÃO DE PERDOAR / REMOVER -->
+          <div class="bg-white rounded-3xl p-6 shadow-sm border border-slate-200">
+            <h3 class="font-bold text-lg mb-1 text-slate-800">🛡️ Perdoar Penalidades Aplicadas</h3>
+            <p class="text-xs text-slate-500 mb-4">Se a criança teve um motivo justo para não fazer a tarefa, você pode remover a penalidade e devolver o XP descontado.</p>
+            <div id="parent-penalties-list" class="space-y-3"></div>
           </div>
 
           <div class="bg-white rounded-3xl p-6 shadow-sm border border-slate-200">
@@ -256,7 +262,6 @@
                 <div>
                   <label class="block text-xs font-bold text-slate-600 mb-1">Penalidade de Perda (-XP)</label>
                   <input type="number" id="task-penalty" value="0" min="0" class="w-full p-3 rounded-xl border border-slate-200 text-sm">
-                  <span class="text-[10px] text-slate-400">Deixe em 0 para tarefa sem penalidade.</span>
                 </div>
               </div>
 
@@ -278,7 +283,7 @@
               <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div class="md:col-span-2">
                   <label class="block text-xs font-bold text-slate-600 mb-1">Nome do Prêmio</label>
-                  <input type="text" id="reward-title" required placeholder="Ex: 30min de Videogame ou Passeio no parque" class="w-full p-3 rounded-xl border border-slate-200 text-sm">
+                  <input type="text" id="reward-title" required placeholder="Ex: 30min de Videogame" class="w-full p-3 rounded-xl border border-slate-200 text-sm">
                 </div>
                 <div>
                   <label class="block text-xs font-bold text-slate-600 mb-1">Ícone / Emoji</label>
@@ -312,11 +317,11 @@
 
   </main>
 
-  <!-- MODAL DE SUGESTÃO -->
+  <!-- MODAIS -->
   <div id="modal-suggestion" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm hidden flex items-center justify-center p-4 z-50">
     <div class="bg-white rounded-3xl p-6 max-w-sm w-full space-y-4 shadow-2xl">
       <h3 class="font-bold text-lg text-slate-800 flex items-center gap-2"><span>💡</span> Sugestão para os Pais</h3>
-      <textarea id="suggestion-text" rows="3" placeholder="Escreva aqui o que gostaria de pedir ou sugerir..." class="w-full p-3 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-purple-500"></textarea>
+      <textarea id="suggestion-text" rows="3" placeholder="Escreva aqui..." class="w-full p-3 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-purple-500"></textarea>
       <div class="flex justify-end gap-2">
         <button onclick="closeSuggestionModal()" class="px-4 py-2 text-xs font-bold text-slate-500 hover:bg-slate-100 rounded-xl">Cancelar</button>
         <button onclick="submitSuggestion()" class="px-4 py-2 text-xs font-bold bg-purple-700 text-white rounded-xl hover:bg-purple-800">Enviar</button>
@@ -324,24 +329,19 @@
     </div>
   </div>
 
-  <!-- MODAL DE LOJINHA DAS CRIANÇAS -->
   <div id="modal-child-shop" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm hidden flex items-center justify-center p-4 z-50">
     <div class="bg-white rounded-3xl p-6 max-w-md w-full space-y-4 shadow-2xl max-h-[85vh] flex flex-col">
       <div class="flex justify-between items-center">
         <h3 class="font-bold text-lg text-slate-800 flex items-center gap-2"><span>🛒</span> Lojinha de Recompensas</h3>
         <button onclick="closeChildShopModal()" class="text-slate-400 font-bold hover:text-slate-600">✕</button>
       </div>
-      <p class="text-xs text-slate-500">Troque seu XP acumulado por recompensas incríveis!</p>
-      
       <div id="child-shop-rewards-list" class="space-y-3 overflow-y-auto pr-1 flex-1"></div>
     </div>
   </div>
 
-  <!-- MODAL DE PEDIR TROCA DE TAREFA -->
   <div id="modal-trade" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm hidden flex items-center justify-center p-4 z-50">
     <div class="bg-white rounded-3xl p-6 max-w-sm w-full space-y-4 shadow-2xl">
       <h3 class="font-bold text-lg text-slate-800 flex items-center gap-2"><span>🔄</span> Pedir Troca de Tarefa</h3>
-      <p class="text-xs text-slate-500">Se seu irmão aceitar, ele fará essa tarefa no seu lugar hoje e ganhará o XP. Amanhã a escala volta ao normal!</p>
       <input type="hidden" id="trade-task-id">
       <select id="trade-target-user" class="w-full p-3 rounded-xl border border-slate-200 text-sm font-bold"></select>
       <div class="flex justify-end gap-2">
@@ -352,7 +352,6 @@
   </div>
 
   <script>
-    // BANCO DE DADOS LOCAL
     const STORAGE_KEY = 'alutadiaria_data_v3';
 
     const defaultData = {
@@ -363,10 +362,8 @@
         Tayrone: { xp: 90, level: 1, avatar: '🧒', password: null }
       },
       tasks: [],
-      rewards: [
-        { id: 1, title: '30 Minutos de Videogame Extra', icon: '🎮', cost: 100 },
-        { id: 2, title: 'Escolher o Filme do Fim de Semana', icon: '🍿', cost: 150 }
-      ],
+      appliedPenalties: [], // Registro de penalidades para opção de perdoar
+      rewards: [],
       rewardRedemptions: [],
       suggestions: [],
       tradeRequests: [],
@@ -374,6 +371,7 @@
     };
 
     let appData = JSON.parse(localStorage.getItem(STORAGE_KEY)) || defaultData;
+    if (!appData.appliedPenalties) appData.appliedPenalties = [];
 
     function saveData() {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(appData));
@@ -383,7 +381,6 @@
     let selectedProfileForLogin = null;
     let activeFilter = 'hoje';
 
-    // LOGIN & AUTENTICAÇÃO
     function openAuthModal(name) {
       selectedProfileForLogin = name;
       const modal = document.getElementById('modal-auth');
@@ -394,7 +391,7 @@
 
       if (name === 'Pais') {
         title.innerText = "Acesso dos Pais";
-        desc.innerText = "Digite a senha mestra (admin1234) para acessar o painel administrativo.";
+        desc.innerText = "Digite a senha mestra (admin1234) para acessar.";
       } else {
         const user = appData.users[name];
         if (!user || !user.password) {
@@ -429,7 +426,7 @@
         if (!user.password) {
           user.password = inputPass;
           saveData();
-          showToast('✅ Senha cadastrada com sucesso!');
+          showToast('✅ Senha cadastrada!');
           loginAs(selectedProfileForLogin);
           closeAuthModal();
         } else {
@@ -466,16 +463,11 @@
       document.getElementById('header-user-info').classList.add('hidden');
     }
 
-    // MODO DESCANSO
     function toggleRestMode(enabled) {
       appData.restMode = enabled;
       saveData();
       updateRestBanner();
-      if (enabled) {
-        showToast('🏖️ Modo Folga Ativado pelos pais!');
-      } else {
-        showToast('⚡ Modo Folga desativado. Rotina restaurada!');
-      }
+      showToast(enabled ? '🏖️ Modo Folga Ativado!' : '⚡ Modo Folga desativado!');
     }
 
     function updateRestBanner() {
@@ -483,14 +475,10 @@
       const toggle = document.getElementById('toggle-rest-mode');
       if (toggle) toggle.checked = appData.restMode;
 
-      if (appData.restMode) {
-        banner.classList.remove('hidden');
-      } else {
-        banner.classList.add('hidden');
-      }
+      if (appData.restMode) banner.classList.remove('hidden');
+      else banner.classList.add('hidden');
     }
 
-    // ÁREA DA CRIANÇA
     function renderChildArea() {
       updateRestBanner();
       const user = appData.users[currentUser];
@@ -506,11 +494,7 @@
       activeFilter = filter;
       ['hoje', 'diarias', 'flexiveis', 'todas'].forEach(f => {
         const btn = document.getElementById(`filter-${f}`);
-        if (f === filter) {
-          btn.className = "flex-1 py-2 rounded-xl text-xs font-bold transition bg-purple-700 text-white cursor-pointer";
-        } else {
-          btn.className = "flex-1 py-2 rounded-xl text-xs font-bold transition text-slate-600 hover:bg-slate-100 cursor-pointer";
-        }
+        btn.className = f === filter ? "flex-1 py-2 rounded-xl text-xs font-bold transition bg-purple-700 text-white cursor-pointer" : "flex-1 py-2 rounded-xl text-xs font-bold transition text-slate-600 hover:bg-slate-100 cursor-pointer";
       });
       renderChildTasks();
     }
@@ -532,7 +516,6 @@
       filtered.forEach(t => {
         const item = document.createElement('div');
         item.className = "bg-white p-4 rounded-2xl shadow-sm border border-slate-200 flex items-center justify-between gap-3";
-        
         const isPendingParent = t.status === 'pending_approval';
 
         item.innerHTML = `
@@ -550,7 +533,7 @@
           <div class="flex items-center gap-2">
             ${isPendingParent ? 
               `<span class="text-xs bg-amber-100 text-amber-800 font-bold px-3 py-1.5 rounded-xl">Em Validação</span>` :
-              `<button onclick="openTradeModal(${t.id})" class="p-2 text-xs bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-xl transition cursor-pointer" title="Pedir Troca">🔄</button>
+              `<button onclick="openTradeModal(${t.id})" class="p-2 text-xs bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-xl cursor-pointer">🔄</button>
                <button onclick="requestCompleteTask(${t.id})" class="px-4 py-2 text-xs bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl transition shadow cursor-pointer">Concluir</button>`
             }
           </div>
@@ -564,12 +547,12 @@
       if (task) {
         task.status = 'pending_approval';
         saveData();
-        showToast('🚀 Missão enviada para validação dos pais!');
+        showToast('🚀 Missão enviada para validação!');
         renderChildTasks();
       }
     }
 
-    // LOJINHA DAS CRIANÇAS
+    // LOJINHA
     function openChildShopModal() {
       renderChildShop();
       document.getElementById('modal-child-shop').classList.remove('hidden');
@@ -582,11 +565,10 @@
     function renderChildShop() {
       const list = document.getElementById('child-shop-rewards-list');
       list.innerHTML = '';
-
       const userXP = appData.users[currentUser].xp;
 
       if (appData.rewards.length === 0) {
-        list.innerHTML = `<p class="text-slate-400 text-sm text-center py-4">Nenhuma recompensa cadastrada pelos pais ainda.</p>`;
+        list.innerHTML = `<p class="text-slate-400 text-sm text-center py-4">Nenhuma recompensa cadastrada ainda.</p>`;
         return;
       }
 
@@ -625,22 +607,20 @@
         });
 
         saveData();
-        showToast('🎉 Prêmio resgatado! Aguarde a entrega dos pais.');
+        showToast('🎉 Prêmio resgatado!');
         renderChildArea();
         renderChildShop();
       }
     }
 
-    // SISTEMA DE TROCAS
+    // TROCAS
     function openTradeModal(taskId) {
       document.getElementById('trade-task-id').value = taskId;
       const select = document.getElementById('trade-target-user');
       select.innerHTML = '';
-
       Object.keys(appData.users).filter(u => u !== currentUser).forEach(u => {
         select.innerHTML += `<option value="${u}">${u}</option>`;
       });
-
       document.getElementById('modal-trade').classList.remove('hidden');
     }
 
@@ -654,11 +634,7 @@
       const task = appData.tasks.find(t => t.id === taskId);
 
       appData.tradeRequests.push({
-        id: Date.now(),
-        taskId: taskId,
-        taskTitle: task.title,
-        from: currentUser,
-        to: targetUser
+        id: Date.now(), taskId, taskTitle: task.title, from: currentUser, to: targetUser
       });
 
       saveData();
@@ -669,20 +645,18 @@
     function renderTradeRequests() {
       const container = document.getElementById('trade-requests-container');
       container.innerHTML = '';
-
       const myRequests = appData.tradeRequests.filter(r => r.to === currentUser);
 
       myRequests.forEach(r => {
-        const card = document.createElement('div');
-        card.className = "bg-amber-50 border border-amber-200 p-4 rounded-2xl flex items-center justify-between";
-        card.innerHTML = `
-          <div>
-            <span class="text-xs font-bold text-amber-800">Solicitação de Troca</span>
-            <p class="text-xs text-amber-900 mt-0.5"><b>${r.from}</b> pediu para você fazer <b>"${r.taskTitle}"</b> hoje.</p>
+        container.innerHTML += `
+          <div class="bg-amber-50 border border-amber-200 p-4 rounded-2xl flex items-center justify-between">
+            <div>
+              <span class="text-xs font-bold text-amber-800">Solicitação de Troca</span>
+              <p class="text-xs text-amber-900 mt-0.5"><b>${r.from}</b> pediu para você fazer <b>"${r.taskTitle}"</b> hoje.</p>
+            </div>
+            <button onclick="acceptTrade(${r.id})" class="px-3 py-1.5 bg-emerald-600 text-white text-xs font-bold rounded-xl cursor-pointer">Aceitar</button>
           </div>
-          <button onclick="acceptTrade(${r.id})" class="px-3 py-1.5 bg-emerald-600 text-white text-xs font-bold rounded-xl cursor-pointer">Aceitar</button>
         `;
-        container.appendChild(card);
       });
     }
 
@@ -691,9 +665,7 @@
       if (reqIndex > -1) {
         const req = appData.tradeRequests[reqIndex];
         const task = appData.tasks.find(t => t.id === req.taskId);
-        if (task) {
-          task.assignee = currentUser;
-        }
+        if (task) task.assignee = currentUser;
         appData.tradeRequests.splice(reqIndex, 1);
         saveData();
         showToast('Troca aceita!');
@@ -702,31 +674,20 @@
     }
 
     // SUGESTÕES
-    function openSuggestionModal() {
-      document.getElementById('modal-suggestion').classList.remove('hidden');
-    }
-
-    function closeSuggestionModal() {
-      document.getElementById('modal-suggestion').classList.add('hidden');
-    }
+    function openSuggestionModal() { document.getElementById('modal-suggestion').classList.remove('hidden'); }
+    function closeSuggestionModal() { document.getElementById('modal-suggestion').classList.add('hidden'); }
 
     function submitSuggestion() {
       const text = document.getElementById('suggestion-text').value;
       if (!text.trim()) return;
-
-      appData.suggestions.push({
-        id: Date.now(),
-        from: currentUser,
-        text: text
-      });
-
+      appData.suggestions.push({ id: Date.now(), from: currentUser, text });
       saveData();
       document.getElementById('suggestion-text').value = '';
       closeSuggestionModal();
-      showToast('Sugestão enviada com sucesso aos pais!');
+      showToast('Sugestão enviada aos pais!');
     }
 
-    // PAINEL DOS PAIS
+    // PAINEL PAIS
     function setParentTab(tab) {
       ['relatorio', 'pendentes', 'missoes', 'lojinha', 'membros'].forEach(t => {
         const btn = document.getElementById(`ptab-${t}`);
@@ -750,29 +711,18 @@
 
       // Sugestões
       const sugList = document.getElementById('parent-suggestions-list');
-      sugList.innerHTML = '';
-      if (appData.suggestions.length === 0) {
-        sugList.innerHTML = `<p class="text-slate-400 text-sm">Nenhuma sugestão recebida.</p>`;
-      } else {
-        appData.suggestions.forEach(s => {
-          sugList.innerHTML += `
-            <div class="p-3 bg-slate-50 border border-slate-200 rounded-xl flex justify-between items-center">
-              <div>
-                <span class="text-xs font-bold text-purple-700">Enviado por: ${s.from}</span>
-                <p class="text-sm text-slate-700">${s.text}</p>
-              </div>
-            </div>
-          `;
-        });
-      }
+      sugList.innerHTML = appData.suggestions.length === 0 ? `<p class="text-slate-400 text-sm">Nenhuma sugestão enviada.</p>` : '';
+      appData.suggestions.forEach(s => {
+        sugList.innerHTML += `<div class="p-3 bg-slate-50 border border-slate-200 rounded-xl"><span class="text-xs font-bold text-purple-700">${s.from}:</span> <p class="text-sm text-slate-700">${s.text}</p></div>`;
+      });
 
-      // Tarefas Pendentes
+      // Pendentes
       const pendingTasksContainer = document.getElementById('parent-pending-tasks');
       pendingTasksContainer.innerHTML = '';
       const pendingTasks = appData.tasks.filter(t => t.status === 'pending_approval');
 
       if (pendingTasks.length === 0) {
-        pendingTasksContainer.innerHTML = `<p class="text-slate-400 text-sm">Nenhuma tarefa aguardando aprovação.</p>`;
+        pendingTasksContainer.innerHTML = `<p class="text-slate-400 text-sm">Nenhuma tarefa pendente de validação.</p>`;
       } else {
         pendingTasks.forEach(t => {
           pendingTasksContainer.innerHTML += `
@@ -788,7 +738,25 @@
         });
       }
 
-      // Resgates da Lojinha Pendentes
+      // NOVO: PERDOAR PENALIDADES
+      const penaltiesContainer = document.getElementById('parent-penalties-list');
+      penaltiesContainer.innerHTML = '';
+      if (!appData.appliedPenalties || appData.appliedPenalties.length === 0) {
+        penaltiesContainer.innerHTML = `<p class="text-slate-400 text-sm">Nenhuma penalidade registrada no momento.</p>`;
+      } else {
+        appData.appliedPenalties.forEach(p => {
+          penaltiesContainer.innerHTML += `
+            <div class="p-3 bg-rose-50 border border-rose-200 rounded-xl flex justify-between items-center text-xs">
+              <div>
+                <span class="font-bold text-rose-900">${p.user}</span> perdeu <b class="text-rose-700">-${p.amount} XP</b> na tarefa <b>"${p.taskTitle}"</b>
+              </div>
+              <button onclick="forgivePenalty(${p.id})" class="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl transition cursor-pointer">Perdoar & Devolver XP</button>
+            </div>
+          `;
+        });
+      }
+
+      // Resgates Pendentes Lojinha
       const pendingRewardsContainer = document.getElementById('parent-pending-rewards');
       pendingRewardsContainer.innerHTML = '';
       const pendingRewards = appData.rewardRedemptions.filter(r => r.status === 'pending');
@@ -802,7 +770,6 @@
               <div>
                 <span class="text-xs font-bold text-emerald-800">${r.user} resgatou:</span>
                 <h4 class="font-bold text-slate-800 text-sm">${r.rewardIcon} ${r.rewardTitle}</h4>
-                <span class="text-xs text-emerald-700 font-bold">Custo: ${r.cost} XP</span>
               </div>
               <button onclick="deliverReward(${r.id})" class="px-3 py-1.5 bg-emerald-600 text-white text-xs font-bold rounded-xl cursor-pointer">Marcar Entregue</button>
             </div>
@@ -812,44 +779,36 @@
 
       // Missões Cadastradas
       const allTasksContainer = document.getElementById('parent-all-tasks');
-      allTasksContainer.innerHTML = '';
-      if (appData.tasks.length === 0) {
-        allTasksContainer.innerHTML = `<p class="text-slate-400 text-sm">Nenhuma missão cadastrada ainda.</p>`;
-      } else {
-        appData.tasks.forEach(t => {
-          allTasksContainer.innerHTML += `
-            <div class="p-3 bg-slate-50 border border-slate-200 rounded-xl flex justify-between items-center text-xs">
-              <div>
-                <span class="font-bold text-slate-800">${t.icon} ${t.title}</span>
-                <span class="text-slate-500 ml-2">(${t.assignee}) - ⏰ ${t.deadline}</span>
-              </div>
-              <div class="flex items-center gap-2">
-                <span class="font-bold text-amber-600">+${t.xp} XP</span>
-                <button onclick="deleteTask(${t.id})" class="text-rose-600 font-bold px-2 py-1 bg-rose-50 rounded-lg cursor-pointer">Excluir</button>
-              </div>
+      allTasksContainer.innerHTML = appData.tasks.length === 0 ? `<p class="text-slate-400 text-sm">Nenhuma missão cadastrada.</p>` : '';
+      appData.tasks.forEach(t => {
+        allTasksContainer.innerHTML += `
+          <div class="p-3 bg-slate-50 border border-slate-200 rounded-xl flex justify-between items-center text-xs">
+            <div>
+              <span class="font-bold text-slate-800">${t.icon} ${t.title}</span>
+              <span class="text-slate-500 ml-2">(${t.assignee}) - ⏰ ${t.deadline}</span>
             </div>
-          `;
-        });
-      }
+            <div class="flex items-center gap-2">
+              <span class="font-bold text-amber-600">+${t.xp} XP</span>
+              <button onclick="deleteTask(${t.id})" class="text-rose-600 font-bold px-2 py-1 bg-rose-50 rounded-lg cursor-pointer">Excluir</button>
+            </div>
+          </div>
+        `;
+      });
 
-      // Prêmios Cadastrados na Lojinha
+      // Lojinha
       const allRewardsContainer = document.getElementById('parent-all-rewards');
-      allRewardsContainer.innerHTML = '';
-      if (appData.rewards.length === 0) {
-        allRewardsContainer.innerHTML = `<p class="text-slate-400 text-sm">Nenhum prêmio cadastrado.</p>`;
-      } else {
-        appData.rewards.forEach(r => {
-          allRewardsContainer.innerHTML += `
-            <div class="p-3 bg-slate-50 border border-slate-200 rounded-xl flex justify-between items-center text-xs">
-              <div>
-                <span class="font-bold text-slate-800">${r.icon} ${r.title}</span>
-                <span class="text-purple-700 font-bold ml-2">(${r.cost} XP)</span>
-              </div>
-              <button onclick="deleteReward(${r.id})" class="text-rose-600 font-bold px-2 py-1 bg-rose-50 rounded-lg cursor-pointer">Excluir</button>
+      allRewardsContainer.innerHTML = appData.rewards.length === 0 ? `<p class="text-slate-400 text-sm">Nenhum prêmio cadastrado.</p>` : '';
+      appData.rewards.forEach(r => {
+        allRewardsContainer.innerHTML += `
+          <div class="p-3 bg-slate-50 border border-slate-200 rounded-xl flex justify-between items-center text-xs">
+            <div>
+              <span class="font-bold text-slate-800">${r.icon} ${r.title}</span>
+              <span class="text-purple-700 font-bold ml-2">(${r.cost} XP)</span>
             </div>
-          `;
-        });
-      }
+            <button onclick="deleteReward(${r.id})" class="text-rose-600 font-bold px-2 py-1 bg-rose-50 rounded-lg cursor-pointer">Excluir</button>
+          </div>
+        `;
+      });
 
       // Membros
       const membersContainer = document.getElementById('parent-members-list');
@@ -884,12 +843,27 @@
       }
     }
 
+    // PERDOAR PENALIDADE
+    function forgivePenalty(penaltyId) {
+      const index = appData.appliedPenalties.findIndex(p => p.id === penaltyId);
+      if (index > -1) {
+        const p = appData.appliedPenalties[index];
+        if (appData.users[p.user]) {
+          appData.users[p.user].xp += p.amount; // Devolve o XP
+        }
+        appData.appliedPenalties.splice(index, 1);
+        saveData();
+        showToast(`🛡️ Penalidade perdoada! +${p.amount} XP devolvidos para ${p.user}.`);
+        renderParentsArea();
+      }
+    }
+
     function deliverReward(redemptionId) {
       const item = appData.rewardRedemptions.find(r => r.id === redemptionId);
       if (item) {
         item.status = 'delivered';
         saveData();
-        showToast('Prêmio marcado como entregue!');
+        showToast('Prêmio entregue!');
         renderParentsArea();
       }
     }
@@ -905,12 +879,11 @@
       const penalty = parseInt(document.getElementById('task-penalty').value);
 
       appData.tasks.push({
-        id: Date.now(),
-        title, icon, assignee, category, deadline, xp, penalty, status: 'pending_user'
+        id: Date.now(), title, icon, assignee, category, deadline, xp, penalty, status: 'pending_user'
       });
 
       saveData();
-      showToast('Nova missão cadastrada com sucesso!');
+      showToast('Nova missão cadastrada!');
       e.target.reset();
       renderParentsArea();
     }
@@ -921,13 +894,9 @@
       const icon = document.getElementById('reward-icon').value;
       const cost = parseInt(document.getElementById('reward-cost').value);
 
-      appData.rewards.push({
-        id: Date.now(),
-        title, icon, cost
-      });
-
+      appData.rewards.push({ id: Date.now(), title, icon, cost });
       saveData();
-      showToast('Novo prêmio cadastrado na lojinha!');
+      showToast('Prêmio cadastrado na lojinha!');
       e.target.reset();
       renderParentsArea();
     }
@@ -950,7 +919,7 @@
       if (appData.users[userName]) {
         appData.users[userName].password = null;
         saveData();
-        showToast(`Senha de ${userName} resetada com sucesso!`);
+        showToast(`Senha de ${userName} resetada!`);
         renderParentsArea();
       }
     }
@@ -963,38 +932,6 @@
         renderParentsArea();
       }
     }
-
-    // MONITOR DE ALERTAS DE HORÁRIO
-    function checkTaskDeadlines() {
-      if (appData.restMode) return;
-
-      const now = new Date();
-      const currentMinutes = now.getHours() * 60 + now.getMinutes();
-
-      appData.tasks.forEach(t => {
-        if (t.status !== 'pending_user') return;
-
-        const [h, m] = t.deadline.split(':').map(Number);
-        const deadlineMinutes = h * 60 + m;
-        const diffMinutes = deadlineMinutes - currentMinutes;
-
-        const key60 = `${t.id}_60`;
-        if (diffMinutes <= 60 && diffMinutes > 30 && !appData.notifiedTasks.includes(key60)) {
-          showToast(`⚠️ Falta 1 hora para o prazo de "${t.title}"!`);
-          appData.notifiedTasks.push(key60);
-          saveData();
-        }
-
-        const key30 = `${t.id}_30`;
-        if (diffMinutes <= 30 && diffMinutes > 0 && !appData.notifiedTasks.includes(key30)) {
-          showToast(`🚨 URGENTE: Faltam 30 minutos para o prazo de "${t.title}"!`);
-          appData.notifiedTasks.push(key30);
-          saveData();
-        }
-      });
-    }
-
-    setInterval(checkTaskDeadlines, 30000);
 
     function showToast(msg) {
       const container = document.getElementById('toast-container');
